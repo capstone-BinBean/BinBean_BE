@@ -1,8 +1,8 @@
-name: bug_issues_template
-about: "버그 이슈 템플릿"
-title: ""
-labels: ""
-assignees: ""
+name: "Bug Report"
+title: "[Bug] "
+description: "버그 이슈를 작성하는 템플릿입니다."
+labels: []
+assignees: []
 
 body:
   - type: textarea
