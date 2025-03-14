@@ -1,5 +1,5 @@
 
-name: Sync issues to jira
+name: Sync feature issues to jira
 on:
   issues:
     types:
