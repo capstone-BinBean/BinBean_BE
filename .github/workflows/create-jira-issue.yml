@@ -23,7 +23,7 @@ jobs:
       - name: Checkout main code
         uses: actions/checkout@v4
         with:
-          ref: main
+          ref: master
 
       - name: Issue Parser
         uses: stefanbuck/github-issue-praser@v3
