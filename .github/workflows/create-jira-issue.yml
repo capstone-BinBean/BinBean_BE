@@ -83,11 +83,6 @@ jobs:
         with:
           ref: develop
 
-      - name: Create branch with Ticket number
-        run: |
-          git checkout -b ${{ steps.create.outputs.issue }}
-          git push origin ${{ steps.create.outputs.issue }}
-
       - name: Configure Git Credentials
         run: |
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
