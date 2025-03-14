@@ -29,7 +29,7 @@ jobs:
         uses: stefanbuck/github-issue-praser@v3
         id: issue-parser
         with:
-          template-path: .github/ISSUE_TEMPLATE/이슈템플릿.yml
+          template-path: .github/ISSUE_TEMPLATE/feature_issues_template.yml
           
 
       - name: Log Issue Parser
@@ -54,7 +54,7 @@ jobs:
           ${{ toJson(github.event.issue.labels) }}
           EOF
           )
-          CLEAN_LABELS=$(echo "$RAW_LABELS" | jq -c '[.[].name]')
+          CLEAN_LABELS=$(echo "$RAW_LABELS" | jq -c '[.[].name | gsub(" "; "-")]')
           echo "JIRA_LABELS=$CLEAN_LABELS" >> $GITHUB_ENV
           echo "Extracted Labels: $CLEAN_LABELS"
         shell: bash
