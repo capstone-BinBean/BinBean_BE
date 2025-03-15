@@ -1,6 +1,7 @@
 package binbean.binbean_BE.auth.service;
 
 import binbean.binbean_BE.auth.dto.request.RegisterRequest;
+import binbean.binbean_BE.exception.user.UserAlreadyExistException;
 import binbean.binbean_BE.user.entity.User;
 import binbean.binbean_BE.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,16 +22,14 @@ public class AuthService implements UserDetailsService {
     }
 
     public void registerUser(RegisterRequest request) {
-        // FIXME : 이메일 중복체크
         userRepository.findByEmail(request.email())
             .ifPresent( user -> {
-                throw new RuntimeException();
+                throw new UserAlreadyExistException(user.getEmail());
             });
 
-        // FIXME : 닉네임 중복체크
         userRepository.findByNickname(request.nickname())
             .ifPresent(user -> {
-                throw new RuntimeException();
+                throw new UserAlreadyExistException(user.getNickname());
             });
 
         userRepository.save(request.toEntity());
