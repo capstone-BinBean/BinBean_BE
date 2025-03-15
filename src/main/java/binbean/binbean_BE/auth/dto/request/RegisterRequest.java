@@ -4,6 +4,7 @@ import binbean.binbean_BE.constants.Role;
 import binbean.binbean_BE.user.entity.User;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 public record RegisterRequest(
     @NotEmpty @Email
@@ -16,6 +17,7 @@ public record RegisterRequest(
     @NotEmpty
     Role role
 ) {
+
     public User toEntity() {
         return User.builder()
             .email(email)

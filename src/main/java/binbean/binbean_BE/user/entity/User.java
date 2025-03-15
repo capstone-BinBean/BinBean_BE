@@ -37,4 +37,8 @@ public class User {
     @Column
     @Enumerated(value = EnumType.STRING)
     private Role role;
+
+    public void setPassword(String encoded) {
+        this.password = encoded;
+    }
 }
