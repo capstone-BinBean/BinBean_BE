@@ -13,6 +13,18 @@ jobs:
       issues: write    # 이슈 생성 및 수정 권한
       pull-requests: write  # PR 생성 및 수정 권한
     steps:
+      - name: Check if "새로운 기능" label exists
+        id: check-label
+        run: |
+          RAW_LABELS=$(echo '${{ toJson(github.event.issue.labels) }}' | jq -r '.[].name')
+          echo "Labels: $RAW_LABELS"
+          if echo "$RAW_LABELS" | grep -q "새로운 기능"; then
+            echo "SKIP=true" >> $GITHUB_ENV
+          else
+            echo "SKIP=false" >> $GITHUB_ENV
+          fi
+        shell: bash
+    
       - name: Login
         uses: atlassian/gajira-login@v3
         env:
