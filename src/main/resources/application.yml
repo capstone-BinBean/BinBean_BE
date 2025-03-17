@@ -3,9 +3,17 @@ spring:
     name: binbean_BE
 
   jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect
     hibernate:
-      ddl-auto: update # jpa? ??? ???? ???? db ???? ???? ????
+      ddl-auto: update
     show-sql: true
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/binbeantestbin
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password:
+
 
 jwt:
   secret-key: YmluYmVhbi1zZWF0cy1maW5kZXItZm9yLWNhZmUtYXV0aG9yaXphdGlvbgo=
