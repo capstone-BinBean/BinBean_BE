@@ -41,7 +41,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtTokenProvider jwtTokenProvider) throws Exception {
 
         // 커스텀 필터 등록 : 로그인 경로 설정 후, 로그인 필터 등록
-        JwtUsernamePasswordAuthFilter filter = new JwtUsernamePasswordAuthFilter();
+        JwtUsernamePasswordAuthFilter filter = new JwtUsernamePasswordAuthFilter(authenticationManager(authenticationConfiguration));
         filter.setFilterProcessesUrl("/api/auths/login");
 
         http
