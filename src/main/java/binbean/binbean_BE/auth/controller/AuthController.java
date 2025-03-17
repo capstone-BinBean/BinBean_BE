@@ -1,5 +1,6 @@
 package binbean.binbean_BE.auth.controller;
 
+import binbean.binbean_BE.auth.dto.request.LoginRequest;
 import binbean.binbean_BE.auth.dto.request.RegisterRequest;
 import binbean.binbean_BE.auth.service.AuthService;
 import binbean.binbean_BE.user.entity.User;
@@ -23,5 +24,9 @@ public class AuthController {
     public ResponseEntity<Void> register(@Valid @RequestBody RegisterRequest request) {
         authService.registerUser(request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @PostMapping("/login")
+    public void login(@Valid @RequestBody LoginRequest request) {
     }
 }
