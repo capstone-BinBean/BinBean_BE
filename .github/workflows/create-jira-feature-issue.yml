@@ -15,19 +15,21 @@ jobs:
         run: |
           RAW_LABELS=$(echo '${{ toJson(github.event.issue.labels) }}' | jq -r '.[].name')
 
-          if echo "$RAW_LABELS" | grep -q "새로운 기능"; then
-            echo "issue_type=feature" >> "$GITHUB_ENV"
-            echo "::set-output name=issue_type::feature"
-          elif echo "$RAW_LABELS" | grep -q "버그"; then
-            echo "issue_type=bug" >> "$GITHUB_ENV"
-            echo "::set-output name=issue_type::bug"
+          # 초기값 설정
+          ISSUE_TYPE="none"
+
+          # 우선순위에 따라 issue_type 설정 (bug > feature > request)
+          if echo "$RAW_LABELS" | grep -q "버그"; then
+            ISSUE_TYPE="bug"
+          elif echo "$RAW_LABELS" | grep -q "새로운 기능"; then
+            ISSUE_TYPE="feature"
           elif echo "$RAW_LABELS" | grep -q "요청"; then
-            echo "issue_type=request" >> "$GITHUB_ENV"
-            echo "::set-output name=issue_type::request"
-          else
-            echo "issue_type=none" >> "$GITHUB_ENV"
-            echo "::set-output name=issue_type::none"
+            ISSUE_TYPE="request"
           fi
+
+          echo "issue_type=$ISSUE_TYPE" >> "$GITHUB_ENV"
+          echo "::set-output name=issue_type::$ISSUE_TYPE"
+
         shell: bash
 
   create-issue:
