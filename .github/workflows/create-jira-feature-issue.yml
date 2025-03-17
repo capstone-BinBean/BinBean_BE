@@ -12,26 +12,12 @@ jobs:
       contents: write  # 저장소 콘텐츠 접근 권한
       issues: write    # 이슈 생성 및 수정 권한
       pull-requests: write  # PR 생성 및 수정 권한
-    
-    steps:
-      - name: Pre Extract Labels
-        id: pre-extract-labels
-        run: |
-          RAW_LABELS=$(echo '${{ toJson(github.event.issue.labels) }}' | jq -r '.[].name')
-          echo "Labels: $RAW_LABELS"
 
-          if echo "$RAW_LABELS" | grep -q "새로운 기능"; then
-            echo "ISSUE_TYPE=feature" >> $GITHUB_ENV
-          elif echo "$RAW_LABELS" | grep -q "버그"; then
-            echo "ISSUE_TYPE=bug" >> $GITHUB_ENV
-          else
-            echo "ISSUE_TYPE=none" >> $GITHUB_ENV
-          fi
-
-      - name: Stop if no relevant label
-        if: env.ISSUE_TYPE == 'none'
-        run: echo "No relevant label found, stopping execution." && exit 0
+    if: contains(join(github.event.issue.labels.*.name, ','), '새로운 기능') &&
+        !contains(join(github.event.issue.labels.*.name, ','), '버그') &&
+        !contains(join(github.event.issue.labels.*.name, ','), '요청')
     
+    steps:    
       - name: Login
         uses: atlassian/gajira-login@v3
         env:
