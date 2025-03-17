@@ -5,18 +5,37 @@ on:
     types:
       - labeled
 jobs:
+  determine-label:
+    runs-on: ubuntu-latest
+    outputs:
+      issue_type: ${{ steps.set-label.outputs.issue_type }}
+    steps:
+      - name: Determine issue type
+        id: set-label
+        run: |
+          RAW_LABELS=$(echo '${{ toJson(github.event.issue.labels) }}' | jq -r '.[].name')
+
+          if echo "$RAW_LABELS" | grep -q "새로운 기능"; then
+            echo "issue_type=feature" >> "$GITHUB_ENV"
+          elif echo "$RAW_LABELS" | grep -q "버그"; then
+            echo "issue_type=bug" >> "$GITHUB_ENV"
+          elif echo "$RAW_LABELS" | grep -q "요청"; then
+            echo "issue_type=request" >> "$GITHUB_ENV"
+          else
+            echo "issue_type=none" >> "$GITHUB_ENV"
+          fi
+        shell: bash
+
   create-issue:
     name: Create Jira issue
     runs-on: ubuntu-latest
+    needs: determine-label
+    if: needs.determine-label.outputs.issue_type == 'feature'
     permissions:
       contents: write  # 저장소 콘텐츠 접근 권한
       issues: write    # 이슈 생성 및 수정 권한
       pull-requests: write  # PR 생성 및 수정 권한
 
-    if: contains(join(github.event.issue.labels.*.name, ','), '새로운 기능') &&
-        !contains(join(github.event.issue.labels.*.name, ','), '버그') &&
-        !contains(join(github.event.issue.labels.*.name, ','), '요청')
-    
     steps:    
       - name: Login
         uses: atlassian/gajira-login@v3
