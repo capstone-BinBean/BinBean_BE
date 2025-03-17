@@ -17,12 +17,16 @@ jobs:
 
           if echo "$RAW_LABELS" | grep -q "새로운 기능"; then
             echo "issue_type=feature" >> "$GITHUB_ENV"
+            echo "::set-output name=issue_type::feature"
           elif echo "$RAW_LABELS" | grep -q "버그"; then
             echo "issue_type=bug" >> "$GITHUB_ENV"
+            echo "::set-output name=issue_type::bug"
           elif echo "$RAW_LABELS" | grep -q "요청"; then
             echo "issue_type=request" >> "$GITHUB_ENV"
+            echo "::set-output name=issue_type::request"
           else
             echo "issue_type=none" >> "$GITHUB_ENV"
+            echo "::set-output name=issue_type::none"
           fi
         shell: bash
 
