@@ -43,7 +43,7 @@ jobs:
     needs: determine-label
     # if: needs.determine-label.outputs.issue_type != 'none'
     permissions:
-      contents: read  # 저장소 콘텐츠 접근 권한
+      contents: write  # 저장소 콘텐츠 접근 권한
       issues: write    # 이슈 생성 및 수정 권한
       pull-requests: write  # PR 생성 및 수정 권한
     steps:        
@@ -57,8 +57,7 @@ jobs:
       - name: Checkout main code
         uses: actions/checkout@v4
         with:
-          ref: main
-          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: master
 
       - name: Issue Parser
         if: env.SKIP != 'true'
@@ -194,7 +193,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: develop
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Configure Git Credentials
         run: |
