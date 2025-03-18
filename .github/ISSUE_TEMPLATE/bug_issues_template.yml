@@ -1,5 +1,5 @@
 name: "bug_issues_template"
-title: "[Bug] "
+title: "fix:"
 description: "버그 이슈를 작성하는 템플릿입니다."
 labels: []
 assignees: []
