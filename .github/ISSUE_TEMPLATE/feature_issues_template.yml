@@ -1,6 +1,6 @@
 name: "feature_issues_template"
 description: "새로운 기능에 대해 작성하는 이슈 템플릿입니다."
-title: "[Feature] "
+title: "feat:"
 labels: []
 assignees: []
 
