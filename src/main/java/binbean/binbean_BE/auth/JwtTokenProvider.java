@@ -6,6 +6,7 @@ import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -118,5 +119,14 @@ public class JwtTokenProvider {
     // 액세스 토큰 헤더 설정
     public void setHeaderAccessToken(HttpServletResponse response, String accessToken) {
         response.setHeader(AUTHORIZATION, BEARER_PREFIX + accessToken);
+    }
+
+    // 헤더 accessToken 리턴
+    public String getHeaderAccessToken(HttpServletRequest request) {
+        String accessToken = request.getHeader(AUTHORIZATION);
+        if (accessToken != null && accessToken.startsWith(BEARER_PREFIX)) {
+            return accessToken.substring(BEARER_PREFIX.length());
+        }
+        return null;
     }
 }
