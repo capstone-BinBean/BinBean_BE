@@ -1,50 +1,52 @@
 
-name: Sync feature issues to jira
+name: Sync issues to jira
 on:
   issues:
     types:
-      - labeled
+      - opened
+      - edited
 jobs:
   determine-label:
     runs-on: ubuntu-latest
     outputs:
       issue_type: ${{ steps.set-label.outputs.issue_type }}
+      template_path: ${{ steps.set-label.outputs.template_path }}
     steps:
       - name: Determine issue type
         id: set-label
         run: |
           RAW_LABELS=$(echo '${{ toJson(github.event.issue.labels) }}' | jq -r '.[].name')
-
+          
+          TEMPLATE_PATH=""
+          
           if echo "$RAW_LABELS" | grep -q "새로운 기능"; then
             echo "issue_type=feature" >> "$GITHUB_ENV"
-            echo "::set-output name=issue_type::feature"
+            echo "issue_type=feature" >> "$GITHUB_OUTPUT"
+            TEMPLATE_PATH=".github/ISSUE_TEMPLATE/feature_issues_template.yml"
           elif echo "$RAW_LABELS" | grep -q "버그"; then
             echo "issue_type=bug" >> "$GITHUB_ENV"
-            echo "::set-output name=issue_type::bug"
+            echo "issue_type=bug" >> "$GITHUB_OUTPUT"
+            TEMPLATE_PATH=".github/ISSUE_TEMPLATE/bug_issues_template.yml"
           elif echo "$RAW_LABELS" | grep -q "요청"; then
             echo "issue_type=request" >> "$GITHUB_ENV"
-            echo "::set-output name=issue_type::request"
+            eecho "issue_type=request" >> "$GITHUB_OUTPUT"
+            TEMPLATE_PATH=".github/ISSUE_TEMPLATE/request_issues_template.yml"
           else
             echo "issue_type=none" >> "$GITHUB_ENV"
-            echo "::set-output name=issue_type::none"
+            echo "issue_type=none" >> "$GITHUB_OUTPUT"
           fi
         shell: bash
         
-    if: contains(join(github.event.issue.labels.*.name, ','), '새로운 기능') &&
-          !contains(join(github.event.issue.labels.*.name, ','), '버그') &&
-          !contains(join(github.event.issue.labels.*.name, ','), '요청')
-
   create-issue:
     name: Create Jira issue
     runs-on: ubuntu-latest
     needs: determine-label
-    if: needs.determine-label.outputs.issue_type == 'feature'
+    # if: needs.determine-label.outputs.issue_type != 'none'
     permissions:
       contents: write  # 저장소 콘텐츠 접근 권한
       issues: write    # 이슈 생성 및 수정 권한
       pull-requests: write  # PR 생성 및 수정 권한
-
-    steps:    
+    steps:        
       - name: Login
         uses: atlassian/gajira-login@v3
         env:
@@ -55,14 +57,14 @@ jobs:
       - name: Checkout main code
         uses: actions/checkout@v4
         with:
-          ref: master
+          ref: main
 
       - name: Issue Parser
+        if: env.SKIP != 'true'
         uses: stefanbuck/github-issue-praser@v3
         id: issue-parser
         with:
-          template-path: .github/ISSUE_TEMPLATE/feature_issues_template.yml
-          
+          template-path: ${{ needs.determine-label.outputs.template_path }}
 
       - name: Log Issue Parser
         run: |
@@ -93,8 +95,85 @@ jobs:
 
       - name: Debug Labels
         run: echo "JIRA_LABELS=${{ env.JIRA_LABELS }}"
+
+      - name: Get existing Jira issue
+        id: get-jira-issue
+        run: |
+          # GitHub Issue 제목 가져오기
+          ISSUE_TITLE=$(jq -r '.issue.title' "$GITHUB_EVENT_PATH")
+          
+          # JQL 쿼리를 동적으로 설정
+          JQL_QUERY="project=BIN AND summary~\"$(echo $ISSUE_TITLE | sed 's/[][():]/ /g')\""
+          echo "🔍 JQL Query: $JQL_QUERY"
+      
+          # Jira API 호출하여 기존 이슈 검색
+          RESPONSE=$(curl -s -u "${{ secrets.JIRA_USER_EMAIL }}:${{ secrets.JIRA_API_TOKEN }}" \
+            -X GET -H "Content-Type: application/json" \
+            "${{ secrets.JIRA_BASE_URL }}/rest/api/2/search?jql=$(echo $JQL_QUERY | jq -sRr @uri)")
+      
+          # Jira 이슈 키 추출
+          JIRA_ISSUE_KEY=$(echo "$RESPONSE" | jq -r '.issues[0].key // empty')
+      
+          if [[ -n "$JIRA_ISSUE_KEY" ]]; then
+            echo "📌 기존 Jira Issue 발견: $JIRA_ISSUE_KEY"
+          else
+            echo "🆕 기존 Jira Issue 없음, 새로 생성 예정"
+          fi
+          
+          # 환경 변수 설정
+          echo "JIRA_ISSUE_KEY=$JIRA_ISSUE_KEY" >> $GITHUB_ENV
+        shell: bash
+
+      
+      - name: Create or Update Jira Issue
+        run: |
+          echo "🔍 Raw JIRA_LABELS: '${{ env.JIRA_LABELS }}'"
+
+          # JIRA_LABELS 값이 이미 JSON 배열이면 그대로 사용
+          if echo '${{ env.JIRA_LABELS }}' | jq -e . >/dev/null 2>&1; then
+            JIRA_LABELS_JSON='${{ env.JIRA_LABELS }}'
+          else
+            # JSON이 아니면 강제로 JSON 배열로 변환
+            JIRA_LABELS_JSON=$(echo '${{ env.JIRA_LABELS }}' | sed 's/^\[\(.*\)\]$/\1/' | jq -R 'split(",") | map(gsub("^ *"; "") | gsub(" *$"; "") | tostring)')
+          fi
+          
+          # JSON 유효성 검사
+          if ! echo "$JIRA_LABELS_JSON" | jq empty >/dev/null 2>&1; then
+            echo "❌ Invalid JSON detected in JIRA_LABELS_JSON! Using default empty array."
+            JIRA_LABELS_JSON='[]'
+          fi
+          
+          echo "📌 Converted JIRA_LABELS_JSON: $JIRA_LABELS_JSON"
+
+          if [ -n "$JIRA_ISSUE_KEY" ]; then
+            echo "🔄 기존 Jira Issue($JIRA_ISSUE_KEY) 업데이트 중..."
+
+            # JSON 요청 바디 생성 (jq로 안전하게 처리)
+            JSON_PAYLOAD=$(jq -n \
+              --arg summary "${{ github.event.issue.title }}" \
+              --argjson labels "$JIRA_LABELS_JSON" \
+              '{
+                fields: {
+                  summary: $summary,
+                  labels: $labels,
+                }
+              }')
+      
+            echo "📌 Final JSON Payload: $JSON_PAYLOAD"
+      
+            RESPONSE=$(curl -s --request PUT \
+              --url "${{ secrets.JIRA_BASE_URL }}/rest/api/3/issue/$JIRA_ISSUE_KEY" \
+              --user "${{ secrets.JIRA_USER_EMAIL }}:${{ secrets.JIRA_API_TOKEN }}" \
+              --header "Accept: application/json" \
+              --header "Content-Type: application/json" \
+              --data "$JSON_PAYLOAD")
+      
+            echo "📌 Jira API Response: $RESPONSE"
+          fi
+        shell: bash
         
       - name: Create Issue
+        if: env.JIRA_ISSUE_KEY == ''
         id: create
         uses: atlassian/gajira-create@v3
         with:
@@ -126,4 +205,4 @@ jobs:
         with:
           actions: "update-issue"
           token: ${{ secrets.GITHUB_TOKEN }}
-          title: "${{ steps.create.outputs.issue }} ${{ github.event.issue.title }}"
+          title: "${{ github.event.issue.title }}"
