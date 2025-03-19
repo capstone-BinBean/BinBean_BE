@@ -18,5 +18,10 @@ spring:
 jwt:
   secret-key: YmluYmVhbi1zZWF0cy1maW5kZXItZm9yLWNhZmUtYXV0aG9yaXphdGlvbgo=
   token:
-    access-expiration-time: 10800000 # 3??
-    refresh-expiration-time: 604800000 # 7?
+    access-expiration-time: 10800000 # 3시간
+    refresh-expiration-time: 604800000 # 7일
+
+data:
+  redis:
+    host: localhost # 로컬 테스트 시
+    port: 6379

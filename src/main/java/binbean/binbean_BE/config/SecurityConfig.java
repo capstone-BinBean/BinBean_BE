@@ -4,6 +4,7 @@ import binbean.binbean_BE.auth.JwtTokenProvider;
 import binbean.binbean_BE.auth.filter.JwtExceptionFilter;
 import binbean.binbean_BE.auth.filter.JwtUsernamePasswordAuthFilter;
 import binbean.binbean_BE.auth.filter.JwtVerificationFilter;
+import binbean.binbean_BE.infra.RedisService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -31,6 +32,7 @@ public class SecurityConfig {
 
     private final JwtVerificationFilter jwtVerificationFilter;
     private final JwtExceptionFilter jwtExceptionFilter;
+    private final RedisService redisService;
 
     // AuthenticationManager의 Bean을 얻기 위한 authConfiguration 객체
     private final AuthenticationConfiguration authenticationConfiguration;
@@ -59,7 +61,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtTokenProvider jwtTokenProvider) throws Exception {
 
         // 커스텀 필터 등록 : 로그인 경로 설정 후, 로그인 필터 등록
-        JwtUsernamePasswordAuthFilter filter = new JwtUsernamePasswordAuthFilter(authenticationManager(), jwtTokenProvider);
+        JwtUsernamePasswordAuthFilter filter = new JwtUsernamePasswordAuthFilter(authenticationManager(), jwtTokenProvider, redisService);
         filter.setFilterProcessesUrl("/api/auths/login");
 
         http
