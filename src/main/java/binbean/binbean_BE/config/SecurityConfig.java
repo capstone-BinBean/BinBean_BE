@@ -39,7 +39,7 @@ public class SecurityConfig {
      * AuthenticationConfiguration로부터 AuthenticationManager 객체 가져오는 메서드
      */
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+    public AuthenticationManager authenticationManager() throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
 
@@ -59,7 +59,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtTokenProvider jwtTokenProvider) throws Exception {
 
         // 커스텀 필터 등록 : 로그인 경로 설정 후, 로그인 필터 등록
-        JwtUsernamePasswordAuthFilter filter = new JwtUsernamePasswordAuthFilter(authenticationManager(authenticationConfiguration), jwtTokenProvider);
+        JwtUsernamePasswordAuthFilter filter = new JwtUsernamePasswordAuthFilter(authenticationManager(), jwtTokenProvider);
         filter.setFilterProcessesUrl("/api/auths/login");
 
         http
@@ -75,7 +75,7 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class)
             .addFilterBefore(jwtVerificationFilter, JwtUsernamePasswordAuthFilter.class)
-            .addFilterAfter(jwtExceptionFilter, jwtVerificationFilter.getClass())
+            .addFilterBefore(jwtExceptionFilter, JwtVerificationFilter.class)
             .httpBasic(HttpBasicConfigurer::disable)
             .formLogin(FormLoginConfigurer::disable);
 
