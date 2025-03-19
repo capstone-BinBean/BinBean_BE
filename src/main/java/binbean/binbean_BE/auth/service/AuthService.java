@@ -1,6 +1,7 @@
 package binbean.binbean_BE.auth.service;
 
 import binbean.binbean_BE.auth.UserDetailsImpl;
+import binbean.binbean_BE.auth.dto.request.LoginRequest;
 import binbean.binbean_BE.auth.dto.request.RegisterRequest;
 import binbean.binbean_BE.exception.user.UserAlreadyExistException;
 import binbean.binbean_BE.exception.user.UserNotFoundException;
@@ -24,6 +25,10 @@ public class AuthService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         var user = getUserEntity(username);
         return new UserDetailsImpl(user);
+    }
+
+    public User test(LoginRequest request) {
+        return getUserEntity(request.email());
     }
 
     public void registerUser(RegisterRequest request) {

@@ -29,4 +29,10 @@ public class AuthController {
     @PostMapping("/login")
     public void login(@Valid @RequestBody LoginRequest request) {
     }
+
+    @PostMapping("/test")
+    public ResponseEntity<User> test(@Valid @RequestBody LoginRequest request) {
+        var response = authService.test(request);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
 }

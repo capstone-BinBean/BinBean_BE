@@ -3,7 +3,9 @@ package binbean.binbean_BE.auth.filter;
 import binbean.binbean_BE.auth.JwtTokenProvider;
 import binbean.binbean_BE.auth.UserDetailsImpl;
 import binbean.binbean_BE.auth.service.AuthService;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.IncorrectClaimException;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -49,25 +51,23 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
+
         try {
             var securityContext = SecurityContextHolder.getContext();
 
-            // 유효한 토큰인지 검사
-            if (jwtTokenProvider.validateToken(accessToken)) {
-                var username = jwtTokenProvider.getUsername(accessToken);
-                var userDetails = authService.loadUserByUsername(username);
-                // 액세스토큰 값이 유효하면 setAuthentication 통해 securityContext에 인증 정보 저장
-                setAuthentication((UserDetailsImpl) userDetails, request, securityContext);
-            }
-        } catch (IncorrectClaimException e) {
-            // 잘못된 토큰일 경우
+            // 유효한 토큰인지 검사 (유효하지 않으면 예외 발생)
+            jwtTokenProvider.validateToken(accessToken);
+            var username = jwtTokenProvider.getUsername(accessToken);
+            var userDetails = authService.loadUserByUsername(username);
+            // 액세스토큰 값이 유효하면 setAuthentication 통해 securityContext에 인증 정보 저장
+            setAuthentication((UserDetailsImpl) userDetails, request, securityContext);
+        } catch (ExpiredJwtException e) {
+            // 만료된 토큰일 경우
             SecurityContextHolder.clearContext();
-            logger.error("Invalid JWT token : " + e.getMessage());
             // JwtExceptionFilter에서 예외 처리하도록 던짐
             throw e;
-        } catch (Exception e) {
-            logger.error("Unexpected error in JWT verification: " + e.getMessage());
-            // JwtExceptionFilter에서 예외 처리하도록 던짐
+        } catch (JwtException e) {
+            // 기타 JWT 예외일 경우
             throw e;
         }
     }

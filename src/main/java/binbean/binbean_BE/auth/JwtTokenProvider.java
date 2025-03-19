@@ -2,6 +2,7 @@ package binbean.binbean_BE.auth;
 
 import binbean.binbean_BE.auth.dto.TokenDto;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -40,8 +41,7 @@ public class JwtTokenProvider {
     }
 
     /**
-     subject를 담아 해당 키로 사인함. jwt 토큰 생성
-     Access Token 만료시점: 현재로부터 3시간 뒤
+     * subject를 담아 해당 키로 사인함. jwt 토큰 생성 Access Token 만료시점: 현재로부터 3시간 뒤
      */
     private TokenDto generateAccessRefreshToken(String subject) {
         Instant now = Instant.now();
@@ -70,7 +70,7 @@ public class JwtTokenProvider {
     }
 
     /**
-     jwt 토큰 복호화하여 subject 추출 (username)
+     * jwt 토큰 복호화하여 subject 추출 (username)
      */
     private String getSubject(String token) {
         try {
@@ -101,18 +101,24 @@ public class JwtTokenProvider {
     }
 
     /**
-     * 토큰의 유효성과 만료 여부 확인
-     * 이미 만료된 토큰에서 페이로드를 파싱하는 과정에서 에러가 발생하기 때문에 예외 처리
+     * 토큰의 유효성과 만료 여부 확인 이미 만료된 토큰에서 페이로드를 파싱하는 과정에서 에러가 발생하기 때문에 예외 처리
      */
-    public boolean validateToken(String jwtToken) {
+    public void validateToken(String jwtToken) {
         try {
             Jws<Claims> claims = Jwts.parser().verifyWith(key).build().parseSignedClaims(jwtToken);
             logger.info("JWT Expiration :", claims.getPayload().getExpiration());
             // exp 날짜가 현재 날짜보다 전에 있지 않으면 토큰 만료
-            return !claims.getPayload().getExpiration().before(new Date());
-        } catch (Exception e) {
-            logger.error("JWT Exception :", e);
-            return false;
+            if (claims.getPayload().getExpiration().before(new Date())) {
+                throw new ExpiredJwtException(null, claims.getPayload(), "JWT Token Expired");
+            }
+        } catch (ExpiredJwtException e) {
+            // 만료된 토큰 예외 던지기
+            logger.error("Expired JWT token: " + e.getMessage());
+            throw e;
+        } catch (JwtException e) {
+            // 기타 JWT 관련 예외
+            logger.error("JWT Exception: ", e);
+            throw new JwtException("Invalid JWT token", e); // 일반적인 JWT 오류 예외 던지기
         }
     }
 
