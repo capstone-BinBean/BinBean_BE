@@ -1,9 +1,8 @@
-package binbean.binbean_BE.auth.controller;
+package binbean.binbean_BE.controller.auth;
 
-import binbean.binbean_BE.auth.dto.request.LoginRequest;
-import binbean.binbean_BE.auth.dto.request.RegisterRequest;
-import binbean.binbean_BE.auth.service.AuthService;
-import binbean.binbean_BE.user.entity.User;
+import binbean.binbean_BE.dto.auth.request.LoginRequest;
+import binbean.binbean_BE.dto.auth.request.RegisterRequest;
+import binbean.binbean_BE.service.auth.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

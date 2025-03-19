@@ -1,8 +1,8 @@
 package binbean.binbean_BE.auth;
 
 import binbean.binbean_BE.constants.Constants;
-import binbean.binbean_BE.constants.Role;
-import binbean.binbean_BE.user.entity.User;
+import binbean.binbean_BE.enums.user.Role;
+import binbean.binbean_BE.entity.user.User;
 import java.util.Collection;
 import java.util.List;
 import lombok.Getter;

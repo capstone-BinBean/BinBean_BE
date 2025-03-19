@@ -1,7 +1,7 @@
 package binbean.binbean_BE.auth.filter;
 
 
-import binbean.binbean_BE.global.ErrorResponse;
+import binbean.binbean_BE.exception.ErrorResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;

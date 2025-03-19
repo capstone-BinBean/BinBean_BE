@@ -1,6 +1,6 @@
 package binbean.binbean_BE.auth;
 
-import binbean.binbean_BE.auth.dto.TokenDto;
+import binbean.binbean_BE.dto.auth.TokenDto;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jws;

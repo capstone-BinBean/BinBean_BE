@@ -2,7 +2,7 @@ package binbean.binbean_BE.auth.filter;
 
 import binbean.binbean_BE.auth.JwtTokenProvider;
 import binbean.binbean_BE.auth.UserDetailsImpl;
-import binbean.binbean_BE.auth.service.AuthService;
+import binbean.binbean_BE.service.auth.AuthService;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;

@@ -1,12 +1,11 @@
-package binbean.binbean_BE.auth.service;
+package binbean.binbean_BE.service.auth;
 
 import binbean.binbean_BE.auth.UserDetailsImpl;
-import binbean.binbean_BE.auth.dto.request.LoginRequest;
-import binbean.binbean_BE.auth.dto.request.RegisterRequest;
+import binbean.binbean_BE.dto.auth.request.RegisterRequest;
 import binbean.binbean_BE.exception.user.UserAlreadyExistException;
 import binbean.binbean_BE.exception.user.UserNotFoundException;
-import binbean.binbean_BE.user.entity.User;
-import binbean.binbean_BE.user.repository.UserRepository;
+import binbean.binbean_BE.entity.user.User;
+import binbean.binbean_BE.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

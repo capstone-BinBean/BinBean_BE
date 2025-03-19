@@ -1,6 +1,6 @@
-package binbean.binbean_BE.user.entity;
+package binbean.binbean_BE.entity.user;
 
-import binbean.binbean_BE.constants.Role;
+import binbean.binbean_BE.enums.user.Role;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

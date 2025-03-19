@@ -1,6 +1,5 @@
-package binbean.binbean_BE.auth.dto.request;
+package binbean.binbean_BE.dto.auth.request;
 
-import binbean.binbean_BE.user.entity.User;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 
