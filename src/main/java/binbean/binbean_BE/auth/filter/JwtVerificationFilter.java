@@ -4,17 +4,13 @@ import binbean.binbean_BE.auth.JwtTokenProvider;
 import binbean.binbean_BE.auth.UserDetailsImpl;
 import binbean.binbean_BE.auth.service.AuthService;
 import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.IncorrectClaimException;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.List;
 import java.util.Set;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -23,11 +19,15 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 @Component
-@RequiredArgsConstructor
 public class JwtVerificationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final AuthService authService;
+
+    public JwtVerificationFilter(JwtTokenProvider jwtTokenProvider, AuthService authService) {
+        this.jwtTokenProvider = jwtTokenProvider;
+        this.authService = authService;
+    }
 
     private static final Set<String> EXCLUDED_URLS = Set.of("/signup");
 
