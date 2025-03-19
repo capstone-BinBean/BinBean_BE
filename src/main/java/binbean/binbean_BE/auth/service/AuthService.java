@@ -27,10 +27,6 @@ public class AuthService implements UserDetailsService {
         return new UserDetailsImpl(user);
     }
 
-    public User test(LoginRequest request) {
-        return getUserEntity(request.email());
-    }
-
     public void registerUser(RegisterRequest request) {
         userRepository.findByEmail(request.email())
             .ifPresent( user -> {
