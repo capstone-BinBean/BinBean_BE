@@ -2,13 +2,12 @@ package binbean.binbean_BE.auth.filter;
 
 import binbean.binbean_BE.auth.JwtTokenProvider;
 import binbean.binbean_BE.auth.UserDetailsImpl;
+import binbean.binbean_BE.constants.Constants;
+import binbean.binbean_BE.constants.Constants.ErrorMsg;
 import binbean.binbean_BE.dto.auth.TokenDto;
 import binbean.binbean_BE.dto.auth.request.LoginRequest;
 import binbean.binbean_BE.exception.ErrorResponse;
-import binbean.binbean_BE.exception.user.UserNotFoundException;
 import binbean.binbean_BE.infra.RedisService;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -19,6 +18,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -61,14 +61,24 @@ public class JwtUsernamePasswordAuthFilter extends UsernamePasswordAuthenticatio
             UsernamePasswordAuthenticationToken authToken =
                 new UsernamePasswordAuthenticationToken(loginDto.email(), loginDto.password());
             return authenticationManager.authenticate(authToken);
-        } catch (UsernameNotFoundException e) {
-            setErrorResponse(response, HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다.");
-        } catch (BadCredentialsException e) {
-            setErrorResponse(response, HttpStatus.UNAUTHORIZED, "이메일 또는 비밀번호가 올바르지 않습니다.");
-        } catch (Exception e) {
-            setErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        } catch (IOException e) {
+            logger.error(e);
+            throw new AuthenticationServiceException(e.getMessage(), e);
         }
-        return null;
+    }
+
+    /**
+     * Spring Security가 인증 과정에서 예외를 던지면 자동으로 호출되는 메서드
+     */
+    @Override
+    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) {
+        if (failed instanceof UsernameNotFoundException) {
+            setErrorResponse(response, HttpStatus.NOT_FOUND, ErrorMsg.USER_NOT_FOUND);
+        } else if (failed instanceof BadCredentialsException) {
+            setErrorResponse(response, HttpStatus.UNAUTHORIZED, ErrorMsg.INVALID_CREDENTIALS);
+        } else {
+            setErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR, failed.getMessage());
+        }
     }
 
     /**

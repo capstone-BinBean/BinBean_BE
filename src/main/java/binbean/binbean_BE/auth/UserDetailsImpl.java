@@ -23,9 +23,9 @@ public class UserDetailsImpl implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         if (user.getRole().equals(Role.ROLE_ADMIN)) {
-            return List.of(new SimpleGrantedAuthority(Constants.ROLE_PREFIX + Role.ROLE_ADMIN.name()));
+            return List.of(new SimpleGrantedAuthority(Constants.User.ROLE_PREFIX + Role.ROLE_ADMIN.name()));
         } else {
-            return List.of(new SimpleGrantedAuthority(Constants.ROLE_PREFIX + Role.ROLE_USER.name()));
+            return List.of(new SimpleGrantedAuthority(Constants.User.ROLE_PREFIX + Role.ROLE_USER.name()));
         }
     }
 
