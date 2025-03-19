@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -50,28 +51,6 @@ public class JwtUsernamePasswordAuthFilter extends UsernamePasswordAuthenticatio
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
         throws AuthenticationException {
-        // request body GET
-//        ServletInputStream servletInputStream;
-//        String requestBody;
-
-//        try {
-//            servletInputStream = request.getInputStream();
-//            requestBody = StreamUtils.copyToString(servletInputStream, StandardCharsets.UTF_8);
-//        } catch (IOException e) {
-//            logger.error(e);
-//            throw new RuntimeException(e);
-//        }
-
-        // Json data parsing
-//        LoginRequest loginDto;
-//        try {
-//            loginDto = objectMapper.readValue(requestBody, LoginRequest.class);
-//        } catch (JsonProcessingException e) {
-//            throw new RuntimeException(e);
-//        }
-//        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(loginDto.email(), loginDto.password());
-//        return authenticationManager.authenticate(authToken);
-
         try {
             ServletInputStream servletInputStream = request.getInputStream();
             String requestBody = StreamUtils.copyToString(servletInputStream, StandardCharsets.UTF_8);
@@ -82,10 +61,11 @@ public class JwtUsernamePasswordAuthFilter extends UsernamePasswordAuthenticatio
             UsernamePasswordAuthenticationToken authToken =
                 new UsernamePasswordAuthenticationToken(loginDto.email(), loginDto.password());
             return authenticationManager.authenticate(authToken);
-
         } catch (UsernameNotFoundException e) {
-            setErrorResponse(response, HttpStatus.NOT_FOUND, "User Not Found");
-        } catch (IOException e) {
+            setErrorResponse(response, HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다.");
+        } catch (BadCredentialsException e) {
+            setErrorResponse(response, HttpStatus.UNAUTHORIZED, "이메일 또는 비밀번호가 올바르지 않습니다.");
+        } catch (Exception e) {
             setErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         }
         return null;
