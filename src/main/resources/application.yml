@@ -9,10 +9,10 @@ spring:
     show-sql: true
 
   datasource:
-    url: jdbc:mysql://localhost:3306/binbeantestbin
+    url: jdbc:mysql://localhost:3306/binbean
     driver-class-name: com.mysql.cj.jdbc.Driver
-    username: root
-    password: binbeantestbin
+    username: binbean
+    password: 1111
 
 
 jwt:

@@ -4,8 +4,11 @@ import binbean.binbean_BE.auth.JwtTokenProvider;
 import binbean.binbean_BE.auth.UserDetailsImpl;
 import binbean.binbean_BE.dto.auth.TokenDto;
 import binbean.binbean_BE.dto.auth.request.LoginRequest;
+import binbean.binbean_BE.exception.ErrorResponse;
+import binbean.binbean_BE.exception.user.UserNotFoundException;
 import binbean.binbean_BE.infra.RedisService;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -14,10 +17,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.util.StreamUtils;
 
@@ -46,26 +51,44 @@ public class JwtUsernamePasswordAuthFilter extends UsernamePasswordAuthenticatio
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
         throws AuthenticationException {
         // request body GET
-        ServletInputStream servletInputStream;
-        String requestBody;
+//        ServletInputStream servletInputStream;
+//        String requestBody;
 
-        try {
-            servletInputStream = request.getInputStream();
-            requestBody = StreamUtils.copyToString(servletInputStream, StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            logger.error(e);
-            throw new RuntimeException(e);
-        }
+//        try {
+//            servletInputStream = request.getInputStream();
+//            requestBody = StreamUtils.copyToString(servletInputStream, StandardCharsets.UTF_8);
+//        } catch (IOException e) {
+//            logger.error(e);
+//            throw new RuntimeException(e);
+//        }
 
         // Json data parsing
-        LoginRequest loginDto;
+//        LoginRequest loginDto;
+//        try {
+//            loginDto = objectMapper.readValue(requestBody, LoginRequest.class);
+//        } catch (JsonProcessingException e) {
+//            throw new RuntimeException(e);
+//        }
+//        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(loginDto.email(), loginDto.password());
+//        return authenticationManager.authenticate(authToken);
+
         try {
-            loginDto = objectMapper.readValue(requestBody, LoginRequest.class);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            ServletInputStream servletInputStream = request.getInputStream();
+            String requestBody = StreamUtils.copyToString(servletInputStream, StandardCharsets.UTF_8);
+
+            // Json data parsing
+            LoginRequest loginDto = objectMapper.readValue(requestBody, LoginRequest.class);
+
+            UsernamePasswordAuthenticationToken authToken =
+                new UsernamePasswordAuthenticationToken(loginDto.email(), loginDto.password());
+            return authenticationManager.authenticate(authToken);
+
+        } catch (UsernameNotFoundException e) {
+            setErrorResponse(response, HttpStatus.NOT_FOUND, "User Not Found");
+        } catch (IOException e) {
+            setErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         }
-        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(loginDto.email(), loginDto.password());
-        return authenticationManager.authenticate(authToken);
+        return null;
     }
 
     /**
@@ -106,5 +129,15 @@ public class JwtUsernamePasswordAuthFilter extends UsernamePasswordAuthenticatio
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         response.getWriter().write(jsonResponse);
+    }
+    private void setErrorResponse(HttpServletResponse response, HttpStatus status, String message) {
+        response.setStatus(status.value());
+        response.setContentType("application/json");
+        try {
+            ErrorResponse errorResponse = new ErrorResponse(status, message);
+            response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
+        } catch (IOException e) {
+            logger.error(e);
+        }
     }
 }

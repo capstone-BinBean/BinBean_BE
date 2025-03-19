@@ -12,10 +12,13 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 @Getter
-@RequiredArgsConstructor
 public class UserDetailsImpl implements UserDetails {
 
     private final User user;
+
+    public UserDetailsImpl(User user) {
+        this.user = user;
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -34,10 +37,6 @@ public class UserDetailsImpl implements UserDetails {
     @Override
     public String getUsername() {
         return user.getEmail();
-    }
-
-    public UserDetailsImpl from(User user) {
-        return new UserDetailsImpl(user);
     }
 
     @Override
