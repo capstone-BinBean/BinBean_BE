@@ -104,20 +104,23 @@ public class JwtUsernamePasswordAuthFilter extends UsernamePasswordAuthenticatio
 //        redisService.setStringValue(userDetails.getUsername(), refreshToken,
 //            jwtTokenProvider.getRefreshExpirationTime());
 
+        setResponseEncoding(response);
         String jsonResponse = objectMapper.writeValueAsString(tokenDto);
-
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
         response.getWriter().write(jsonResponse);
     }
     private void setErrorResponse(HttpServletResponse response, HttpStatus status, String message) {
         response.setStatus(status.value());
-        response.setContentType("application/json");
+        setResponseEncoding(response);
         try {
             ErrorResponse errorResponse = new ErrorResponse(status, message);
             response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
         } catch (IOException e) {
             logger.error(e);
         }
+    }
+
+    private void setResponseEncoding(HttpServletResponse response) {
+        response.setContentType("application/json; charset=utf-8");
+        response.setCharacterEncoding("UTF-8");
     }
 }
