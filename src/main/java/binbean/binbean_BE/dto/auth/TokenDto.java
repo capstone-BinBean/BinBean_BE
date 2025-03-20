@@ -1,4 +1,4 @@
-package binbean.binbean_BE.auth.dto;
+package binbean.binbean_BE.dto.auth;
 
 import lombok.Builder;
 import lombok.Getter;

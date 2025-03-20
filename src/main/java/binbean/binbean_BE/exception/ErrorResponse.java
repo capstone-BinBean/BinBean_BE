@@ -1,4 +1,4 @@
-package binbean.binbean_BE.global;
+package binbean.binbean_BE.exception;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import org.springframework.http.HttpStatus;

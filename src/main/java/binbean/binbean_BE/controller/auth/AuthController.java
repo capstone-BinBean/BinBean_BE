@@ -1,8 +1,8 @@
-package binbean.binbean_BE.auth.controller;
+package binbean.binbean_BE.controller.auth;
 
-import binbean.binbean_BE.auth.dto.request.RegisterRequest;
-import binbean.binbean_BE.auth.service.AuthService;
-import binbean.binbean_BE.user.entity.User;
+import binbean.binbean_BE.dto.auth.request.LoginRequest;
+import binbean.binbean_BE.dto.auth.request.RegisterRequest;
+import binbean.binbean_BE.service.auth.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -14,14 +14,21 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/auths")
-@RequiredArgsConstructor
 public class AuthController {
 
     private final AuthService authService;
+
+    public AuthController(AuthService authService) {
+        this.authService = authService;
+    }
 
     @PostMapping("/registration")
     public ResponseEntity<Void> register(@Valid @RequestBody RegisterRequest request) {
         authService.registerUser(request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @PostMapping("/login")
+    public void login(@Valid @RequestBody LoginRequest request) {
     }
 }

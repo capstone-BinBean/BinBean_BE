@@ -1,6 +1,6 @@
-package binbean.binbean_BE.user.repository;
+package binbean.binbean_BE.repository.user;
 
-import binbean.binbean_BE.user.entity.User;
+import binbean.binbean_BE.entity.user.User;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
