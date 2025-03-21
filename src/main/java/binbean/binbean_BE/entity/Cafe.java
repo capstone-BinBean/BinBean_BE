@@ -47,19 +47,19 @@ public class Cafe {
     private String cafeDescription;
 
     @Column(name = "max_seats", nullable = false)
-    private String maxSeats;
+    private int maxSeats;
 
     @Column(name = "wife_available", nullable = false)
-    private String wifiAvailable;
+    private int wifiAvailable;
 
     @Column(name = "pet_available", nullable = false)
-    private String petAvailable;
+    private int petAvailable;
 
     @Column(name = "kids_available", nullable = false)
-    private String kidsAvailable;
+    private int kidsAvailable;
 
     @Column(name = "charge_available", nullable = false)
-    private String chargeAvailable;
+    private int chargeAvailable;
 
     protected Cafe() {}
 }

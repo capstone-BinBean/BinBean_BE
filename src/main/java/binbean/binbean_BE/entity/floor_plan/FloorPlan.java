@@ -18,7 +18,7 @@ public class FloorPlan {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "cafe_id", nullable = false)
+    @Column(name = "floor_plan_id", nullable = false)
     private Long id;
 
     @ManyToOne

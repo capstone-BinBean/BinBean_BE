@@ -1,6 +1,5 @@
 package binbean.binbean_BE.entity.floor_plan;
 
-import binbean.binbean_BE.entity.Cafe;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -18,12 +17,12 @@ public class Seats {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "cafe_id", nullable = false)
+    @Column(name = "seats_id", nullable = false)
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "cafe_id", nullable = false)
-    private Cafe cafe;
+    @JoinColumn(name = "floor_plan_id", nullable = false)
+    private FloorPlan floorPlan;
 
     @Column(name = "x", nullable = false)
     private double x;
