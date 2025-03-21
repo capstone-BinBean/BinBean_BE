@@ -3,6 +3,10 @@ package binbean.binbean_BE.constants;
 public class Constants {
     private Constants() {}
 
+    public static class Kakao {
+        public static final String KAKAO_TOKEN_INFO_URL = "https://kapi.kakao.com/v1/user/access_token_info";
+    }
+
     public static class User {
         public static final String ROLE_PREFIX = "ROLE_";
     }

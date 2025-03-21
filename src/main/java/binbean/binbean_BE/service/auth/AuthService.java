@@ -12,14 +12,17 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 @Service
 public class AuthService implements UserDetailsService {
 
+    private final RestTemplate restTemplate;
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
 
-    public AuthService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
+    public AuthService(RestTemplate restTemplate, UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
+        this.restTemplate = restTemplate;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
