@@ -1,6 +1,7 @@
 package binbean.binbean_BE.controller;
 
 import binbean.binbean_BE.dto.request.CafeRegisterRequest;
+import binbean.binbean_BE.dto.request.FloorPlanRegisterRequest;
 import binbean.binbean_BE.service.CafeService;
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -23,10 +24,11 @@ public class CafeController {
     }
 
     @PostMapping(value = "/registration", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<Void> registerCafe(@RequestPart("cafe") CafeRegisterRequest request,
+    public ResponseEntity<Void> registerCafe(@RequestPart("cafe") CafeRegisterRequest cafeRequest,
+        @RequestPart("floorPlan") FloorPlanRegisterRequest floorRequest,
         @RequestPart(value = "cafeImg", required = false) List<MultipartFile> cafeImg) {
 
-        cafeService.registerCafe(request, cafeImg);
+        cafeService.registerCafe(cafeRequest, floorRequest, cafeImg);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

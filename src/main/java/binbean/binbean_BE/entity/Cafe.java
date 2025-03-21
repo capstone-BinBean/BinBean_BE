@@ -46,9 +46,6 @@ public class Cafe {
     @Column(name = "cafe_description", nullable = false)
     private String cafeDescription;
 
-    @Column(name = "max_seats", nullable = false)
-    private int maxSeats;
-
     @Column(name = "wife_available", nullable = false)
     private int wifiAvailable;
 

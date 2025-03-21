@@ -27,4 +27,7 @@ public class FloorPlan {
 
     @Column(name = "floor_number", nullable = false)
     private int floorNumber;
+
+    @Column(name = "max_seats", nullable = false)
+    private int maxSeats;
 }
