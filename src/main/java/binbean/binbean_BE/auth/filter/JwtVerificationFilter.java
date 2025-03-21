@@ -29,7 +29,7 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
         this.authService = authService;
     }
 
-    private static final Set<String> EXCLUDED_URLS = Set.of("/signup");
+    private static final Set<String> EXCLUDED_URLS = Set.of("/signup", "/api/auths/kakao/login");
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
@@ -40,7 +40,7 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
         // excludedUrls 리스트의 url 요청은 토큰 검증을 하지 않음
         if (EXCLUDED_URLS.contains(requestURI)) {
             filterChain.doFilter(request, response);
-            return;
+//            return;
         }
 
         var accessToken = jwtTokenProvider.getHeaderAccessToken(request);

@@ -90,7 +90,7 @@ public class SecurityConfig {
             .sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests((requests) ->
                 requests
-                    .requestMatchers(HttpMethod.POST, "/api/auths/registration", "/api/auths/login")
+                    .requestMatchers(HttpMethod.POST, "/api/auths/registration", "/api/auths/login", "/api/auths/kakao/login")
                     .permitAll()
                     .anyRequest()
                     .authenticated()
