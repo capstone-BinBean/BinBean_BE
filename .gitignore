@@ -35,3 +35,13 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### application-dev.yml ###
+application-dev.yml
+
+src/**/application-dev.yml
+
+### application-prod.yml ###
+application-prod.yml
+
+src/**/application-prod.yml
