@@ -5,8 +5,10 @@ import binbean.binbean_BE.dto.request.FloorPlanRegisterRequest;
 import binbean.binbean_BE.dto.request.FloorPlanRegisterRequest.FloorInfo;
 import binbean.binbean_BE.entity.BusinessHours;
 import binbean.binbean_BE.entity.Cafe;
+import binbean.binbean_BE.entity.CafeImg;
 import binbean.binbean_BE.entity.floor_plan.FloorPlan;
 import binbean.binbean_BE.repository.BusinessHoursRepository;
+import binbean.binbean_BE.repository.CafeImgRepository;
 import binbean.binbean_BE.repository.CafeRepository;
 import binbean.binbean_BE.repository.floor_plan.BorderLineRepository;
 import binbean.binbean_BE.repository.floor_plan.CounterRepository;
@@ -33,11 +35,14 @@ public class CafeService {
     private final CounterRepository counterRepository;
     private final ToiletRepository toiletRepository;
     private final WindowRepository windowRepository;
+    private final ImageStorageService imageStorageService;
+    private final CafeImgRepository cafeImgRepository;
 
     public CafeService(CafeRepository cafeRepository, BusinessHoursRepository businessHoursRepository,
         FloorPlanRepository floorPlanRepository, BorderLineRepository borderLineRepository,
         SeatsRepository seatsRepository, DoorRepository doorRepository, CounterRepository counterRepository,
-        ToiletRepository toiletRepository, WindowRepository windowRepository) {
+        ToiletRepository toiletRepository, WindowRepository windowRepository,
+        ImageStorageService imageStorageService, CafeImgRepository cafeImgRepository) {
         this.cafeRepository = cafeRepository;
         this.businessHoursRepository = businessHoursRepository;
         this.floorPlanRepository = floorPlanRepository;
@@ -47,10 +52,12 @@ public class CafeService {
         this.counterRepository = counterRepository;
         this.toiletRepository = toiletRepository;
         this.windowRepository = windowRepository;
+        this.imageStorageService = imageStorageService;
+        this.cafeImgRepository = cafeImgRepository;
     }
 
     public void registerCafe(CafeRegisterRequest cafeRequest, FloorPlanRegisterRequest floorRequest,
-        List<MultipartFile> cafeImg) {
+        List<MultipartFile> cafeImgFiles) {
 
         Cafe cafe = cafeRequest.toEntity();
         cafeRepository.save(cafe);
@@ -58,18 +65,28 @@ public class CafeService {
         BusinessHours businessHours = cafeRequest.toBusinessHoursEntity();
         businessHoursRepository.save(businessHours);
 
-        for (FloorInfo floorInfo : floorRequest.floorList()) {
+        saveFloorPlan(floorRequest, cafe);
+
+        saveCafeImages(cafe, cafeImgFiles);
+    }
+
+    private void saveFloorPlan(FloorPlanRegisterRequest floorRequest, Cafe cafe) {
+        for (FloorPlanRegisterRequest.FloorInfo floorInfo : floorRequest.floorList()) {
             FloorPlan floorPlan = floorPlanRepository.save(floorInfo.toFloorPlanEntity(cafe));
-            saveFloorPlanDetails(floorInfo, floorPlan);
+            borderLineRepository.saveAll(floorInfo.toBorderLinesEntity(floorPlan));
+            seatsRepository.saveAll(floorInfo.toSeatsEntities(floorPlan));
+            doorRepository.saveAll(floorInfo.toDoorsEntity(floorPlan));
+            counterRepository.saveAll(floorInfo.toCountersEntity(floorPlan));
+            toiletRepository.saveAll(floorInfo.toToiletsEntity(floorPlan));
+            windowRepository.saveAll(floorInfo.toWindowsEntity(floorPlan));
         }
     }
 
-    private void saveFloorPlanDetails(FloorInfo floorInfo, FloorPlan floorPlan) {
-        borderLineRepository.saveAll(floorInfo.toBorderLinesEntity(floorPlan));
-        seatsRepository.saveAll(floorInfo.toSeatsEntities(floorPlan));
-        doorRepository.saveAll(floorInfo.toDoorsEntity(floorPlan));
-        counterRepository.saveAll(floorInfo.toCountersEntity(floorPlan));
-        toiletRepository.saveAll(floorInfo.toToiletsEntity(floorPlan));
-        windowRepository.saveAll(floorInfo.toWindowsEntity(floorPlan));
+    private void saveCafeImages(Cafe cafe, List<MultipartFile> cafeImgFiles) {
+        for (MultipartFile image : cafeImgFiles) {
+            String imageUrl = imageStorageService.uploadImage(image);
+            CafeImg cafeImg = CafeImg.toEntity(cafe, imageUrl);
+            cafeImgRepository.save(cafeImg);
+        }
     }
 }

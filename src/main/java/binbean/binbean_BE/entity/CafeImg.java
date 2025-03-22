@@ -26,4 +26,11 @@ public class CafeImg {
 
     @Column(name = "cafe_img_url", nullable = true)
     private String cafeImgUrl;
+
+    public static CafeImg toEntity(Cafe cafe, String cafeImgUrl) {
+        return CafeImg.builder()
+            .cafe(cafe)
+            .cafeImgUrl(cafeImgUrl)
+            .build();
+    }
 }
