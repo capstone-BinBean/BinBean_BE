@@ -5,17 +5,19 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.Builder;
 import lombok.Getter;
 
 @Entity
 @Getter
 @Builder
+@Table(name = "BUSINESS_HOURS_TB")
 public class BusinessHours {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "cafe_id", nullable = false)
+    @Column(name = "business_hours_id", nullable = false)
     private Long id;
 
     @Column(name = "monday_start", nullable = false)

@@ -6,13 +6,16 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import lombok.Builder;
 import lombok.Getter;
 
 @Entity
 @Getter
 @Builder
+@Table(name = "CAFE_TB")
 public class Cafe {
 
     @Id
@@ -25,10 +28,7 @@ public class Cafe {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @ManyToOne
-    @JoinColumn(name = "business_hour_id", nullable = false)
-    private BusinessHour businessHour;
-     */
+*/
 
     @OneToOne
     @JoinColumn(name = "business_hours_id", nullable = false)
@@ -59,4 +59,20 @@ public class Cafe {
     private int chargeAvailable;
 
     protected Cafe() {}
+
+    @Builder
+    public Cafe(Long id, BusinessHours businessHours, String cafeName, String cafeAddress,
+        String cafePhone, String cafeDescription, int wifiAvailable, int petAvailable,
+        int kidsAvailable, int chargeAvailable) {
+        this.id = id;
+        this.businessHours = businessHours;
+        this.cafeName = cafeName;
+        this.cafeAddress = cafeAddress;
+        this.cafePhone = cafePhone;
+        this.cafeDescription = cafeDescription;
+        this.wifiAvailable = wifiAvailable;
+        this.petAvailable = petAvailable;
+        this.kidsAvailable = kidsAvailable;
+        this.chargeAvailable = chargeAvailable;
+    }
 }
