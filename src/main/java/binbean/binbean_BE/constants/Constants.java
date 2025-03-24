@@ -1,5 +1,7 @@
 package binbean.binbean_BE.constants;
 
+import java.util.Set;
+
 public class Constants {
     private Constants() {}
 
@@ -8,8 +10,16 @@ public class Constants {
         public static final String KAKAO_USER_INFO_URL = "https://kapi.kakao.com/v2/user/me";
     }
 
+    public static class URL {
+        public static final Set<String> EXCLUDED_URLS = Set.of("/signup", "/api/auths/kakao/login");
+    }
+
     public static class User {
         public static final String ROLE_PREFIX = "ROLE_";
+    }
+
+    public static class LoggingMsg {
+        public static final String ACCESS_TOKEN_MISSING = "Access token is missing in request: ";
     }
 
     public static class ErrorMsg {

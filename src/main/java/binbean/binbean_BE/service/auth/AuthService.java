@@ -107,9 +107,6 @@ public class AuthService implements UserDetailsService {
             logger.info("headers: ", response.kakaoAcount().getEmail());
             logger.info("body: ", jsonResponse.getBody());
 
-
-
-
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
