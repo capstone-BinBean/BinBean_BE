@@ -8,6 +8,7 @@ import binbean.binbean_BE.auth.filter.UrlBasedAuthenticationFilter;
 import binbean.binbean_BE.constants.Constants;
 import binbean.binbean_BE.constants.Constants.URL;
 import binbean.binbean_BE.infra.RedisService;
+import binbean.binbean_BE.service.auth.AuthService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -37,14 +38,16 @@ public class SecurityConfig {
 
     private final JwtVerificationFilter jwtVerificationFilter;
     private final JwtExceptionFilter jwtExceptionFilter;
+    private final AuthService authService;
     private final RedisService redisService;
 
     // AuthenticationManager의 Bean을 얻기 위한 authConfiguration 객체
     private final AuthenticationConfiguration authenticationConfiguration;
 
-    public SecurityConfig(JwtVerificationFilter jwtVerificationFilter, JwtExceptionFilter jwtExceptionFilter, AuthenticationConfiguration authenticationConfiguration, RedisService redisService) {
+    public SecurityConfig(JwtVerificationFilter jwtVerificationFilter, JwtExceptionFilter jwtExceptionFilter, AuthService authService,  AuthenticationConfiguration authenticationConfiguration, RedisService redisService) {
         this.jwtVerificationFilter = jwtVerificationFilter;
         this.jwtExceptionFilter = jwtExceptionFilter;
+        this.authService = authService;
         this.redisService = redisService;
         this.authenticationConfiguration = authenticationConfiguration;
     }
@@ -58,15 +61,9 @@ public class SecurityConfig {
     }
 
     @Bean
-    public UrlBasedAuthenticationFilter urlBasedAuthenticationFilter(AuthenticationManager authenticationManager,
-        JwtTokenProvider jwtTokenProvider, RedisService redisService) {
-        return new UrlBasedAuthenticationFilter(authenticationManager, jwtTokenProvider, redisService);
-    }
-
-    @Bean
     public JwtUsernamePasswordAuthFilter jwtUsernamePasswordAuthFilter(AuthenticationManager authenticationManager, JwtTokenProvider jwtTokenProvider, RedisService redisService)
         throws Exception {
-        var filter = new JwtUsernamePasswordAuthFilter(authenticationManager, jwtTokenProvider, redisService);
+        var filter = new JwtUsernamePasswordAuthFilter(authenticationManager, authService, jwtTokenProvider, redisService);
         filter.setAuthenticationManager(authenticationManager());
         return filter;
     }
@@ -98,16 +95,15 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtTokenProvider jwtTokenProvider) throws Exception {
         // 일반 로그인 필터 (일반 로그인 경로에만 적용)
-//        JwtUsernamePasswordAuthFilter loginFilter = new JwtUsernamePasswordAuthFilter(authenticationManager(), jwtTokenProvider, redisService);
-//        loginFilter.setFilterProcessesUrl("/api/auths/login");
-//
-//        // 카카오 로그인 필터 (카카오 로그인 경로에만 적용)
-//        JwtUsernamePasswordAuthFilter socialLoginFilter = new JwtUsernamePasswordAuthFilter(authenticationManager(), jwtTokenProvider, redisService);
-//        socialLoginFilter.setFilterProcessesUrl("/api/auths/kakao/login");
+        JwtUsernamePasswordAuthFilter loginFilter = new JwtUsernamePasswordAuthFilter(authenticationManager(), authService, jwtTokenProvider, redisService);
+        loginFilter.setFilterProcessesUrl("/api/auths/login");
+
+        // 카카오 로그인 필터 (카카오 로그인 경로에만 적용)
+        JwtUsernamePasswordAuthFilter socialLoginFilter = new JwtUsernamePasswordAuthFilter(authenticationManager(), authService, jwtTokenProvider, redisService);
+        socialLoginFilter.setFilterProcessesUrl("/api/auths/kakao/login");
 
         // OncePerRequestFilter 등록하여 경로에 따라 필터를 분기 처리
-        UrlBasedAuthenticationFilter filter = new UrlBasedAuthenticationFilter(authenticationManager(), jwtTokenProvider, redisService);
-//        UrlBasedAuthenticationFilter filter = new UrlBasedAuthenticationFilter(loginFilter, socialLoginFilter);
+        UrlBasedAuthenticationFilter filter = new UrlBasedAuthenticationFilter(loginFilter, socialLoginFilter);
 
         http
             .cors(Customizer.withDefaults())

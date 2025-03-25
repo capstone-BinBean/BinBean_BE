@@ -14,23 +14,12 @@ import org.springframework.web.filter.OncePerRequestFilter;
 //@Component
 public class UrlBasedAuthenticationFilter extends OncePerRequestFilter {
 
-    private final AuthenticationManager authenticationManager;
-    private final JwtTokenProvider jwtTokenProvider;
-    private final RedisService redisService;
     private final JwtUsernamePasswordAuthFilter loginFilter;
     private final JwtUsernamePasswordAuthFilter socialLoginFilter;
 
-    public UrlBasedAuthenticationFilter(AuthenticationManager authenticationManager,
-        JwtTokenProvider jwtTokenProvider,
-        RedisService redisService) {
-        this.authenticationManager = authenticationManager;
-        this.jwtTokenProvider = jwtTokenProvider;
-        this.redisService = redisService;
-        this.loginFilter = new JwtUsernamePasswordAuthFilter(authenticationManager, jwtTokenProvider, redisService);
-        this.loginFilter.setFilterProcessesUrl("/api/auths/login");
-
-        this.socialLoginFilter = new JwtUsernamePasswordAuthFilter(authenticationManager, jwtTokenProvider, redisService);
-        this.socialLoginFilter.setFilterProcessesUrl("/api/auths/kakao/login");
+    public UrlBasedAuthenticationFilter(JwtUsernamePasswordAuthFilter loginFilter, JwtUsernamePasswordAuthFilter socialLoginFilter) {
+        this.loginFilter = loginFilter;
+        this.socialLoginFilter = socialLoginFilter;
     }
 
     @Override
