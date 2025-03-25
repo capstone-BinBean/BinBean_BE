@@ -4,6 +4,8 @@ import binbean.binbean_BE.auth.JwtTokenProvider;
 import binbean.binbean_BE.auth.filter.JwtExceptionFilter;
 import binbean.binbean_BE.auth.filter.JwtUsernamePasswordAuthFilter;
 import binbean.binbean_BE.auth.filter.JwtVerificationFilter;
+import binbean.binbean_BE.constants.Constants;
+import binbean.binbean_BE.constants.Constants.URL;
 import binbean.binbean_BE.infra.RedisService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -90,7 +92,7 @@ public class SecurityConfig {
             .sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests((requests) ->
                 requests
-                    .requestMatchers(HttpMethod.POST, "/api/auths/registration", "/api/auths/login", "/api/auths/kakao/login")
+                    .requestMatchers(HttpMethod.POST, URL.ALLOWED_URLS)
                     .permitAll()
                     .anyRequest()
                     .authenticated()

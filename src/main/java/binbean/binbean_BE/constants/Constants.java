@@ -1,5 +1,6 @@
 package binbean.binbean_BE.constants;
 
+import java.util.List;
 import java.util.Set;
 
 public class Constants {
@@ -13,7 +14,14 @@ public class Constants {
     }
 
     public static class URL {
+        // SecurityConfig 허용 URL
+        public static final String[] ALLOWED_URLS = {
+            "/api/auths/registration",
+            "/api/auths/login",
+            "/api/auths/kakao/login"};
+        // Verification Filter에서 토큰 검증을 하지 않는 URL
         public static final Set<String> EXCLUDED_URLS = Set.of("/signup", "/api/auths/kakao/login");
+
     }
 
     public static class User {
