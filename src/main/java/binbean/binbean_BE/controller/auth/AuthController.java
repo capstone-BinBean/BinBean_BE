@@ -33,14 +33,4 @@ public class AuthController {
     @PostMapping("/login")
     public void login(@Valid @RequestBody LoginRequest request) {
     }
-
-    @GetMapping("/kakao/login")
-    public ResponseEntity<String> social(@Valid @RequestBody SocialRegisterRequest request) {
-        boolean isValid = authService.validateKakaoAccessToken(request.accessToken());
-        if (isValid) {
-            return ResponseEntity.status(HttpStatus.CREATED).build();
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("카카오 액세스 토큰이 유효하지 않습니다");
-        }
-    }
 }

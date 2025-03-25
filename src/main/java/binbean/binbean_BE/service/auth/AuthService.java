@@ -12,18 +12,15 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 @Service
 public class AuthService implements UserDetailsService {
     private static final Logger logger = LoggerFactory.getLogger(AuthService.class);
 
-    private final RestTemplate restTemplate;
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
 
-    public AuthService(RestTemplate restTemplate, UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
-        this.restTemplate = restTemplate;
+    public AuthService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
@@ -46,8 +43,18 @@ public class AuthService implements UserDetailsService {
             });
 
         var user = request.toEntity();
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setPassword(encodePassword(user.getPassword()));
         userRepository.save(user);
+    }
+
+    /**
+     * 소셜 로그인일 경우, password를 null로 보냄
+     */
+    private String encodePassword(String password) {
+        if (password == null || password.isEmpty()) {
+            return null;
+        }
+        return passwordEncoder.encode(password);
     }
 
     private User getUserEntity(String email) {

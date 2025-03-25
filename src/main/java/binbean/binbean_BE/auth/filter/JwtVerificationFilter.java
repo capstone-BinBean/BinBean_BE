@@ -38,7 +38,7 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
 
         String requestURI = request.getRequestURI().trim().toLowerCase();
 
-        // excludedUrls 리스트의 url 요청은 토큰 검증을 하지 않음
+        // EXCLUDED_URLS의 url 요청은 토큰 검증을 하지 않음
         if (URL.EXCLUDED_URLS.contains(requestURI)) {
             filterChain.doFilter(request, response);
         }
