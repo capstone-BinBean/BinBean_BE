@@ -96,11 +96,11 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtTokenProvider jwtTokenProvider) throws Exception {
         // 일반 로그인 필터 (일반 로그인 경로에만 적용)
         JwtUsernamePasswordAuthFilter loginFilter = new JwtUsernamePasswordAuthFilter(authenticationManager(), authService, jwtTokenProvider, redisService);
-        loginFilter.setFilterProcessesUrl("/api/auths/login");
+        loginFilter.setFilterProcessesUrl(URL.NORMAL_LOGIN_URL);
 
         // 카카오 로그인 필터 (카카오 로그인 경로에만 적용)
         JwtUsernamePasswordAuthFilter socialLoginFilter = new JwtUsernamePasswordAuthFilter(authenticationManager(), authService, jwtTokenProvider, redisService);
-        socialLoginFilter.setFilterProcessesUrl("/api/auths/kakao/login");
+        socialLoginFilter.setFilterProcessesUrl(URL.KAKAO_LOGIN_URL);
 
         // OncePerRequestFilter 등록하여 경로에 따라 필터를 분기 처리
         UrlBasedAuthenticationFilter filter = new UrlBasedAuthenticationFilter(loginFilter, socialLoginFilter);

@@ -17,11 +17,10 @@ public class Constants {
         // SecurityConfig 허용하는 URL
         public static final String[] ALLOWED_URLS = {
             "/api/auths/registration",
-            "/api/auths/login",
-            "/api/auths/kakao/login"};
-        // Verification Filter에서 토큰 검증을 하지 않는 URL
-//        public static final Set<String> EXCLUDED_URLS = Set.of("/api/auths/kakao/login");
-
+            URL.NORMAL_LOGIN_URL,
+            URL.KAKAO_LOGIN_URL};
+        public static final String KAKAO_LOGIN_URL = "/api/auths/kakao/login";
+        public static final String NORMAL_LOGIN_URL = "/api/auths/login";
     }
 
     public static class User {

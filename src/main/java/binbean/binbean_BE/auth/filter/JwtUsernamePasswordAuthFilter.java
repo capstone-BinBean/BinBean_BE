@@ -4,6 +4,7 @@ import binbean.binbean_BE.auth.JwtTokenProvider;
 import binbean.binbean_BE.auth.UserDetailsImpl;
 import binbean.binbean_BE.constants.Constants;
 import binbean.binbean_BE.constants.Constants.ErrorMsg;
+import binbean.binbean_BE.constants.Constants.URL;
 import binbean.binbean_BE.dto.auth.TokenDto;
 import binbean.binbean_BE.dto.auth.request.LoginRequest;
 import binbean.binbean_BE.exception.ErrorResponse;
@@ -68,7 +69,7 @@ public class JwtUsernamePasswordAuthFilter extends UsernamePasswordAuthenticatio
 
             String requestURI = request.getRequestURI();
             // 소셜 로그인
-            if (requestURI.contains("/api/auths/kakao/login")) {
+            if (requestURI.contains(URL.KAKAO_LOGIN_URL)) {
                 return authenticateSocialLogin(loginDto.email());
             } else {
                 // 일반 로그인

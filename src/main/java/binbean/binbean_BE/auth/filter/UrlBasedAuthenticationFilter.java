@@ -1,6 +1,8 @@
 package binbean.binbean_BE.auth.filter;
 
 import binbean.binbean_BE.auth.JwtTokenProvider;
+import binbean.binbean_BE.constants.Constants;
+import binbean.binbean_BE.constants.Constants.URL;
 import binbean.binbean_BE.infra.RedisService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -28,9 +30,9 @@ public class UrlBasedAuthenticationFilter extends OncePerRequestFilter {
         String requestURI = request.getRequestURI().trim().toLowerCase();
 
         // 일반 로그인 필터 처리
-        if (requestURI.contains("/api/auths/login")) {
+        if (requestURI.contains(URL.NORMAL_LOGIN_URL)) {
             loginFilter.doFilter(request, response, filterChain);
-        } else if (requestURI.contains("/api/auths/kakao/login")) {
+        } else if (requestURI.contains(URL.KAKAO_LOGIN_URL)) {
             // 소셜 로그인 필터 처리
             socialLoginFilter.doFilter(request, response, filterChain);
         } else {
