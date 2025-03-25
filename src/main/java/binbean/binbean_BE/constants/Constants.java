@@ -14,13 +14,13 @@ public class Constants {
     }
 
     public static class URL {
-        // SecurityConfig 허용 URL
+        // SecurityConfig 허용하는 URL
         public static final String[] ALLOWED_URLS = {
             "/api/auths/registration",
             "/api/auths/login",
             "/api/auths/kakao/login"};
         // Verification Filter에서 토큰 검증을 하지 않는 URL
-        public static final Set<String> EXCLUDED_URLS = Set.of("/signup", "/api/auths/kakao/login");
+//        public static final Set<String> EXCLUDED_URLS = Set.of("/api/auths/kakao/login");
 
     }
 

@@ -38,11 +38,6 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
 
         String requestURI = request.getRequestURI().trim().toLowerCase();
 
-        // EXCLUDED_URLS의 url 요청은 토큰 검증을 하지 않음
-        if (URL.EXCLUDED_URLS.contains(requestURI)) {
-            filterChain.doFilter(request, response);
-        }
-
         var accessToken = jwtTokenProvider.getHeaderAccessToken(request);
 
         // Access Token이 없는 경우 바로 요청 통과

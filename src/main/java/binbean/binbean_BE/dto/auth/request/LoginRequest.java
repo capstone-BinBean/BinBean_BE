@@ -7,6 +7,7 @@ public record LoginRequest(
     @NotEmpty
     @Email
     String email,
+    @NotEmpty
     String password
 ) {
 }
