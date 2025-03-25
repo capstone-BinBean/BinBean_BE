@@ -4,7 +4,11 @@ import binbean.binbean_BE.auth.JwtTokenProvider;
 import binbean.binbean_BE.auth.filter.JwtExceptionFilter;
 import binbean.binbean_BE.auth.filter.JwtUsernamePasswordAuthFilter;
 import binbean.binbean_BE.auth.filter.JwtVerificationFilter;
+import binbean.binbean_BE.auth.filter.UrlBasedAuthenticationFilter;
+import binbean.binbean_BE.constants.Constants;
+import binbean.binbean_BE.constants.Constants.URL;
 import binbean.binbean_BE.infra.RedisService;
+import binbean.binbean_BE.service.auth.AuthService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -34,14 +38,16 @@ public class SecurityConfig {
 
     private final JwtVerificationFilter jwtVerificationFilter;
     private final JwtExceptionFilter jwtExceptionFilter;
+    private final AuthService authService;
     private final RedisService redisService;
 
     // AuthenticationManager의 Bean을 얻기 위한 authConfiguration 객체
     private final AuthenticationConfiguration authenticationConfiguration;
 
-    public SecurityConfig(JwtVerificationFilter jwtVerificationFilter, JwtExceptionFilter jwtExceptionFilter, AuthenticationConfiguration authenticationConfiguration, RedisService redisService) {
+    public SecurityConfig(JwtVerificationFilter jwtVerificationFilter, JwtExceptionFilter jwtExceptionFilter, AuthService authService,  AuthenticationConfiguration authenticationConfiguration, RedisService redisService) {
         this.jwtVerificationFilter = jwtVerificationFilter;
         this.jwtExceptionFilter = jwtExceptionFilter;
+        this.authService = authService;
         this.redisService = redisService;
         this.authenticationConfiguration = authenticationConfiguration;
     }
@@ -52,6 +58,14 @@ public class SecurityConfig {
     @Bean
     public AuthenticationManager authenticationManager() throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
+    }
+
+    @Bean
+    public JwtUsernamePasswordAuthFilter jwtUsernamePasswordAuthFilter(AuthenticationManager authenticationManager, JwtTokenProvider jwtTokenProvider, RedisService redisService)
+        throws Exception {
+        var filter = new JwtUsernamePasswordAuthFilter(authenticationManager, authService, jwtTokenProvider, redisService);
+        filter.setAuthenticationManager(authenticationManager());
+        return filter;
     }
 
     @Bean
@@ -74,23 +88,29 @@ public class SecurityConfig {
         configuration.setAllowedHeaders(List.of("*"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/api/", configuration);
+        source.registerCorsConfiguration("/**", configuration);
         return source;
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtTokenProvider jwtTokenProvider) throws Exception {
+        // 일반 로그인 필터 (일반 로그인 경로에만 적용)
+        JwtUsernamePasswordAuthFilter loginFilter = new JwtUsernamePasswordAuthFilter(authenticationManager(), authService, jwtTokenProvider, redisService);
+        loginFilter.setFilterProcessesUrl(URL.NORMAL_LOGIN_URL);
 
-        // 커스텀 필터 등록 : 로그인 경로 설정 후, 로그인 필터 등록
-        JwtUsernamePasswordAuthFilter filter = new JwtUsernamePasswordAuthFilter(authenticationManager(), jwtTokenProvider, redisService);
-        filter.setFilterProcessesUrl("/api/auths/login");
+        // 카카오 로그인 필터 (카카오 로그인 경로에만 적용)
+        JwtUsernamePasswordAuthFilter socialLoginFilter = new JwtUsernamePasswordAuthFilter(authenticationManager(), authService, jwtTokenProvider, redisService);
+        socialLoginFilter.setFilterProcessesUrl(URL.KAKAO_LOGIN_URL);
+
+        // OncePerRequestFilter 등록하여 경로에 따라 필터를 분기 처리
+        UrlBasedAuthenticationFilter filter = new UrlBasedAuthenticationFilter(loginFilter, socialLoginFilter);
 
         http
             .cors(Customizer.withDefaults())
             .sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests((requests) ->
                 requests
-                    .requestMatchers(HttpMethod.POST, "/api/auths/registration", "/api/auths/login")
+                    .requestMatchers(HttpMethod.POST, URL.ALLOWED_URLS)
                     .permitAll()
                     .anyRequest()
                     .authenticated()

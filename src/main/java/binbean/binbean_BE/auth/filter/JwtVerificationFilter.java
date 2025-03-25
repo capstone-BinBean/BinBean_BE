@@ -2,6 +2,9 @@ package binbean.binbean_BE.auth.filter;
 
 import binbean.binbean_BE.auth.JwtTokenProvider;
 import binbean.binbean_BE.auth.UserDetailsImpl;
+import binbean.binbean_BE.constants.Constants;
+import binbean.binbean_BE.constants.Constants.LoggingMsg;
+import binbean.binbean_BE.constants.Constants.URL;
 import binbean.binbean_BE.service.auth.AuthService;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -29,25 +32,17 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
         this.authService = authService;
     }
 
-    private static final Set<String> EXCLUDED_URLS = Set.of("/signup");
-
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
         FilterChain filterChain) throws ServletException, IOException {
 
         String requestURI = request.getRequestURI().trim().toLowerCase();
 
-        // excludedUrls 리스트의 url 요청은 토큰 검증을 하지 않음
-        if (EXCLUDED_URLS.contains(requestURI)) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
         var accessToken = jwtTokenProvider.getHeaderAccessToken(request);
 
         // Access Token이 없는 경우 바로 요청 통과
         if (accessToken == null) {
-            logger.warn("Access token is missing in request: " + requestURI);
+            logger.warn(LoggingMsg.ACCESS_TOKEN_MISSING + requestURI);
             filterChain.doFilter(request, response);
             return;
         }
@@ -70,6 +65,8 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
             // 기타 JWT 예외일 경우
             throw e;
         }
+
+        filterChain.doFilter(request, response);
     }
 
     public void setAuthentication(UserDetailsImpl userDetails, HttpServletRequest request, SecurityContext securityContext) {

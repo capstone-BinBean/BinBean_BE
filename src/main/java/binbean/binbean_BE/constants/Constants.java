@@ -1,10 +1,34 @@
 package binbean.binbean_BE.constants;
 
+import java.util.List;
+import java.util.Set;
+
 public class Constants {
     private Constants() {}
 
+    public static class Kakao {
+        public static final String KAKAO_OAUTH_QUERY_STRING =
+            "/oauth/authorize?client_id=%s&redirect_uri=%s&response_type=code";
+        public static final String KAKAO_TOKEN_INFO_URL = "https://kapi.kakao.com/v1/user/access_token_info";
+        public static final String KAKAO_USER_INFO_URL = "https://kapi.kakao.com/v2/user/me";
+    }
+
+    public static class URL {
+        // SecurityConfig 허용하는 URL
+        public static final String[] ALLOWED_URLS = {
+            "/api/auths/registration",
+            URL.NORMAL_LOGIN_URL,
+            URL.KAKAO_LOGIN_URL};
+        public static final String KAKAO_LOGIN_URL = "/api/auths/kakao/login";
+        public static final String NORMAL_LOGIN_URL = "/api/auths/login";
+    }
+
     public static class User {
         public static final String ROLE_PREFIX = "ROLE_";
+    }
+
+    public static class LoggingMsg {
+        public static final String ACCESS_TOKEN_MISSING = "Access token is missing in request: ";
     }
 
     public static class ErrorMsg {
