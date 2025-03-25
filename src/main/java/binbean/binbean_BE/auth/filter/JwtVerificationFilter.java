@@ -65,6 +65,8 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
             // 기타 JWT 예외일 경우
             throw e;
         }
+
+        filterChain.doFilter(request, response);
     }
 
     public void setAuthentication(UserDetailsImpl userDetails, HttpServletRequest request, SecurityContext securityContext) {
