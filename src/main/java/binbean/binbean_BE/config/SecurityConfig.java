@@ -4,6 +4,7 @@ import binbean.binbean_BE.auth.JwtTokenProvider;
 import binbean.binbean_BE.auth.filter.JwtExceptionFilter;
 import binbean.binbean_BE.auth.filter.JwtUsernamePasswordAuthFilter;
 import binbean.binbean_BE.auth.filter.JwtVerificationFilter;
+import binbean.binbean_BE.auth.filter.UrlBasedAuthenticationFilter;
 import binbean.binbean_BE.constants.Constants;
 import binbean.binbean_BE.constants.Constants.URL;
 import binbean.binbean_BE.infra.RedisService;
@@ -57,6 +58,20 @@ public class SecurityConfig {
     }
 
     @Bean
+    public UrlBasedAuthenticationFilter urlBasedAuthenticationFilter(AuthenticationManager authenticationManager,
+        JwtTokenProvider jwtTokenProvider, RedisService redisService) {
+        return new UrlBasedAuthenticationFilter(authenticationManager, jwtTokenProvider, redisService);
+    }
+
+    @Bean
+    public JwtUsernamePasswordAuthFilter jwtUsernamePasswordAuthFilter(AuthenticationManager authenticationManager, JwtTokenProvider jwtTokenProvider, RedisService redisService)
+        throws Exception {
+        var filter = new JwtUsernamePasswordAuthFilter(authenticationManager, jwtTokenProvider, redisService);
+        filter.setAuthenticationManager(authenticationManager());
+        return filter;
+    }
+
+    @Bean
     public DaoAuthenticationProvider authenticationProvider(UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
         provider.setUserDetailsService(userDetailsService);
@@ -82,10 +97,17 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtTokenProvider jwtTokenProvider) throws Exception {
+        // 일반 로그인 필터 (일반 로그인 경로에만 적용)
+//        JwtUsernamePasswordAuthFilter loginFilter = new JwtUsernamePasswordAuthFilter(authenticationManager(), jwtTokenProvider, redisService);
+//        loginFilter.setFilterProcessesUrl("/api/auths/login");
+//
+//        // 카카오 로그인 필터 (카카오 로그인 경로에만 적용)
+//        JwtUsernamePasswordAuthFilter socialLoginFilter = new JwtUsernamePasswordAuthFilter(authenticationManager(), jwtTokenProvider, redisService);
+//        socialLoginFilter.setFilterProcessesUrl("/api/auths/kakao/login");
 
-        // 커스텀 필터 등록 : 로그인 경로 설정 후, 로그인 필터 등록
-        JwtUsernamePasswordAuthFilter filter = new JwtUsernamePasswordAuthFilter(authenticationManager(), jwtTokenProvider, redisService);
-        filter.setFilterProcessesUrl("/api/auths/login");
+        // OncePerRequestFilter 등록하여 경로에 따라 필터를 분기 처리
+        UrlBasedAuthenticationFilter filter = new UrlBasedAuthenticationFilter(authenticationManager(), jwtTokenProvider, redisService);
+//        UrlBasedAuthenticationFilter filter = new UrlBasedAuthenticationFilter(loginFilter, socialLoginFilter);
 
         http
             .cors(Customizer.withDefaults())

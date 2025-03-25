@@ -8,7 +8,6 @@ import binbean.binbean_BE.dto.auth.TokenDto;
 import binbean.binbean_BE.dto.auth.request.LoginRequest;
 import binbean.binbean_BE.exception.ErrorResponse;
 import binbean.binbean_BE.infra.RedisService;
-import binbean.binbean_BE.service.auth.AuthService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -24,16 +23,16 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StreamUtils;
 
 /**
  * 클라이언트의 로그인 요청을 처리해주는 인증 필터
  * UsernamePasswordAuthenticationFilter를 확장하여 JWT 기반 인증을 수행
  */
+//@Component
 public class JwtUsernamePasswordAuthFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
