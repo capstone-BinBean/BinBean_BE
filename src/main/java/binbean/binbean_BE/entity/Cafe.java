@@ -1,5 +1,6 @@
 package binbean.binbean_BE.entity;
 
+import binbean.binbean_BE.entity.floor_plan.FloorPlan;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -34,6 +35,10 @@ public class Cafe {
     @JoinColumn(name = "business_hours_id", nullable = false)
     private BusinessHours businessHours;
 
+    @ManyToOne
+    @JoinColumn(name = "floor_plan_id", nullable = false)
+    private FloorPlan floorPlan;
+
     @Column(name = "cafe_name", nullable = false)
     private String cafeName;
 
@@ -61,11 +66,12 @@ public class Cafe {
     protected Cafe() {}
 
     @Builder
-    public Cafe(Long id, BusinessHours businessHours, String cafeName, String cafeAddress,
+    public Cafe(Long id, BusinessHours businessHours, FloorPlan floorPlan, String cafeName, String cafeAddress,
         String cafePhone, String cafeDescription, int wifiAvailable, int petAvailable,
         int kidsAvailable, int chargeAvailable) {
         this.id = id;
         this.businessHours = businessHours;
+        this.floorPlan = floorPlan;
         this.cafeName = cafeName;
         this.cafeAddress = cafeAddress;
         this.cafePhone = cafePhone;

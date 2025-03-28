@@ -1,7 +1,7 @@
 package binbean.binbean_BE.controller;
 
 import binbean.binbean_BE.auth.UserDetailsImpl;
-import binbean.binbean_BE.dto.marker.MarkerDto;
+import binbean.binbean_BE.dto.marker.CafeMarkerDto;
 import binbean.binbean_BE.service.MarkerService;
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -20,7 +20,7 @@ public class MarkerController {
     public MarkerController(MarkerService markerService) { this.markerService = markerService; }
 
     @GetMapping
-    public ResponseEntity<List<MarkerDto>> register(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public ResponseEntity<List<CafeMarkerDto>> register(@AuthenticationPrincipal UserDetailsImpl userDetails) {
         var response = markerService.getMarkers(userDetails.getUser());
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
