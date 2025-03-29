@@ -71,7 +71,7 @@ public class CafeService {
         saveCafeImages(cafe, cafeImgFiles);
     }
 
-    public CafeInfoResponse getCafeInfo(){
+    public CafeInfoResponse getCafeInfo(Long cafeId){
 
     }
 

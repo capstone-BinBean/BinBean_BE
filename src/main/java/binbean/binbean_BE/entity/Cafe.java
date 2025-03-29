@@ -1,6 +1,7 @@
 package binbean.binbean_BE.entity;
 
 import binbean.binbean_BE.dto.response.CafeInfoResponse;
+import binbean.binbean_BE.entity.user.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -24,12 +25,9 @@ public class Cafe {
     @Column(name = "cafe_id", nullable = false)
     private Long id;
 
-    /*
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
-
-*/
 
     @OneToOne
     @JoinColumn(name = "business_hours_id", nullable = false)

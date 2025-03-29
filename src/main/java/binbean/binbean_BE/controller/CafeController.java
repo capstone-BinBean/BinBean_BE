@@ -36,9 +36,9 @@ public class CafeController {
     }
 
     @GetMapping("/{cafe_id}")
-    public ResponseEntity<CafeInfoResponse> getCafeInfo(@PathVariable(name = "cafe_id")) {
+    public ResponseEntity<CafeInfoResponse> getCafeInfo(@PathVariable(name = "cafe_id") Long cafeId) {
 
-        CafeInfoResponse response = cafeService.getCafeInfo();
+        CafeInfoResponse response = cafeService.getCafeInfo(cafeId);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }
