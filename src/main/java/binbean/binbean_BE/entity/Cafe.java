@@ -1,5 +1,6 @@
 package binbean.binbean_BE.entity;
 
+import binbean.binbean_BE.dto.response.CafeInfoResponse;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -74,5 +75,9 @@ public class Cafe {
         this.petAvailable = petAvailable;
         this.kidsAvailable = kidsAvailable;
         this.chargeAvailable = chargeAvailable;
+    }
+
+    public CafeInfoResponse toCafeDto() {
+        return CafeInfoResponse.builder()
     }
 }

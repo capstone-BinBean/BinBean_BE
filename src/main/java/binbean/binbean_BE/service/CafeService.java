@@ -3,6 +3,7 @@ package binbean.binbean_BE.service;
 import binbean.binbean_BE.dto.request.CafeRegisterRequest;
 import binbean.binbean_BE.dto.request.FloorPlanRegisterRequest;
 import binbean.binbean_BE.dto.request.FloorPlanRegisterRequest.FloorInfo;
+import binbean.binbean_BE.dto.response.CafeInfoResponse;
 import binbean.binbean_BE.entity.BusinessHours;
 import binbean.binbean_BE.entity.Cafe;
 import binbean.binbean_BE.entity.CafeImg;
@@ -59,7 +60,7 @@ public class CafeService {
     public void registerCafe(CafeRegisterRequest cafeRequest, FloorPlanRegisterRequest floorRequest,
         List<MultipartFile> cafeImgFiles) {
 
-        Cafe cafe = cafeRequest.toEntity();
+        Cafe cafe = cafeRequest.toCafeEntity();
         cafeRepository.save(cafe);
 
         BusinessHours businessHours = cafeRequest.toBusinessHoursEntity();
@@ -68,6 +69,10 @@ public class CafeService {
         saveFloorPlan(floorRequest, cafe);
 
         saveCafeImages(cafe, cafeImgFiles);
+    }
+
+    public CafeInfoResponse getCafeInfo(){
+
     }
 
     private void saveFloorPlan(FloorPlanRegisterRequest floorRequest, Cafe cafe) {

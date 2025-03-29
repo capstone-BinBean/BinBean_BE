@@ -2,11 +2,14 @@ package binbean.binbean_BE.controller;
 
 import binbean.binbean_BE.dto.request.CafeRegisterRequest;
 import binbean.binbean_BE.dto.request.FloorPlanRegisterRequest;
+import binbean.binbean_BE.dto.response.CafeInfoResponse;
 import binbean.binbean_BE.service.CafeService;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -29,6 +32,13 @@ public class CafeController {
         @RequestPart(value = "cafeImg", required = false) List<MultipartFile> cafeImg) {
 
         cafeService.registerCafe(cafeRequest, floorRequest, cafeImg);
-        return ResponseEntity.status(HttpStatus.OK).build();
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @GetMapping("/{cafe_id}")
+    public ResponseEntity<CafeInfoResponse> getCafeInfo(@PathVariable(name = "cafe_id")) {
+
+        CafeInfoResponse response = cafeService.getCafeInfo();
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }
