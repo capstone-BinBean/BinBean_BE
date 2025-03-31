@@ -1,5 +1,8 @@
 package binbean.binbean_BE.entity;
 
+import binbean.binbean_BE.dto.response.CafeInfoResponse;
+import binbean.binbean_BE.dto.response.ReviewResponse;
+import binbean.binbean_BE.entity.user.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -9,6 +12,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -23,12 +27,9 @@ public class Cafe {
     @Column(name = "cafe_id", nullable = false)
     private Long id;
 
-    /*
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
-
-*/
 
     @OneToOne
     @JoinColumn(name = "business_hours_id", nullable = false)
@@ -74,5 +75,26 @@ public class Cafe {
         this.petAvailable = petAvailable;
         this.kidsAvailable = kidsAvailable;
         this.chargeAvailable = chargeAvailable;
+    }
+
+    public CafeInfoResponse toCafeDto(String startTime, String endTime, double reviewAvg,
+        List<String> cafeImgUrl, List<ReviewResponse> reviewResponse, List<Long> floorPlanIds) {
+        return CafeInfoResponse.builder()
+            .cafeId(this.id)
+            .cafeName(this.cafeName)
+            .cafeAddress(this.cafeAddress)
+            .startTime(startTime)
+            .endTime(endTime)
+            .cafePhone(this.cafePhone)
+            .reviewAvg(reviewAvg)
+            .wifiAvailable(this.wifiAvailable)
+            .chargeAvailable(this.chargeAvailable)
+            .petAvailable(this.petAvailable)
+            .kidsAvailable(this.kidsAvailable)
+            .cafeDescription(this.cafeDescription)
+            .cafeImgUrl(cafeImgUrl)
+            .reviews(reviewResponse)
+            .floorPlanId(floorPlanIds)
+            .build();
     }
 }
