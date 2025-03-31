@@ -5,17 +5,20 @@ import binbean.binbean_BE.entity.floor_plan.FloorPlan;
 import java.util.List;
 import lombok.Builder;
 
-// FIXME : cafeName, latitude, longitude로 수정
 @Builder
 public record CafeMarkerDto(
     Long cafeId,
-    String cafeAddress,
+    String cafeName,
+    Double latitude,
+    Double longitude,
     List<FloorSeatsDto> floorSeats
 ) {
     public static CafeMarkerDto toDto(Cafe cafe, List<FloorPlan> floorList) {
         return CafeMarkerDto.builder()
             .cafeId(cafe.getId())
-            .cafeAddress(cafe.getCafeAddress())
+            .cafeName(cafe.getCafeName())
+            .latitude(cafe.getLatitude())
+            .longitude(cafe.getLongitude())
             .floorSeats(floorList.stream().map(FloorSeatsDto::toDto).toList())
             .build();
     }
