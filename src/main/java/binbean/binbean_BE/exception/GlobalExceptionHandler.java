@@ -28,4 +28,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleClientErrorException(Exception e) {
         return ResponseEntity.internalServerError().build();
     }
+
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<String> handleNotFoundException(NotFoundException e) {
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+    }
 }

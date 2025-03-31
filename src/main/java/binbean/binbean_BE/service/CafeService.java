@@ -1,16 +1,22 @@
 package binbean.binbean_BE.service;
 
+import binbean.binbean_BE.dto.BusinessHoursDto;
 import binbean.binbean_BE.dto.request.CafeRegisterRequest;
 import binbean.binbean_BE.dto.request.FloorPlanRegisterRequest;
 import binbean.binbean_BE.dto.request.FloorPlanRegisterRequest.FloorInfo;
 import binbean.binbean_BE.dto.response.CafeInfoResponse;
+import binbean.binbean_BE.dto.response.ReviewResponse;
 import binbean.binbean_BE.entity.BusinessHours;
 import binbean.binbean_BE.entity.Cafe;
 import binbean.binbean_BE.entity.CafeImg;
+import binbean.binbean_BE.entity.Review;
 import binbean.binbean_BE.entity.floor_plan.FloorPlan;
+import binbean.binbean_BE.exception.NotFoundException;
 import binbean.binbean_BE.repository.BusinessHoursRepository;
 import binbean.binbean_BE.repository.CafeImgRepository;
 import binbean.binbean_BE.repository.CafeRepository;
+import binbean.binbean_BE.repository.ReviewImgRepository;
+import binbean.binbean_BE.repository.ReviewRepository;
 import binbean.binbean_BE.repository.floor_plan.BorderLineRepository;
 import binbean.binbean_BE.repository.floor_plan.CounterRepository;
 import binbean.binbean_BE.repository.floor_plan.DoorRepository;
@@ -19,6 +25,7 @@ import binbean.binbean_BE.repository.floor_plan.SeatsRepository;
 import binbean.binbean_BE.repository.floor_plan.ToiletRepository;
 import binbean.binbean_BE.repository.floor_plan.WindowRepository;
 import jakarta.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -38,12 +45,17 @@ public class CafeService {
     private final WindowRepository windowRepository;
     private final ImageStorageService imageStorageService;
     private final CafeImgRepository cafeImgRepository;
+    private final ReviewService reviewService;
+    private final FloorPlanService floorPlanService;
+    private final BusinessHoursService businessHoursService;
 
     public CafeService(CafeRepository cafeRepository, BusinessHoursRepository businessHoursRepository,
         FloorPlanRepository floorPlanRepository, BorderLineRepository borderLineRepository,
         SeatsRepository seatsRepository, DoorRepository doorRepository, CounterRepository counterRepository,
         ToiletRepository toiletRepository, WindowRepository windowRepository,
-        ImageStorageService imageStorageService, CafeImgRepository cafeImgRepository) {
+        ImageStorageService imageStorageService, CafeImgRepository cafeImgRepository,
+        ReviewService reviewService, FloorPlanService floorPlanService,
+        BusinessHoursService businessHoursService) {
         this.cafeRepository = cafeRepository;
         this.businessHoursRepository = businessHoursRepository;
         this.floorPlanRepository = floorPlanRepository;
@@ -55,6 +67,9 @@ public class CafeService {
         this.windowRepository = windowRepository;
         this.imageStorageService = imageStorageService;
         this.cafeImgRepository = cafeImgRepository;
+        this.reviewService = reviewService;
+        this.floorPlanService = floorPlanService;
+        this.businessHoursService = businessHoursService;
     }
 
     public void registerCafe(CafeRegisterRequest cafeRequest, FloorPlanRegisterRequest floorRequest,
@@ -71,8 +86,18 @@ public class CafeService {
         saveCafeImages(cafe, cafeImgFiles);
     }
 
-    public CafeInfoResponse getCafeInfo(Long cafeId){
+    public CafeInfoResponse getCafeInfo(Long cafeId) {
+        Cafe cafe = cafeRepository.findById(cafeId)
+            .orElseThrow(() -> new NotFoundException("Cafe not found with id: " + cafeId));
 
+        BusinessHoursDto businessHoursDto = businessHoursService.getBusinessHoursForToday(cafeId);
+        double reviewAvg = reviewService.getReviewAvg(cafeId);
+        List<String> cafeImgUrl = getCafeImageUrls(cafeId);
+        List<ReviewResponse> reviewResponse = reviewService.getReview(cafeId);
+        List<Long> floorPlanId = floorPlanService.getFloorPlanIdByCafeId(cafeId);
+
+        return cafe.toCafeDto(businessHoursDto.getStartTime(), businessHoursDto.getEndTime(), reviewAvg,
+            cafeImgUrl, reviewResponse, floorPlanId);
     }
 
     private void saveFloorPlan(FloorPlanRegisterRequest floorRequest, Cafe cafe) {
@@ -93,5 +118,14 @@ public class CafeService {
             CafeImg cafeImg = CafeImg.toEntity(cafe, imageUrl);
             cafeImgRepository.save(cafeImg);
         }
+    }
+
+    private List<String> getCafeImageUrls(Long cafeId) {
+        List<CafeImg> cafeImg = cafeImgRepository.findByCafeId(cafeId);
+        List<String> cafeImgUrls = new ArrayList<>();
+        for (CafeImg img : cafeImg) {
+            cafeImgUrls.add(img.getCafeImgUrl());
+        }
+        return cafeImgUrls;
     }
 }

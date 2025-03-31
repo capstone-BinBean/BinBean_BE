@@ -7,4 +7,5 @@ import lombok.Builder;
 public record CafeInfoResponse(Long cafeId, String cafeName, String cafeAddress, String startTime,
                                String endTime, String cafePhone, double reviewAvg, int wifiAvailable,
                                int chargeAvailable, int petAvailable, int kidsAvailable,
-                               String cafeDescription, List<String> cafeImgUrl, Long floorPlanId) {}
+                               String cafeDescription, List<String> cafeImgUrl, List<ReviewResponse> reviews,
+                               List<Long> floorPlanId) {}
