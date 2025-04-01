@@ -6,20 +6,20 @@ import java.util.List;
 import lombok.Builder;
 
 @Builder
-public record CafeMarkerDto(
+public record CafeMarkerResponse(
     Long cafeId,
     String cafeName,
     Double latitude,
     Double longitude,
-    List<FloorSeatsDto> floorSeats
+    List<FloorSeatsResponse> floorSeats
 ) {
-    public static CafeMarkerDto toDto(Cafe cafe, List<FloorPlan> floorList) {
-        return CafeMarkerDto.builder()
+    public static CafeMarkerResponse toDto(Cafe cafe, List<FloorPlan> floorList) {
+        return CafeMarkerResponse.builder()
             .cafeId(cafe.getId())
             .cafeName(cafe.getCafeName())
             .latitude(cafe.getLatitude())
             .longitude(cafe.getLongitude())
-            .floorSeats(floorList.stream().map(FloorSeatsDto::toDto).toList())
+            .floorSeats(floorList.stream().map(FloorSeatsResponse::toDto).toList())
             .build();
     }
 }

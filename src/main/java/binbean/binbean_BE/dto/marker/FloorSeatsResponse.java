@@ -4,12 +4,12 @@ import binbean.binbean_BE.entity.floor_plan.FloorPlan;
 import lombok.Builder;
 
 @Builder
-public record FloorSeatsDto(
+public record FloorSeatsResponse(
     Integer maxSeats,
     Integer currentSeats
 ) {
-    public static FloorSeatsDto toDto(FloorPlan floorPlan) {
-        return FloorSeatsDto.builder()
+    public static FloorSeatsResponse toDto(FloorPlan floorPlan) {
+        return FloorSeatsResponse.builder()
             .maxSeats(floorPlan.getMaxSeats())
             .currentSeats(floorPlan.getCurrentSeats())
             .build();
