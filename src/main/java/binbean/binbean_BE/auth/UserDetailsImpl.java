@@ -2,11 +2,10 @@ package binbean.binbean_BE.auth;
 
 import binbean.binbean_BE.constants.Constants;
 import binbean.binbean_BE.enums.user.Role;
-import binbean.binbean_BE.entity.user.User;
+import binbean.binbean_BE.entity.User;
 import java.util.Collection;
 import java.util.List;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

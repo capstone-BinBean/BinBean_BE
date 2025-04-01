@@ -9,7 +9,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.util.List;
@@ -41,6 +40,12 @@ public class Cafe {
     @Column(name = "cafe_address", nullable = false)
     private String cafeAddress;
 
+    @Column(name = "latitude", nullable = false)
+    private Double latitude;
+
+    @Column(name = "longitude", nullable = false)
+    private Double longitude;
+
     @Column(name = "cafe_phone", nullable = false)
     private String cafePhone;
 
@@ -63,12 +68,14 @@ public class Cafe {
 
     @Builder
     public Cafe(Long id, BusinessHours businessHours, String cafeName, String cafeAddress,
-        String cafePhone, String cafeDescription, int wifiAvailable, int petAvailable,
+        double latitude, double longitude, String cafePhone, String cafeDescription, int wifiAvailable, int petAvailable,
         int kidsAvailable, int chargeAvailable) {
         this.id = id;
         this.businessHours = businessHours;
         this.cafeName = cafeName;
         this.cafeAddress = cafeAddress;
+        this.latitude = latitude;
+        this.longitude = longitude;
         this.cafePhone = cafePhone;
         this.cafeDescription = cafeDescription;
         this.wifiAvailable = wifiAvailable;

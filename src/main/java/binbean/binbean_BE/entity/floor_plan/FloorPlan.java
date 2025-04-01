@@ -32,4 +32,7 @@ public class FloorPlan {
 
     @Column(name = "max_seats", nullable = false)
     private int maxSeats;
+
+    @Column(name = "current_seats")
+    private int currentSeats;
 }
