@@ -1,12 +1,12 @@
 package binbean.binbean_BE.repository;
 
-import binbean.binbean_BE.entity.CafeImg;
+import binbean.binbean_BE.entity.Review;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface CafeImgRepository extends JpaRepository<CafeImg, Long> {
+public interface ReviewRepository extends JpaRepository<Review, Long> {
 
-    List<CafeImg> findByCafeId(Long cafeId);
+    List<Review> findByCafeId(Long cafeId);
 }

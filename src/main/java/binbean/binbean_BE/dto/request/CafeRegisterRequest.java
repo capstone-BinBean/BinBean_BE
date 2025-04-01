@@ -21,7 +21,7 @@ public record CafeRegisterRequest(String cafeName, String cafeAddress, String ca
                                   String saturday_start, String saturday_end, String sunday_start,
                                   String sunday_end) {
 
-    public Cafe toEntity() {
+    public Cafe toCafeEntity() {
         return Cafe.builder()
             .cafeName(cafeName)
             .cafeAddress(cafeAddress)
