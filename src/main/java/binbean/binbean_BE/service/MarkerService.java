@@ -1,7 +1,9 @@
 package binbean.binbean_BE.service;
 
+import binbean.binbean_BE.auth.UserDetailsImpl;
 import binbean.binbean_BE.dto.marker.CafeMarkerDto;
-import binbean.binbean_BE.entity.user.User;
+import binbean.binbean_BE.dto.request.CafeFindRequest;
+import binbean.binbean_BE.entity.User;
 import binbean.binbean_BE.repository.CafeRepository;
 import binbean.binbean_BE.repository.floor_plan.FloorPlanRepository;
 import java.util.List;
@@ -18,9 +20,9 @@ public class MarkerService {
         this.floorPlanRepository = floorPlanRepository;
     }
 
-    public List<CafeMarkerDto> getMarkers(User currentUser) {
-        // FIXME : 특정 지역(예: 사용자의 현재 위치 기준 반경 1km)
-        var cafes = cafeRepository.findAll();
+    public List<CafeMarkerDto> getMarkers(CafeFindRequest request) {
+        // 사용자의 현재 위치 기준 또는 검색하는 위치 기준 반경 1km 내의 카페를 검색
+        var cafes = cafeRepository.findCafesWithinRadius(request.latitude(), request.longitude(), 1);
 
         return cafes.stream()
             .map( cafe -> {

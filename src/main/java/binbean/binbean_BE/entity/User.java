@@ -1,4 +1,4 @@
-package binbean.binbean_BE.entity.user;
+package binbean.binbean_BE.entity;
 
 import binbean.binbean_BE.enums.user.Role;
 import jakarta.persistence.Column;
@@ -15,7 +15,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Table(name = "users")
+@Table(name = "USER_TB")
 @Entity
 @Getter
 @Builder

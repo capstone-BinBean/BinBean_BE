@@ -2,12 +2,14 @@ package binbean.binbean_BE.controller;
 
 import binbean.binbean_BE.auth.UserDetailsImpl;
 import binbean.binbean_BE.dto.marker.CafeMarkerDto;
+import binbean.binbean_BE.dto.request.CafeFindRequest;
 import binbean.binbean_BE.service.MarkerService;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,8 +22,8 @@ public class MarkerController {
     public MarkerController(MarkerService markerService) { this.markerService = markerService; }
 
     @GetMapping
-    public ResponseEntity<List<CafeMarkerDto>> register(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        var response = markerService.getMarkers(userDetails.getUser());
+    public ResponseEntity<List<CafeMarkerDto>> getMarkers(@RequestBody CafeFindRequest request) {
+        var response = markerService.getMarkers(request);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }

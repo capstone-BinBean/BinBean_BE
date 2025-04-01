@@ -40,10 +40,10 @@ public class Cafe {
     private String cafeAddress;
 
     @Column(name = "latitude", nullable = false)
-    private double latitude;
+    private Double latitude;
 
     @Column(name = "longitude", nullable = false)
-    private double longitude;
+    private Double longitude;
 
     @Column(name = "cafe_phone", nullable = false)
     private String cafePhone;
