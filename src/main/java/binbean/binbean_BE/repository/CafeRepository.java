@@ -1,7 +1,9 @@
 package binbean.binbean_BE.repository;
 
 import binbean.binbean_BE.entity.Cafe;
+import binbean.binbean_BE.entity.User;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -25,4 +27,6 @@ public interface CafeRepository extends JpaRepository<Cafe, Long> {
         @Param("latitude") double latitude,
         @Param("longitude") double longitude,
         @Param("radius") double radius);
+
+    Optional<Cafe> findByUser(User user);
 }

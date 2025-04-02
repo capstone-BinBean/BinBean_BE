@@ -2,6 +2,7 @@ package binbean.binbean_BE.service;
 
 import binbean.binbean_BE.dto.BusinessHoursDto;
 import binbean.binbean_BE.entity.BusinessHours;
+import binbean.binbean_BE.entity.Cafe;
 import binbean.binbean_BE.exception.NotFoundException;
 import binbean.binbean_BE.repository.BusinessHoursRepository;
 import java.time.DayOfWeek;
@@ -19,7 +20,7 @@ public class BusinessHoursService {
 
     public BusinessHoursDto getBusinessHoursForToday(Long cafeId) {
         BusinessHours businessHours = businessHoursRepository.findByCafeId(cafeId)
-            .orElseThrow(() -> new NotFoundException("BusinessHours not found"));
+            .orElseThrow(() -> new NotFoundException("There is no registered businessHorus."));
 
         DayOfWeek today = LocalDate.now().getDayOfWeek();
 

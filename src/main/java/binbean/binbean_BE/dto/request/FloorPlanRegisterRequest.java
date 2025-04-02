@@ -21,8 +21,8 @@ public record FloorPlanRegisterRequest(List<FloorInfo> floorList) {
         public FloorPlan toFloorPlanEntity(Cafe cafe) {
             return FloorPlan.builder()
                 .cafe(cafe)
-                .floorNumber(floorNumber)
-                .maxSeats(maxSeats)
+                .floorNumber(this.floorNumber)
+                .maxSeats(this.maxSeats)
                 .build();
         }
 
