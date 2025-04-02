@@ -63,7 +63,7 @@ public class CafeService {
         Cafe cafe = cafeRepository.findById(cafeId)
             .orElseThrow(() -> new NotFoundException("Cafe not found with id: " + cafeId));
 
-        BusinessHoursDto businessHoursDto = businessHoursService.getBusinessHoursForToday(cafe);
+        BusinessHoursDto businessHoursDto = businessHoursService.getBusinessHoursForToday(cafeId);
         double reviewAvg = reviewService.getReviewAvg(cafeId);
         List<String> cafeImgUrl = getCafeImageUrls(cafeId);
         List<ReviewResponse> reviewResponse = reviewService.getReview(cafeId);
@@ -77,7 +77,8 @@ public class CafeService {
 
         Cafe cafe = cafeRepository.findByUser(user)
             .orElseThrow(() -> new NotFoundException("The user's cafe does not exist."));
-        BusinessHours businessHours = cafe.getBusinessHours();
+        BusinessHours businessHours = businessHoursRepository.findByCafeId(cafe.getId())
+            .orElseThrow(() -> new NotFoundException("There is no registered businessHorus."));
 
         cafe.update(request);
         businessHours.update(request);
