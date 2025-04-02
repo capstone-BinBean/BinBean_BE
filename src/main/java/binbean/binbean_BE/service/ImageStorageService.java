@@ -5,6 +5,9 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.UUID;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Service;
@@ -55,5 +58,15 @@ public class ImageStorageService {
         metadata.setContentType(contentType);
         metadata.setContentLength(file.getSize());
         return metadata;
+    }
+
+    public void deleteImage(String imageUrl) {
+        // TODO : 테스트 필요
+        Path filePath = Paths.get(imageUrl);
+        try {
+            Files.deleteIfExists(filePath);
+        } catch (IOException e) {
+            throw new RuntimeException("failed deleting image"); // ImageDeleteException
+        }
     }
 }
