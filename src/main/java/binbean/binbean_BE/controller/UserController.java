@@ -27,11 +27,13 @@ public class UserController {
     /**
      * 사용자 프로필 이미지가 존재하지 않을 경우
      */
-    @PutMapping(value = "/{user_id}/profile-img", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<Void> uploadProfileImage(@PathVariable(name = "user_id") Long userId,
-        @RequestParam("image") MultipartFile image,
+    @PutMapping(value = "/profile-img", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    public ResponseEntity<Void> uploadProfileImage(@RequestParam("profileImgUrl") MultipartFile profileImgUrl,
         @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        userService.uploadProfileImage(userId, image, userDetails.getUser());
+
+        if (profileImgUrl.isEmpty()) { return ResponseEntity.status(HttpStatus.BAD_REQUEST).build(); }
+
+        userService.uploadProfileImage(profileImgUrl, userDetails.getUser());
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 

@@ -26,34 +26,25 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public void uploadProfileImage(Long userId, MultipartFile image, User currentUser) {
-        var user = userRepository.findById(userId)
-            .orElseThrow(() -> new UserNotFoundException(currentUser.getEmail()));
-
+    public void uploadProfileImage(MultipartFile image, User currentUser) {
         // 현재 로그인한 사용자와 DB에 등록된 사용자가 같은지 확인
-        if (!user.getId().equals(currentUser.getId())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, ErrorMsg.ACCESS_DENIED);
-        }
+        var user = userRepository.findById(currentUser.getId())
+            .orElseThrow(() -> new UserNotFoundException(currentUser.getEmail()));
 
         // 기존 프로필 이미지 삭제 (존재하는 경우)
         if (user.getProfile() != null) {
             imageStorageService.deleteImage(user.getProfile());
         }
 
-        // FIXME : imageStorageService의 uploadFile 메서드 분리 (버킷명 분리 필요)
         String imageUrl = imageStorageService.uploadImage(image);
         user.setProfile(imageUrl);
         userRepository.save(user);
     }
 
     public void changePassword(ChangePasswordRequest request, User currentUser) {
+        // 현재 로그인한 사용자와 DB에 등록된 사용자가 같은지 확인
         var user = userRepository.findById(currentUser.getId())
             .orElseThrow(() -> new UserNotFoundException(currentUser.getEmail()));
-
-        // 현재 로그인한 사용자와 DB에 등록된 사용자가 같은지 확인
-        if (!user.getId().equals(currentUser.getId())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, ErrorMsg.ACCESS_DENIED);
-        }
 
         // 현재 비밀번호 검증
         if (request.currentPassword() != null) {
