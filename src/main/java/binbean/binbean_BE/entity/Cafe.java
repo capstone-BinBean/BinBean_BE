@@ -68,10 +68,11 @@ public class Cafe {
     protected Cafe() {}
 
     @Builder
-    public Cafe(Long id, BusinessHours businessHours, String cafeName, String cafeAddress,
+    public Cafe(Long id, User user, BusinessHours businessHours, String cafeName, String cafeAddress,
         double latitude, double longitude, String cafePhone, String cafeDescription, int wifiAvailable, int petAvailable,
         int kidsAvailable, int chargeAvailable) {
         this.id = id;
+        this.user = user;
         this.businessHours = businessHours;
         this.cafeName = cafeName;
         this.cafeAddress = cafeAddress;

@@ -7,6 +7,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface BusinessHoursRepository extends JpaRepository<BusinessHours, Long> {
-
-    Optional<BusinessHours> findByCafeId(Long cafeId);
+    
 }
