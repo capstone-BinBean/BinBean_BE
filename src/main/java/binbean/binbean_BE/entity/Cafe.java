@@ -10,7 +10,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.util.List;
 import lombok.Builder;
@@ -30,10 +29,6 @@ public class Cafe {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
-
-    @OneToOne
-    @JoinColumn(name = "business_hours_id", nullable = false)
-    private BusinessHours businessHours;
 
     @Column(name = "cafe_name", nullable = false)
     private String cafeName;
@@ -68,12 +63,11 @@ public class Cafe {
     protected Cafe() {}
 
     @Builder
-    public Cafe(Long id, User user, BusinessHours businessHours, String cafeName, String cafeAddress,
+    public Cafe(Long id, User user, String cafeName, String cafeAddress,
         double latitude, double longitude, String cafePhone, String cafeDescription, int wifiAvailable, int petAvailable,
         int kidsAvailable, int chargeAvailable) {
         this.id = id;
         this.user = user;
-        this.businessHours = businessHours;
         this.cafeName = cafeName;
         this.cafeAddress = cafeAddress;
         this.latitude = latitude;
