@@ -3,7 +3,7 @@ package binbean.binbean_BE.controller.auth;
 import binbean.binbean_BE.dto.auth.request.LoginRequest;
 import binbean.binbean_BE.dto.auth.request.RegisterRequest;
 import binbean.binbean_BE.dto.auth.request.SocialLoginRequest;
-import binbean.binbean_BE.service.auth.AuthService;
+import binbean.binbean_BE.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

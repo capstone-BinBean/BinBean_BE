@@ -46,4 +46,8 @@ public class User {
     public void setPassword(String encoded) {
         this.password = encoded;
     }
+
+    public void setProfile(String imageUrl) {
+        this.profile = imageUrl;
+    }
 }

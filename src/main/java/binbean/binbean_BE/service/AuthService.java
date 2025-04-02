@@ -1,4 +1,4 @@
-package binbean.binbean_BE.service.auth;
+package binbean.binbean_BE.service;
 
 import binbean.binbean_BE.auth.UserDetailsImpl;
 import binbean.binbean_BE.dto.auth.request.RegisterRequest;
