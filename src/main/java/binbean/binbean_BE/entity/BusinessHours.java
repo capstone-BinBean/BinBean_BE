@@ -5,6 +5,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.Builder;
 import lombok.Getter;
@@ -19,6 +21,10 @@ public class BusinessHours {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "business_hours_id", nullable = false)
     private Long id;
+
+    @OneToOne
+    @JoinColumn(name = "cafe_id", nullable = false)
+    private Cafe cafe;
 
     @Column(name = "monday_start", nullable = false)
     private String mondayStart;
