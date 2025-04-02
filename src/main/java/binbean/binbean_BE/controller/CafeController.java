@@ -1,6 +1,7 @@
 package binbean.binbean_BE.controller;
 
 import binbean.binbean_BE.dto.request.CafeRegisterRequest;
+import binbean.binbean_BE.dto.request.CafeUpdateRequest;
 import binbean.binbean_BE.dto.request.FloorPlanRegisterRequest;
 import binbean.binbean_BE.dto.response.CafeInfoResponse;
 import binbean.binbean_BE.service.CafeService;
@@ -11,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
@@ -40,5 +43,12 @@ public class CafeController {
 
         CafeInfoResponse response = cafeService.getCafeInfo(cafeId);
         return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @PutMapping
+    public ResponseEntity<CafeUpdateRequest> updateCafeInfo(@RequestBody CafeUpdateRequest request) {
+
+        cafeService.updateCafeInfo(request);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

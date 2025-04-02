@@ -2,6 +2,7 @@ package binbean.binbean_BE.service;
 
 import binbean.binbean_BE.dto.BusinessHoursDto;
 import binbean.binbean_BE.dto.request.CafeRegisterRequest;
+import binbean.binbean_BE.dto.request.CafeUpdateRequest;
 import binbean.binbean_BE.dto.request.FloorPlanRegisterRequest;
 import binbean.binbean_BE.dto.request.FloorPlanRegisterRequest.FloorInfo;
 import binbean.binbean_BE.dto.response.CafeInfoResponse;
@@ -98,6 +99,10 @@ public class CafeService {
 
         return cafe.toCafeDto(businessHoursDto.getStartTime(), businessHoursDto.getEndTime(), reviewAvg,
             cafeImgUrl, reviewResponse, floorPlanId);
+    }
+
+    public void updateCafeInfo(CafeUpdateRequest request) {
+
     }
 
     private void saveFloorPlan(FloorPlanRegisterRequest floorRequest, Cafe cafe) {

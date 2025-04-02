@@ -2,13 +2,13 @@ package binbean.binbean_BE.entity;
 
 import binbean.binbean_BE.dto.response.CafeInfoResponse;
 import binbean.binbean_BE.dto.response.ReviewResponse;
-import binbean.binbean_BE.entity.user.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.util.List;
