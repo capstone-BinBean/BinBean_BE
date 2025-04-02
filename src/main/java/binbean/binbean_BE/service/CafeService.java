@@ -11,6 +11,7 @@ import binbean.binbean_BE.entity.BusinessHours;
 import binbean.binbean_BE.entity.Cafe;
 import binbean.binbean_BE.entity.CafeImg;
 import binbean.binbean_BE.entity.Review;
+import binbean.binbean_BE.entity.User;
 import binbean.binbean_BE.entity.floor_plan.FloorPlan;
 import binbean.binbean_BE.exception.NotFoundException;
 import binbean.binbean_BE.repository.BusinessHoursRepository;
@@ -37,13 +38,6 @@ public class CafeService {
 
     private final CafeRepository cafeRepository;
     private final BusinessHoursRepository businessHoursRepository;
-    private final FloorPlanRepository floorPlanRepository;
-    private final BorderLineRepository borderLineRepository;
-    private final SeatsRepository seatsRepository;
-    private final DoorRepository doorRepository;
-    private final CounterRepository counterRepository;
-    private final ToiletRepository toiletRepository;
-    private final WindowRepository windowRepository;
     private final ImageStorageService imageStorageService;
     private final CafeImgRepository cafeImgRepository;
     private final ReviewService reviewService;
@@ -51,21 +45,11 @@ public class CafeService {
     private final BusinessHoursService businessHoursService;
 
     public CafeService(CafeRepository cafeRepository, BusinessHoursRepository businessHoursRepository,
-        FloorPlanRepository floorPlanRepository, BorderLineRepository borderLineRepository,
-        SeatsRepository seatsRepository, DoorRepository doorRepository, CounterRepository counterRepository,
-        ToiletRepository toiletRepository, WindowRepository windowRepository,
         ImageStorageService imageStorageService, CafeImgRepository cafeImgRepository,
         ReviewService reviewService, FloorPlanService floorPlanService,
         BusinessHoursService businessHoursService) {
         this.cafeRepository = cafeRepository;
         this.businessHoursRepository = businessHoursRepository;
-        this.floorPlanRepository = floorPlanRepository;
-        this.borderLineRepository = borderLineRepository;
-        this.seatsRepository = seatsRepository;
-        this.doorRepository = doorRepository;
-        this.counterRepository = counterRepository;
-        this.toiletRepository = toiletRepository;
-        this.windowRepository = windowRepository;
         this.imageStorageService = imageStorageService;
         this.cafeImgRepository = cafeImgRepository;
         this.reviewService = reviewService;
@@ -74,15 +58,15 @@ public class CafeService {
     }
 
     public void registerCafe(CafeRegisterRequest cafeRequest, FloorPlanRegisterRequest floorRequest,
-        List<MultipartFile> cafeImgFiles) {
+        List<MultipartFile> cafeImgFiles, User user) {
 
-        Cafe cafe = cafeRequest.toCafeEntity();
+        Cafe cafe = cafeRequest.toCafeEntity(user);
         cafeRepository.save(cafe);
 
         BusinessHours businessHours = cafeRequest.toBusinessHoursEntity();
         businessHoursRepository.save(businessHours);
 
-        saveFloorPlan(floorRequest, cafe);
+        floorPlanService.saveFloorPlan(floorRequest, cafe);
 
         saveCafeImages(cafe, cafeImgFiles);
     }
@@ -101,20 +85,15 @@ public class CafeService {
             cafeImgUrl, reviewResponse, floorPlanId);
     }
 
-    public void updateCafeInfo(CafeUpdateRequest request) {
+    public void updateCafeInfo(CafeUpdateRequest request, List<MultipartFile> cafeImgFiles, User user) {
 
-    }
+        Cafe cafe = cafeRepository.findByUser(user)
+            .orElseThrow(() -> new NotFoundException("The user's cafe does not exist."));
+        BusinessHours businessHours = cafe.getBusinessHours();
 
-    private void saveFloorPlan(FloorPlanRegisterRequest floorRequest, Cafe cafe) {
-        for (FloorPlanRegisterRequest.FloorInfo floorInfo : floorRequest.floorList()) {
-            FloorPlan floorPlan = floorPlanRepository.save(floorInfo.toFloorPlanEntity(cafe));
-            borderLineRepository.saveAll(floorInfo.toBorderLinesEntity(floorPlan));
-            seatsRepository.saveAll(floorInfo.toSeatsEntities(floorPlan));
-            doorRepository.saveAll(floorInfo.toDoorsEntity(floorPlan));
-            counterRepository.saveAll(floorInfo.toCountersEntity(floorPlan));
-            toiletRepository.saveAll(floorInfo.toToiletsEntity(floorPlan));
-            windowRepository.saveAll(floorInfo.toWindowsEntity(floorPlan));
-        }
+        cafe.update(request);
+        businessHours.update(request);
+        saveCafeImages(cafe, cafeImgFiles);
     }
 
     private void saveCafeImages(Cafe cafe, List<MultipartFile> cafeImgFiles) {

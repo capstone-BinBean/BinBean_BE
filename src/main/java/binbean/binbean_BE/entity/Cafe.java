@@ -1,5 +1,6 @@
 package binbean.binbean_BE.entity;
 
+import binbean.binbean_BE.dto.request.CafeUpdateRequest;
 import binbean.binbean_BE.dto.response.CafeInfoResponse;
 import binbean.binbean_BE.dto.response.ReviewResponse;
 import jakarta.persistence.Column;
@@ -103,5 +104,16 @@ public class Cafe {
             .reviews(reviewResponse)
             .floorPlanId(floorPlanIds)
             .build();
+    }
+
+    public void update(CafeUpdateRequest request) {
+        this.cafeName = request.cafeName();
+        this.cafeAddress = request.cafeAddress();
+        this.cafePhone = request.cafePhone();
+        this.wifiAvailable = request.wifiAvailable();
+        this.chargeAvailable = request.chargerAvailable();
+        this.petAvailable = request.petAvailable();
+        this.kidsAvailable = request.kidsAvailable();
+        this.cafeDescription = request.cafeDescription();
     }
 }

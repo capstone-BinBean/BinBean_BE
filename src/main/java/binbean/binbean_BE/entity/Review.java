@@ -1,7 +1,6 @@
 package binbean.binbean_BE.entity;
 
 import binbean.binbean_BE.dto.response.ReviewResponse;
-import binbean.binbean_BE.entity.user.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
