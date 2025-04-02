@@ -1,15 +1,16 @@
 package binbean.binbean_BE.controller;
 
 import binbean.binbean_BE.auth.UserDetailsImpl;
-import binbean.binbean_BE.entity.User;
+import binbean.binbean_BE.dto.request.ChangePasswordRequest;
 import binbean.binbean_BE.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,6 +32,15 @@ public class UserController {
         @RequestParam("image") MultipartFile image,
         @AuthenticationPrincipal UserDetailsImpl userDetails) {
         userService.uploadProfileImage(userId, image, userDetails.getUser());
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @PutMapping("/password")
+    public ResponseEntity<?> changePassword(@Valid @RequestBody ChangePasswordRequest request,
+        @AuthenticationPrincipal UserDetailsImpl userDetails) {
+
+        // FIXME : 비밀번호 변경 완료 이후, 로그아웃 처리 시킬지 확인 필요
+        userService.changePassword(request, userDetails.getUser());
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 }
