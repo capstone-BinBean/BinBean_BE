@@ -9,7 +9,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface FloorPlanRepository extends JpaRepository<FloorPlan, Long> {
 
-    List<FloorPlan> findByCafeId(Long cafeId);
-
-    FloorPlan findByCafe(Cafe cafe);
+    List<FloorPlan> findByCafe(Cafe cafe);
 }

@@ -35,4 +35,8 @@ public class FloorPlan {
 
     @Column(name = "current_seats")
     private int currentSeats;
+
+    public void setMaxSeats(int maxSeats) {
+        this.maxSeats = maxSeats;
+    }
 }
