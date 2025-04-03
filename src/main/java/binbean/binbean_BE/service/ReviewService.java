@@ -1,6 +1,7 @@
 package binbean.binbean_BE.service;
 
 import binbean.binbean_BE.dto.response.ReviewResponse;
+import binbean.binbean_BE.entity.Cafe;
 import binbean.binbean_BE.entity.Review;
 import binbean.binbean_BE.entity.ReviewImg;
 import binbean.binbean_BE.exception.NotFoundException;
@@ -22,9 +23,9 @@ public class ReviewService {
         this.reviewImgRepository = reviewImgRepository;
     }
 
-    public List<ReviewResponse> getReview(Long cafeId) {
+    public List<ReviewResponse> getReview(Cafe cafe) {
         List<ReviewResponse> responses = new ArrayList<>();
-        List<Review> reviews = reviewRepository.findByCafeId(cafeId);
+        List<Review> reviews = reviewRepository.findByCafe(cafe);
         if (reviews.isEmpty()) {
             throw new NotFoundException("Review not found");
         }
@@ -36,9 +37,9 @@ public class ReviewService {
         return responses;
     }
 
-    public double getReviewAvg(Long cafeId) {
+    public double getReviewAvg(Cafe cafe) {
         double reviewAvg = 0;
-        List<Review> reviews = reviewRepository.findByCafeId(cafeId);
+        List<Review> reviews = reviewRepository.findByCafe(cafe);
 
         for (Review review : reviews) {
             reviewAvg += review.getReviewScore();
@@ -48,7 +49,7 @@ public class ReviewService {
     }
 
     private ReviewResponse convertReviewToDto(Review review) {
-        List<ReviewImg> reviewImg = reviewImgRepository.findByReviewId(review.getId());
+        List<ReviewImg> reviewImg = reviewImgRepository.findByReview(review);
         List<String> reviewImgUrls = reviewImg.stream()
             .map(ReviewImg::getReviewImgUrl)
             .collect(Collectors.toList());

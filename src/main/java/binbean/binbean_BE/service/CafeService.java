@@ -63,11 +63,11 @@ public class CafeService {
         Cafe cafe = cafeRepository.findById(cafeId)
             .orElseThrow(() -> new NotFoundException("Cafe not found with id: " + cafeId));
 
-        BusinessHoursDto businessHoursDto = businessHoursService.getBusinessHoursForToday(cafeId);
-        double reviewAvg = reviewService.getReviewAvg(cafeId);
-        List<String> cafeImgUrl = getCafeImageUrls(cafeId);
-        List<ReviewResponse> reviewResponse = reviewService.getReview(cafeId);
-        List<Long> floorPlanId = floorPlanService.getFloorPlanIdByCafeId(cafeId);
+        BusinessHoursDto businessHoursDto = businessHoursService.getBusinessHoursForToday(cafe);
+        double reviewAvg = reviewService.getReviewAvg(cafe);
+        List<String> cafeImgUrl = getCafeImageUrls(cafe);
+        List<ReviewResponse> reviewResponse = reviewService.getReview(cafe);
+        List<Long> floorPlanId = floorPlanService.getFloorPlanIdByCafeId(cafe);
 
         return cafe.toCafeDto(businessHoursDto.getStartTime(), businessHoursDto.getEndTime(), reviewAvg,
             cafeImgUrl, reviewResponse, floorPlanId);
@@ -77,7 +77,7 @@ public class CafeService {
 
         Cafe cafe = cafeRepository.findByUser(user)
             .orElseThrow(() -> new NotFoundException("The user's cafe does not exist."));
-        BusinessHours businessHours = businessHoursRepository.findByCafeId(cafe.getId())
+        BusinessHours businessHours = businessHoursRepository.findByCafe(cafe)
             .orElseThrow(() -> new NotFoundException("There is no registered businessHorus."));
 
         cafe.update(request);
@@ -93,8 +93,8 @@ public class CafeService {
         }
     }
 
-    private List<String> getCafeImageUrls(Long cafeId) {
-        List<CafeImg> cafeImg = cafeImgRepository.findByCafeId(cafeId);
+    private List<String> getCafeImageUrls(Cafe cafe) {
+        List<CafeImg> cafeImg = cafeImgRepository.findByCafe(cafe);
         List<String> cafeImgUrls = new ArrayList<>();
         for (CafeImg img : cafeImg) {
             cafeImgUrls.add(img.getCafeImgUrl());
