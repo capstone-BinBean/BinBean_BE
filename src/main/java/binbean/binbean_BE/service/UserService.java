@@ -3,6 +3,7 @@ package binbean.binbean_BE.service;
 import binbean.binbean_BE.constants.Constants.ErrorMsg;
 import binbean.binbean_BE.dto.request.ChangePasswordRequest;
 import binbean.binbean_BE.dto.response.FavoritesResponse;
+import binbean.binbean_BE.dto.response.SeatsResponse;
 import binbean.binbean_BE.entity.User;
 import binbean.binbean_BE.exception.ResponseStatusException;
 import binbean.binbean_BE.exception.user.UserNotFoundException;
@@ -74,8 +75,24 @@ public class UserService {
         userRepository.save(user);
     }
 
+    public List<FavoritesResponse> getFavoriteSeats(Long userId) {
+        // 현재 로그인한 사용자와 DB에 등록된 사용자가 같은지 확인
+        var user = userRepository.findById(userId)
+            .orElseThrow(() -> new UserNotFoundException(userId));
+        var favorites = favoritesRepository.findByUserId(user.getId());
 
+        return favorites.stream().map(favorite -> {
+            var cafe = favorite.getCafe();
+            var floorPlans = floorPlanRepository.findByCafeId(cafe.getId());
 
+            List<SeatsResponse> seatsList = floorPlans.stream()
+                .flatMap(floorPlan ->
+                    seatsRepository.findByFloorPlanId(floorPlan.getId()).stream()
+                        .map(seat -> new SeatsResponse(seat.getId(), floorPlan.getFloorNumber(), 0))
+                )
+                .toList();
 
+            return new FavoritesResponse(favorite.getCafe().getId(), favorite.getCafe().getCafeName(), seatsList);
+        }).toList();
     }
 }
