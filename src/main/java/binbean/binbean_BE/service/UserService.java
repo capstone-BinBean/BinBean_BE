@@ -2,10 +2,17 @@ package binbean.binbean_BE.service;
 
 import binbean.binbean_BE.constants.Constants.ErrorMsg;
 import binbean.binbean_BE.dto.request.ChangePasswordRequest;
+import binbean.binbean_BE.dto.response.FavoritesResponse;
+import binbean.binbean_BE.dto.response.SeatsResponse;
 import binbean.binbean_BE.entity.User;
 import binbean.binbean_BE.exception.ResponseStatusException;
 import binbean.binbean_BE.exception.user.UserNotFoundException;
+import binbean.binbean_BE.repository.FavoritesRepository;
 import binbean.binbean_BE.repository.UserRepository;
+import binbean.binbean_BE.repository.floor_plan.FloorPlanRepository;
+import binbean.binbean_BE.repository.floor_plan.SeatsRepository;
+import jakarta.transaction.Transactional;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -16,12 +23,19 @@ import org.springframework.web.multipart.MultipartFile;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final FavoritesRepository favoritesRepository;
+    private final FloorPlanRepository floorPlanRepository;
+    private final SeatsRepository seatsRepository;
     private final ImageStorageService imageStorageService;
     private final BCryptPasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository, ImageStorageService imageStorageService,
+    public UserService(UserRepository userRepository, FavoritesRepository favoritesRepository,
+        FloorPlanRepository floorPlanRepository, SeatsRepository seatsRepository, ImageStorageService imageStorageService,
         BCryptPasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.favoritesRepository = favoritesRepository;
+        this.floorPlanRepository = floorPlanRepository;
+        this.seatsRepository = seatsRepository;
         this.imageStorageService = imageStorageService;
         this.passwordEncoder = passwordEncoder;
     }
@@ -60,5 +74,27 @@ public class UserService {
 
         user.setPassword(passwordEncoder.encode(request.newPassword()));
         userRepository.save(user);
+    }
+
+    @Transactional
+    public List<FavoritesResponse> getFavoriteSeats(Long userId) {
+        // 현재 로그인한 사용자와 DB에 등록된 사용자가 같은지 확인
+        var user = userRepository.findById(userId)
+            .orElseThrow(() -> new UserNotFoundException(userId));
+        var favorites = favoritesRepository.findByUserId(user.getId());
+
+        return favorites.stream().map(favorite -> {
+            var cafe = favorite.getCafe();
+            var floorPlans = floorPlanRepository.findByCafeId(cafe.getId());
+
+            List<SeatsResponse> seatsList = floorPlans.stream()
+                .flatMap(floorPlan ->
+                    seatsRepository.findByFloorPlanId(floorPlan.getId()).stream()
+                        .map(seat -> new SeatsResponse(seat.getId(), floorPlan.getFloorNumber(), 0))
+                )
+                .toList();
+
+            return new FavoritesResponse(favorite.getCafe().getId(), favorite.getCafe().getCafeName(), seatsList);
+        }).toList();
     }
 }

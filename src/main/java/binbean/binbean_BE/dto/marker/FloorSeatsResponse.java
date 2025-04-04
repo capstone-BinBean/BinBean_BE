@@ -5,8 +5,8 @@ import lombok.Builder;
 
 @Builder
 public record FloorSeatsResponse(
-    Integer maxSeats,
-    Integer currentSeats
+    int maxSeats,
+    int currentSeats
 ) {
     public static FloorSeatsResponse toDto(FloorPlan floorPlan) {
         return FloorSeatsResponse.builder()

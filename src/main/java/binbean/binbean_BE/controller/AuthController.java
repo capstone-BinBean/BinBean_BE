@@ -1,4 +1,4 @@
-package binbean.binbean_BE.controller.auth;
+package binbean.binbean_BE.controller;
 
 import binbean.binbean_BE.dto.auth.request.LoginRequest;
 import binbean.binbean_BE.dto.auth.request.RegisterRequest;
