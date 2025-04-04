@@ -1,5 +1,6 @@
 package binbean.binbean_BE.entity;
 
+import binbean.binbean_BE.dto.request.CafeUpdateRequest;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -67,4 +68,21 @@ public class BusinessHours {
 
     @Column(name = "sunday_end", nullable = false)
     private String sundayEnd;
+
+    public void update(CafeUpdateRequest request){
+        this.mondayStart = request.mondayStart();
+        this.mondayEnd = request.mondayEnd();
+        this.tuesdayStart = request.tuesdayStart();
+        this.tuesdayEnd = request.tuesdayEnd();
+        this.wednesdayStart = request.wednesdayStart();
+        this.wednesdayEnd = request.wednesdayEnd();
+        this.thursdayStart = request.thursdayStart();
+        this.thursdayEnd = request.thursdayEnd();
+        this.fridayStart = request.fridayStart();
+        this.fridayEnd = request.fridayEnd();
+        this.saturdayStart = request.saturdayStart();
+        this.saturdayEnd = request.saturdayEnd();
+        this.sundayStart = request.sundayStart();
+        this.sundayEnd = request.sundayEnd();
+    }
 }
