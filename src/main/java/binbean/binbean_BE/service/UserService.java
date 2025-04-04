@@ -11,6 +11,7 @@ import binbean.binbean_BE.repository.FavoritesRepository;
 import binbean.binbean_BE.repository.UserRepository;
 import binbean.binbean_BE.repository.floor_plan.FloorPlanRepository;
 import binbean.binbean_BE.repository.floor_plan.SeatsRepository;
+import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.http.HttpStatus;
@@ -75,6 +76,7 @@ public class UserService {
         userRepository.save(user);
     }
 
+    @Transactional
     public List<FavoritesResponse> getFavoriteSeats(Long userId) {
         // 현재 로그인한 사용자와 DB에 등록된 사용자가 같은지 확인
         var user = userRepository.findById(userId)

@@ -53,7 +53,7 @@ public class UserController {
      */
     @GetMapping("/favorites")
     public ResponseEntity<List<FavoritesResponse>> getFavoriteSeats(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        var response = userService.getFavoriteSeats(userDetails.getUser().getId());
+        List<FavoritesResponse> response = userService.getFavoriteSeats(userDetails.getUser().getId());
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }
