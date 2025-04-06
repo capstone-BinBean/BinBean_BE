@@ -25,7 +25,7 @@ public class ReviewService {
 
     public List<ReviewResponse> getReview(Cafe cafe) {
         List<ReviewResponse> responses = new ArrayList<>();
-        List<Review> reviews = reviewRepository.findByCafe(cafe);
+        List<Review> reviews = reviewRepository.findByCafeId(cafe.getId());
         if (reviews.isEmpty()) {
             throw new NotFoundException("Review not found");
         }
@@ -39,7 +39,7 @@ public class ReviewService {
 
     public double getReviewAvg(Cafe cafe) {
         double reviewAvg = 0;
-        List<Review> reviews = reviewRepository.findByCafe(cafe);
+        List<Review> reviews = reviewRepository.findByCafeId(cafe.getId());
 
         for (Review review : reviews) {
             reviewAvg += review.getReviewScore();

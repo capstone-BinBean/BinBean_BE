@@ -77,7 +77,7 @@ public class CafeService {
 
         Cafe cafe = cafeRepository.findByUser(user)
             .orElseThrow(() -> new NotFoundException("The user's cafe does not exist."));
-        BusinessHours businessHours = businessHoursRepository.findByCafe(cafe)
+        BusinessHours businessHours = businessHoursRepository.findByCafeId(cafe.getId())
             .orElseThrow(() -> new NotFoundException("There is no registered businessHorus."));
 
         cafe.update(request);
@@ -94,7 +94,7 @@ public class CafeService {
     }
 
     private List<String> getCafeImageUrls(Cafe cafe) {
-        List<CafeImg> cafeImg = cafeImgRepository.findByCafe(cafe);
+        List<CafeImg> cafeImg = cafeImgRepository.findByCafeId(cafe.getId());
         List<String> cafeImgUrls = new ArrayList<>();
         for (CafeImg img : cafeImg) {
             cafeImgUrls.add(img.getCafeImgUrl());

@@ -19,7 +19,7 @@ public class BusinessHoursService {
     }
 
     public BusinessHoursDto getBusinessHoursForToday(Cafe cafe) {
-        BusinessHours businessHours = businessHoursRepository.findByCafe(cafe)
+        BusinessHours businessHours = businessHoursRepository.findByCafeId(cafe.getId())
             .orElseThrow(() -> new NotFoundException("There is no registered businessHorus."));
 
         DayOfWeek today = LocalDate.now().getDayOfWeek();

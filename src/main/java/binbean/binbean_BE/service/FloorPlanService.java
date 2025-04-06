@@ -1,7 +1,9 @@
 package binbean.binbean_BE.service;
 
+import binbean.binbean_BE.dto.FloorList;
 import binbean.binbean_BE.dto.request.FloorPlanRegisterRequest;
 import binbean.binbean_BE.dto.request.FloorPlanUpdateRequest;
+import binbean.binbean_BE.dto.response.FloorPlanResponse;
 import binbean.binbean_BE.entity.Cafe;
 import binbean.binbean_BE.entity.User;
 import binbean.binbean_BE.entity.floor_plan.BorderLine;
@@ -20,6 +22,7 @@ import binbean.binbean_BE.repository.floor_plan.FloorPlanRepository;
 import binbean.binbean_BE.repository.floor_plan.SeatsRepository;
 import binbean.binbean_BE.repository.floor_plan.ToiletRepository;
 import binbean.binbean_BE.repository.floor_plan.WindowRepository;
+import binbean.binbean_BE.util.FloorPlanResponseMapper;
 import binbean.binbean_BE.util.FloorPlanMapper;
 import jakarta.transaction.Transactional;
 import java.util.ArrayList;
@@ -40,11 +43,13 @@ public class FloorPlanService {
     private final ToiletRepository toiletRepository;
     private final WindowRepository windowRepository;
     private final FloorPlanMapper floorPlanMapper;
+    private final FloorPlanResponseMapper floorPlanResponseMapper;
 
     public FloorPlanService(CafeRepository cafeRepository, FloorPlanRepository floorPlanRepository,
         BorderLineRepository borderLineRepository, SeatsRepository seatsRepository,
         DoorRepository doorRepository, CounterRepository counterRepository, ToiletRepository toiletRepository,
-        WindowRepository windowRepository, FloorPlanMapper floorPlanMapper) {
+        WindowRepository windowRepository, FloorPlanMapper floorPlanMapper,
+        FloorPlanResponseMapper floorPlanResponseMapper) {
         this.cafeRepository = cafeRepository;
         this.floorPlanRepository = floorPlanRepository;
         this.borderLineRepository = borderLineRepository;
@@ -54,11 +59,12 @@ public class FloorPlanService {
         this.toiletRepository = toiletRepository;
         this.windowRepository = windowRepository;
         this.floorPlanMapper = floorPlanMapper;
+        this.floorPlanResponseMapper = floorPlanResponseMapper;
     }
 
     public List<Long> getFloorPlanIdByCafeId(Cafe cafe) {
         List<Long> floorPlanId = new ArrayList<>();
-        List<FloorPlan> floorPlans = floorPlanRepository.findByCafe(cafe);
+        List<FloorPlan> floorPlans = floorPlanRepository.findByCafeId(cafe.getId());
 
         if (floorPlans.isEmpty()) {
             throw new NotFoundException("Not found floorPlan");
@@ -71,23 +77,31 @@ public class FloorPlanService {
         return floorPlanId;
     }
 
+    @Transactional
     public void saveFloorPlan(FloorPlanRegisterRequest floorRequest, Cafe cafe) {
-        for (FloorPlanRegisterRequest.FloorInfo floorInfo : floorRequest.floorList()) {
-            FloorPlan floorPlan = floorPlanRepository.save(floorInfo.toFloorPlanEntity(cafe));
-            borderLineRepository.saveAll(floorInfo.toBorderLinesEntity(floorPlan));
-            seatsRepository.saveAll(floorInfo.toSeatsEntities(floorPlan));
-            doorRepository.saveAll(floorInfo.toDoorsEntity(floorPlan));
-            counterRepository.saveAll(floorInfo.toCountersEntity(floorPlan));
-            toiletRepository.saveAll(floorInfo.toToiletsEntity(floorPlan));
-            windowRepository.saveAll(floorInfo.toWindowsEntity(floorPlan));
-        }
+        FloorPlan floorPlan = floorPlanRepository.save(
+            FloorPlan.builder()
+                .cafe(cafe)
+                .floorNumber(floorRequest.floorNumber())
+                .maxSeats(floorRequest.maxSeats())
+                .build()
+        );
+
+        FloorList floorList = floorRequest.floorList();
+
+        borderLineRepository.saveAll(floorPlanMapper.toBorderLines(floorList, floorPlan));
+        seatsRepository.saveAll(floorPlanMapper.toSeats(floorList, floorPlan));
+        doorRepository.saveAll(floorPlanMapper.toDoors(floorList, floorPlan));
+        counterRepository.saveAll(floorPlanMapper.toCounters(floorList, floorPlan));
+        toiletRepository.saveAll(floorPlanMapper.toToilets(floorList, floorPlan));
+        windowRepository.saveAll(floorPlanMapper.toWindows(floorList, floorPlan));
     }
 
     @Transactional
     public void updateFloorPlan(List<FloorPlanUpdateRequest> requests, User user) {
         Cafe cafe = cafeRepository.findByUser(user)
             .orElseThrow(() -> new NotFoundException("The user's cafe does not exist."));
-        List<FloorPlan> floorPlans = floorPlanRepository.findByCafe(cafe);
+        List<FloorPlan> floorPlans = floorPlanRepository.findByCafeId(cafe.getId());
         Map<Integer, FloorPlan> floorPlanMap = floorPlans.stream()
             .collect(Collectors.toMap(FloorPlan::getFloorNumber, fp -> fp));
 
@@ -114,5 +128,13 @@ public class FloorPlanService {
             List<Window> windows = floorPlanMapper.toWindows(request.floorList(), floorPlan);
             windowRepository.saveAll(windows);
         }
+    }
+
+    public List<FloorPlanResponse> getFloorPlan(Long cafeId) {
+        List<FloorPlan> floorPlans = floorPlanRepository.findByCafeId(cafeId);
+
+        return floorPlans.stream()
+            .map(floorPlanResponseMapper::toFloorPlanResponse)
+            .collect(Collectors.toList());
     }
 }

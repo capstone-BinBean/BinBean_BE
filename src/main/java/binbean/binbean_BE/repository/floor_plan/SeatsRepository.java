@@ -7,5 +7,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface SeatsRepository extends JpaRepository<Seats, Long> {
+
     List<Seats> findByFloorPlanId(Long floorId);
 }
