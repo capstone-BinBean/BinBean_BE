@@ -6,6 +6,7 @@ import binbean.binbean_BE.dto.request.CafeUpdateRequest;
 import binbean.binbean_BE.dto.request.FloorPlanRegisterRequest;
 import binbean.binbean_BE.dto.request.FloorPlanUpdateRequest;
 import binbean.binbean_BE.dto.response.CafeInfoResponse;
+import binbean.binbean_BE.dto.response.FloorPlanResponse;
 import binbean.binbean_BE.service.CafeService;
 import binbean.binbean_BE.service.FloorPlanService;
 import java.util.List;
@@ -67,5 +68,12 @@ public class CafeController {
 
         floorPlanService.updateFloorPlan(requests, userDetails.getUser());
         return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @GetMapping("/floor-plan/{cafe_id}")
+    public ResponseEntity<List<FloorPlanResponse>> getFloorPlan(@PathVariable(name = "cafe_id") Long cafeId) {
+
+        List<FloorPlanResponse> response = floorPlanService.getFloorPlan(cafeId);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }

@@ -1,5 +1,6 @@
 package binbean.binbean_BE.entity.floor_plan;
 
+import binbean.binbean_BE.dto.Position;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -31,4 +32,11 @@ public class Seats {
 
     @Column(name = "y", nullable = false)
     private double y;
+
+    public Position toPosition() {
+        return Position.builder()
+            .x(this.x)
+            .y(this.y)
+            .build();
+    }
 }
