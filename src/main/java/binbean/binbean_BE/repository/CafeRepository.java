@@ -29,4 +29,5 @@ public interface CafeRepository extends JpaRepository<Cafe, Long> {
         @Param("radius") double radius);
 
     Optional<Cafe> findByUser(User user);
+    Optional<Cafe> findByFloorPlanId(Long floorPlanId);
 }
