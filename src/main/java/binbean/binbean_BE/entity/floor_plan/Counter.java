@@ -33,7 +33,15 @@ public class Counter {
     @Column(name = "y", nullable = false)
     private double y;
 
-    public Position toPosition() {
+    public static Counter create(FloorPlan floorPlan, double x, double y) {
+        return Counter.builder()
+            .floorPlan(floorPlan)
+            .x(x)
+            .y(y)
+            .build();
+    }
+
+    public Position ResponsePosition() {
         return Position.builder()
             .x(this.x)
             .y(this.y)

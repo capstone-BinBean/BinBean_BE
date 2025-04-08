@@ -8,5 +8,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface FavoritesRepository extends JpaRepository<Favorites, Long> {
 
     List<Favorites> findByUserId(Long userId);
-    Favorites findByCafeIdAndUserId(Long cafeId, Long userId);
+    List<Favorites> findByCafeIdAndUserId(Long cafeId, Long userId);
 }

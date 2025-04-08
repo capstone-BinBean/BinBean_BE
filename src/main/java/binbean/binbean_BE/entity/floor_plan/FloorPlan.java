@@ -68,4 +68,12 @@ public class FloorPlan {
             .currentSeats(currentSeats)
             .build();
     }
+
+    public static FloorPlan create(Cafe cafe, int floorNumber, int maxSeats) {
+        return FloorPlan.builder()
+            .cafe(cafe)
+            .floorNumber(floorNumber)
+            .maxSeats(maxSeats)
+            .build();
+    }
 }

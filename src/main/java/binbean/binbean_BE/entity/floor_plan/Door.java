@@ -33,7 +33,15 @@ public class Door {
     @Column(name = "y", nullable = false)
     private double y;
 
-    public Position toPosition() {
+    public static Door create(FloorPlan floorPlan, double x, double y) {
+        return Door.builder()
+            .floorPlan(floorPlan)
+            .x(x)
+            .y(y)
+            .build();
+    }
+
+    public Position ResponsePosition() {
         return Position.builder()
             .x(this.x)
             .y(this.y)

@@ -32,7 +32,19 @@ public class Favorites {
     @Column(name = "is_favorites", nullable = false)
     private Boolean isFavorites;
 
-    public void setFavorites(Boolean favorites) {
-        this.isFavorites = favorites;
+    @Column(name = "seats_number", nullable = false)
+    private Long seatsNumber;
+
+    public void setIsFavorites(Boolean isFavorites) {
+        this.isFavorites = isFavorites;
+    }
+
+    public static Favorites create(User user, Cafe cafe, Long seatsNumber){
+        return Favorites.builder()
+            .user(user)
+            .cafe(cafe)
+            .isFavorites(true)
+            .seatsNumber(seatsNumber)
+            .build();
     }
 }
