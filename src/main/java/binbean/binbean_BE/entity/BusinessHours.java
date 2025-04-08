@@ -69,6 +69,29 @@ public class BusinessHours {
     @Column(name = "sunday_end", nullable = false)
     private String sundayEnd;
 
+    public static BusinessHours create(String mondayStart, String mondayEnd, String tuesdayStart,
+        String tuesdayEnd, String wednesdayStart, String wednesdayEnd, String thursdayStart,
+        String thursdayEnd, String fridayStart, String fridayEnd, String saturdayStart, String saturdayEnd,
+        String sundayStart, String sundayEnd) {
+
+        return BusinessHours.builder()
+            .mondayStart(mondayStart)
+            .mondayEnd(mondayEnd)
+            .tuesdayStart(tuesdayStart)
+            .tuesdayEnd(tuesdayEnd)
+            .wednesdayStart(wednesdayStart)
+            .wednesdayEnd(wednesdayEnd)
+            .thursdayStart(thursdayStart)
+            .thursdayEnd(thursdayEnd)
+            .fridayStart(fridayStart)
+            .fridayEnd(fridayEnd)
+            .saturdayStart(saturdayStart)
+            .saturdayEnd(saturdayEnd)
+            .sundayStart(sundayStart)
+            .sundayEnd(sundayEnd)
+            .build();
+    }
+
     public void update(CafeUpdateRequest request){
         this.mondayStart = request.mondayStart();
         this.mondayEnd = request.mondayEnd();

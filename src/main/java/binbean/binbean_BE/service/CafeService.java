@@ -1,6 +1,6 @@
 package binbean.binbean_BE.service;
 
-import binbean.binbean_BE.dto.BusinessHoursDto;
+import binbean.binbean_BE.dto.OperatingHours;
 import binbean.binbean_BE.dto.request.CafeRegisterRequest;
 import binbean.binbean_BE.dto.request.CafeUpdateRequest;
 import binbean.binbean_BE.dto.request.FloorPlanRegisterRequest;
@@ -63,13 +63,13 @@ public class CafeService {
         Cafe cafe = cafeRepository.findById(cafeId)
             .orElseThrow(() -> new NotFoundException("Cafe not found with id: " + cafeId));
 
-        BusinessHoursDto businessHoursDto = businessHoursService.getBusinessHoursForToday(cafe);
+        OperatingHours operatingHours = businessHoursService.getBusinessHoursForToday(cafe);
         double reviewAvg = reviewService.getReviewAvg(cafe);
         List<String> cafeImgUrl = getCafeImageUrls(cafe);
         List<ReviewResponse> reviewResponse = reviewService.getReview(cafe);
         List<Long> floorPlanId = floorPlanService.getFloorPlanIdByCafeId(cafe);
 
-        return cafe.toCafeDto(businessHoursDto.getStartTime(), businessHoursDto.getEndTime(), reviewAvg,
+        return cafe.toCafeDto(operatingHours.startTime(), operatingHours.endTime(), reviewAvg,
             cafeImgUrl, reviewResponse, floorPlanId);
     }
 
@@ -88,7 +88,7 @@ public class CafeService {
     private void saveCafeImages(Cafe cafe, List<MultipartFile> cafeImgFiles) {
         for (MultipartFile image : cafeImgFiles) {
             String imageUrl = imageStorageService.uploadImage(image);
-            CafeImg cafeImg = CafeImg.toEntity(cafe, imageUrl);
+            CafeImg cafeImg = CafeImg.create(cafe, imageUrl);
             cafeImgRepository.save(cafeImg);
         }
     }

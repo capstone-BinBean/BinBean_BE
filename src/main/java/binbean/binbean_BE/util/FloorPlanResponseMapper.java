@@ -44,32 +44,32 @@ public class FloorPlanResponseMapper {
     public FloorPlanResponse floorPlanResponse(FloorPlan floorPlan) {
         List<Position> borderPositions = borderLineRepository.findByFloorPlanId(floorPlan.getId())
             .stream()
-            .map(BorderLine::ResponsePosition)
+            .map(BorderLine::toPositionEntity)
             .collect(Collectors.toList());
 
         List<Position> seatPositions = seatsRepository.findByFloorPlanId(floorPlan.getId())
             .stream()
-            .map(Seats::ResponsePosition)
+            .map(Seats::toPositionEntity)
             .collect(Collectors.toList());
 
         List<Position> doorPositions = doorRepository.findByFloorPlanId(floorPlan.getId())
             .stream()
-            .map(Door::ResponsePosition)
+            .map(Door::toPositionEntity)
             .collect(Collectors.toList());
 
         List<Position> counterPositions = counterRepository.findByFloorPlanId(floorPlan.getId())
             .stream()
-            .map(Counter::ResponsePosition)
+            .map(Counter::toPositionEntity)
             .collect(Collectors.toList());
 
         List<Position> toiletPositions = toiletRepository.findByFloorPlanId(floorPlan.getId())
             .stream()
-            .map(Toilet::ResponsePosition)
+            .map(Toilet::toPositionEntity)
             .collect(Collectors.toList());
 
         List<Position> windowPositions = windowRepository.findByFloorPlanId(floorPlan.getId())
             .stream()
-            .map(Window::ResponsePosition)
+            .map(Window::toPositionEntity)
             .collect(Collectors.toList());
 
         List<Position> currentPositions = new ArrayList<>();

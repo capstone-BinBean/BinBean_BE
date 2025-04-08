@@ -41,7 +41,7 @@ public class Window {
             .build();
     }
 
-    public Position ResponsePosition() {
+    public Position toPositionEntity() {
         return Position.builder()
             .x(this.x)
             .y(this.y)

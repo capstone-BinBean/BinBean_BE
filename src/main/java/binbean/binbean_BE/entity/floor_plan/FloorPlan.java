@@ -19,7 +19,6 @@ import lombok.Getter;
 
 @Entity
 @Getter
-@Builder
 @Table(name = "FLOOR_PLAN_TB")
 public class FloorPlan {
 
@@ -49,26 +48,15 @@ public class FloorPlan {
         List<Position> doorPositions, List<Position> counterPositions, List<Position> toiletPositions,
         List<Position> windowPositions, List<Position> currentPositions) {
 
-        FloorList floorList = FloorList.builder()
-            .borderPosition(borderPositions)
-            .seatPosition(seatPositions)
-            .doorPosition(doorPositions)
-            .counterPosition(counterPositions)
-            .toiletPosition(toiletPositions)
-            .windowPosition(windowPositions)
-            .build();
+        FloorList floorList = FloorList.create(borderPositions, seatPositions, doorPositions,
+            counterPositions, toiletPositions, windowPositions);
 
-        CurrentSeats currentSeats = CurrentSeats.builder()
-            .currentPosition(currentPositions)
-            .build();
+        CurrentSeats currentSeats = CurrentSeats.create(currentPositions);
 
-        return FloorPlanResponse.builder()
-            .floorList(floorList)
-            .floorNumber(this.floorNumber)
-            .currentSeats(currentSeats)
-            .build();
+        return FloorPlanResponse.create(floorList, this.floorNumber, currentSeats);
     }
 
+    @Builder
     public static FloorPlan create(Cafe cafe, int floorNumber, int maxSeats) {
         return FloorPlan.builder()
             .cafe(cafe)

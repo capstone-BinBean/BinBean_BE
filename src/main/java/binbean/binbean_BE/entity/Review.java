@@ -43,13 +43,8 @@ public class Review {
     private LocalDateTime createdAt;
 
     public ReviewResponse toReviewDto(List<String> reviewImgUrls) {
-        return ReviewResponse.builder()
-            .createAt(this.createdAt)
-            .reviewer(this.user.getNickname())
-            .reviewerProfileUrl(this.user.getProfile())
-            .reviewText(this.reviewText)
-            .reviewScore(this.reviewScore)
-            .reviewImgUrl(reviewImgUrls)
-            .build();
+
+        return ReviewResponse.create(this.createdAt, this.user.getNickname(), this.user.getProfile(),
+                this.reviewText, this.reviewScore, reviewImgUrls);
     }
 }
