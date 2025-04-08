@@ -6,18 +6,18 @@ import binbean.binbean_BE.dto.response.FavoritesResponse;
 import binbean.binbean_BE.dto.response.SeatsResponse;
 import binbean.binbean_BE.entity.User;
 import binbean.binbean_BE.entity.floor_plan.Seats;
+import binbean.binbean_BE.exception.NotFoundException;
 import binbean.binbean_BE.exception.ResponseStatusException;
-import binbean.binbean_BE.exception.user.UserNotFoundException;
 import binbean.binbean_BE.repository.FavoritesRepository;
 import binbean.binbean_BE.repository.UserRepository;
 import binbean.binbean_BE.repository.floor_plan.FloorPlanRepository;
 import binbean.binbean_BE.repository.floor_plan.SeatsRepository;
-import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
@@ -44,7 +44,7 @@ public class UserService {
     public void uploadProfileImage(MultipartFile image, User currentUser) {
         // 현재 로그인한 사용자와 DB에 등록된 사용자가 같은지 확인
         var user = userRepository.findById(currentUser.getId())
-            .orElseThrow(() -> new UserNotFoundException(currentUser.getEmail()));
+            .orElseThrow(() -> new NotFoundException(String.format(ErrorMsg.USER_NOT_FOUND_WITH_EMAIL, currentUser.getEmail())));
 
         // 기존 프로필 이미지 삭제 (존재하는 경우)
         if (user.getProfile() != null) {
@@ -59,7 +59,7 @@ public class UserService {
     public void changePassword(ChangePasswordRequest request, User currentUser) {
         // 현재 로그인한 사용자와 DB에 등록된 사용자가 같은지 확인
         var user = userRepository.findById(currentUser.getId())
-            .orElseThrow(() -> new UserNotFoundException(currentUser.getEmail()));
+            .orElseThrow(() -> new NotFoundException(String.format(ErrorMsg.USER_NOT_FOUND_WITH_EMAIL, currentUser.getEmail())));
 
         // 현재 비밀번호 검증
         if (request.currentPassword() != null) {
@@ -77,11 +77,11 @@ public class UserService {
         userRepository.save(user);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<FavoritesResponse> getFavoriteSeats(Long userId) {
         // 현재 로그인한 사용자와 DB에 등록된 사용자가 같은지 확인
         var user = userRepository.findById(userId)
-            .orElseThrow(() -> new UserNotFoundException(userId));
+            .orElseThrow(() -> new NotFoundException(String.format(ErrorMsg.USER_NOT_FOUND_WITH_ID, userId)));
         // 즐겨찾기 카페 목록
         var favorites = favoritesRepository.findByUserId(user.getId());
 
