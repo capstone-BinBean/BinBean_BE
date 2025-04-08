@@ -13,19 +13,20 @@ import binbean.binbean_BE.entity.floor_plan.Window;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public record CafeRegisterRequest(String cafeName, String cafeAddress, String cafePhone, int wifiAvailable,
-                                  int chargerAvailable, int kidsAvailable, int petAvailable,
-                                  String cafeDescription, String monday_start,
-                                  String monday_end, String tuesday_start, String tuesday_end,
-                                  String wednesday_start, String wednesday_end, String thursday_start,
-                                  String thursday_end, String friday_start, String friday_end,
-                                  String saturday_start, String saturday_end, String sunday_start,
-                                  String sunday_end) {
+public record CafeRegisterRequest(String cafeName, String cafeAddress, double latitude, double longitude,
+                                  String cafePhone, int wifiAvailable, int chargerAvailable,
+                                  int kidsAvailable, int petAvailable, String cafeDescription,
+                                  String monday_start, String monday_end, String tuesday_start,
+                                  String tuesday_end, String wednesday_start, String wednesday_end,
+                                  String thursday_start, String thursday_end, String friday_start,
+                                  String friday_end, String saturday_start, String saturday_end,
+                                  String sunday_start, String sunday_end) {
 
     public Cafe toCafeEntity(User user) {
 
-        return Cafe.create(user, this.cafeName, this.cafeAddress, this.cafePhone, this.wifiAvailable,
-            this.chargerAvailable, this.kidsAvailable, this.petAvailable, this.cafeDescription);
+        return Cafe.create(user, this.cafeName, this.cafeAddress, this.latitude, this.longitude,
+            this.cafePhone, this.wifiAvailable, this.chargerAvailable, this.kidsAvailable, this.petAvailable,
+            this.cafeDescription);
     }
 
     public BusinessHours toBusinessHoursEntity() {

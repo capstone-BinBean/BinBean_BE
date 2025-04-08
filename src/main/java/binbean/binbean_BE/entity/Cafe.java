@@ -36,10 +36,10 @@ public class Cafe {
     private String cafeAddress;
 
     @Column(name = "latitude", nullable = false)
-    private Double latitude;
+    private double latitude;
 
     @Column(name = "longitude", nullable = false)
-    private Double longitude;
+    private double longitude;
 
     @Column(name = "cafe_phone", nullable = false)
     private String cafePhone;
@@ -63,14 +63,16 @@ public class Cafe {
     }
 
     @Builder
-    public static Cafe create(User user, String cafeName, String cafeAddress, String cafePhone,
-        int wifiAvailable, int chargerAvailable, int kidsAvailable, int petAvailable,
-        String cafeDescription) {
+    public static Cafe create(User user, String cafeName, String cafeAddress, double latitude,
+        double longitude, String cafePhone, int wifiAvailable, int chargerAvailable, int kidsAvailable,
+        int petAvailable, String cafeDescription) {
 
         return Cafe.builder()
             .user(user)
             .cafeName(cafeName)
             .cafeAddress(cafeAddress)
+            .latitude(latitude)
+            .longitude(longitude)
             .cafePhone(cafePhone)
             .wifiAvailable(wifiAvailable)
             .chargerAvailable(chargerAvailable)
@@ -80,12 +82,13 @@ public class Cafe {
             .build();
     }
 
-    public CafeInfoResponse toCafeDto(String startTime, String endTime, double reviewAvg,
-        List<String> cafeImgUrl, List<ReviewResponse> reviewResponse, List<Long> floorPlanIds) {
+    public CafeInfoResponse toCafeDto(String startTime, String endTime, List<String> cafeImgUrl,
+        double reviewAvg, List<ReviewResponse> reviewResponse, List<Long> floorPlanIds) {
 
-        return CafeInfoResponse.create(this.id, this.cafeName, this.cafeAddress, startTime, endTime,
-            this.cafePhone, this.wifiAvailable, this.chargerAvailable, this.petAvailable, this.kidsAvailable,
-            this.cafeDescription, cafeImgUrl, reviewAvg, reviewResponse, floorPlanIds);
+        return CafeInfoResponse.create(this.id, this.cafeName, this.cafeAddress, this.latitude,
+            this.longitude, startTime, endTime, this.cafePhone, this.wifiAvailable, this.chargerAvailable,
+            this.petAvailable, this.kidsAvailable, this.cafeDescription, cafeImgUrl, reviewAvg,
+            reviewResponse, floorPlanIds);
     }
 
     public void update(CafeUpdateRequest request) {

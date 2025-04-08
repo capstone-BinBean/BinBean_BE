@@ -64,13 +64,13 @@ public class CafeService {
             .orElseThrow(() -> new NotFoundException("Cafe not found with id: " + cafeId));
 
         OperatingHours operatingHours = businessHoursService.getBusinessHoursForToday(cafe);
-        double reviewAvg = reviewService.getReviewAvg(cafe);
         List<String> cafeImgUrl = getCafeImageUrls(cafe);
+        double reviewAvg = reviewService.getReviewAvg(cafe);
         List<ReviewResponse> reviewResponse = reviewService.getReview(cafe);
-        List<Long> floorPlanId = floorPlanService.getFloorPlanIdByCafeId(cafe);
+        List<Long> floorPlanId = floorPlanService.getFloorPlanIdByCafe(cafe);
 
-        return cafe.toCafeDto(operatingHours.startTime(), operatingHours.endTime(), reviewAvg,
-            cafeImgUrl, reviewResponse, floorPlanId);
+        return cafe.toCafeDto(operatingHours.startTime(), operatingHours.endTime(), cafeImgUrl, reviewAvg,
+            reviewResponse, floorPlanId);
     }
 
     public void updateCafeInfo(CafeUpdateRequest request, List<MultipartFile> cafeImgFiles, User user) {

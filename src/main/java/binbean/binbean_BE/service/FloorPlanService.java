@@ -62,7 +62,7 @@ public class FloorPlanService {
         this.floorPlanResponseMapper = floorPlanResponseMapper;
     }
 
-    public List<Long> getFloorPlanIdByCafeId(Cafe cafe) {
+    public List<Long> getFloorPlanIdByCafe(Cafe cafe) {
         List<Long> floorPlanId = new ArrayList<>();
         List<FloorPlan> floorPlans = floorPlanRepository.findByCafeId(cafe.getId());
 
