@@ -25,17 +25,15 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final FavoritesRepository favoritesRepository;
-    private final FloorPlanRepository floorPlanRepository;
     private final SeatsRepository seatsRepository;
     private final ImageStorageService imageStorageService;
     private final BCryptPasswordEncoder passwordEncoder;
 
     public UserService(UserRepository userRepository, FavoritesRepository favoritesRepository,
-        FloorPlanRepository floorPlanRepository, SeatsRepository seatsRepository, ImageStorageService imageStorageService,
+         SeatsRepository seatsRepository, ImageStorageService imageStorageService,
         BCryptPasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.favoritesRepository = favoritesRepository;
-        this.floorPlanRepository = floorPlanRepository;
         this.seatsRepository = seatsRepository;
         this.imageStorageService = imageStorageService;
         this.passwordEncoder = passwordEncoder;
