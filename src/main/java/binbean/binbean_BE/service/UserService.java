@@ -5,6 +5,7 @@ import binbean.binbean_BE.dto.request.ChangePasswordRequest;
 import binbean.binbean_BE.dto.response.FavoritesResponse;
 import binbean.binbean_BE.dto.response.SeatsResponse;
 import binbean.binbean_BE.entity.User;
+import binbean.binbean_BE.entity.floor_plan.Seats;
 import binbean.binbean_BE.exception.ResponseStatusException;
 import binbean.binbean_BE.exception.user.UserNotFoundException;
 import binbean.binbean_BE.repository.FavoritesRepository;
@@ -81,20 +82,22 @@ public class UserService {
         // 현재 로그인한 사용자와 DB에 등록된 사용자가 같은지 확인
         var user = userRepository.findById(userId)
             .orElseThrow(() -> new UserNotFoundException(userId));
+        // 즐겨찾기 카페 목록
         var favorites = favoritesRepository.findByUserId(user.getId());
 
         return favorites.stream().map(favorite -> {
-            var cafe = favorite.getCafe();
-            var floorPlans = floorPlanRepository.findByCafeId(cafe.getId());
+            var cafeId = favorite.getCafe().getId();
 
-            List<SeatsResponse> seatsList = floorPlans.stream()
-                .flatMap(floorPlan ->
-                    seatsRepository.findByFloorPlanId(floorPlan.getId()).stream()
-                        .map(seat -> new SeatsResponse(seat.getId(), floorPlan.getFloorNumber(), 0))
-                )
+            // (즐겨찾기한) 카페들의 모든 좌석을 한번에 조회 (floorPlan, cafe까지 fetch join 됨)
+            List<Seats> seats = seatsRepository.findByCafeIdWithFloorAndCafe(cafeId);
+            List<SeatsResponse> seatsList = seats.stream()
+                .map(seat -> new SeatsResponse(
+                    seat.getId(),
+                    seat.getFloorPlan().getFloorNumber(),
+                    0))
                 .toList();
 
-            return new FavoritesResponse(favorite.getCafe().getId(), favorite.getCafe().getCafeName(), seatsList);
+            return new FavoritesResponse(cafeId, favorite.getCafe().getCafeName(), seatsList);
         }).toList();
     }
 }
