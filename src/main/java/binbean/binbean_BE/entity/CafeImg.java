@@ -13,7 +13,6 @@ import lombok.Getter;
 
 @Entity
 @Getter
-@Builder
 @Table(name = "CAFE_IMG_TB")
 public class CafeImg {
 
@@ -28,6 +27,15 @@ public class CafeImg {
 
     @Column(name = "cafe_img_url", nullable = true)
     private String cafeImgUrl;
+
+    protected CafeImg() {
+    }
+
+    @Builder
+    public CafeImg(Cafe cafe, String cafeImgUrl) {
+        this.cafe = cafe;
+        this.cafeImgUrl = cafeImgUrl;
+    }
 
     public static CafeImg create(Cafe cafe, String cafeImgUrl) {
         return CafeImg.builder()

@@ -45,17 +45,15 @@ public class CafeService {
         this.businessHoursService = businessHoursService;
     }
 
-    public void registerCafe(CafeRegisterRequest cafeRequest, FloorPlanRegisterRequest floorRequest,
+    public void registerCafe(CafeRegisterRequest cafeRequest, List<FloorPlanRegisterRequest> floorRequest,
         List<MultipartFile> cafeImgFiles, User user) {
-
         Cafe cafe = cafeRequest.toCafeEntity(user);
         cafeRepository.save(cafe);
 
-        BusinessHours businessHours = cafeRequest.toBusinessHoursEntity();
+        BusinessHours businessHours = cafeRequest.toBusinessHoursEntity(cafe);
         businessHoursRepository.save(businessHours);
 
         floorPlanService.saveFloorPlan(floorRequest, cafe);
-
         saveCafeImages(cafe, cafeImgFiles);
     }
 

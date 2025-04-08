@@ -23,7 +23,7 @@ public class FavoritesService {
         this.floorPlanRepository = floorPlanRepository;
     }
 
-    public void registerFavorites(FavoritesRequest request, User user) {
+    public void toggleFavorites(FavoritesRequest request, User user) {
         FloorPlan floorPlan = floorPlanRepository.findById(request.floorPlanId())
             .orElseThrow(() -> new NotFoundException(String.format(ErrorMsg.CAFE_NOT_FOUND)));
         Cafe cafe = floorPlan.getCafe();
@@ -35,8 +35,7 @@ public class FavoritesService {
             Favorites newFavorites = Favorites.create(user, cafe, request.seatsId());
             favoritesRepository.save(newFavorites);
         } else {
-            targetFavorite.setIsFavorites(!targetFavorite.getIsFavorites());
-            favoritesRepository.save(targetFavorite);
+            favoritesRepository.delete(targetFavorite);
         }
     }
 

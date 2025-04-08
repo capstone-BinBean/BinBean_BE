@@ -43,7 +43,7 @@ public class CafeController {
 
     @PostMapping(value = "/registration", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<Void> registerCafe(@RequestPart("cafe") CafeRegisterRequest cafeRequest,
-        @RequestPart("floorPlan") FloorPlanRegisterRequest floorRequest,
+        @RequestPart("floorPlan") List<FloorPlanRegisterRequest> floorRequest,
         @RequestPart(value = "cafeImg", required = false) List<MultipartFile> cafeImgFiles,
         @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
@@ -83,10 +83,10 @@ public class CafeController {
     }
 
     @PostMapping("/favorites")
-    public ResponseEntity<Void> registerFavorites(@RequestBody FavoritesRequest request,
+    public ResponseEntity<Void> toggleFavorites(@RequestBody FavoritesRequest request,
         @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
-        favoritesService.registerFavorites(request, userDetails.getUser());
+        favoritesService.toggleFavorites(request, userDetails.getUser());
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }

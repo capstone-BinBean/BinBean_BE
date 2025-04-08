@@ -14,7 +14,6 @@ import lombok.Getter;
 
 @Entity
 @Getter
-@Builder
 @Table(name = "BORDER_LINE_TB")
 public class BorderLine {
 
@@ -32,6 +31,16 @@ public class BorderLine {
 
     @Column(name = "y", nullable = false)
     private double y;
+
+    protected BorderLine() {
+    }
+
+    @Builder
+    public BorderLine(FloorPlan floorPlan, double x, double y) {
+        this.floorPlan = floorPlan;
+        this.x = x;
+        this.y = y;
+    }
 
     public static BorderLine create(FloorPlan floorPlan, double x, double y) {
         return BorderLine.builder()

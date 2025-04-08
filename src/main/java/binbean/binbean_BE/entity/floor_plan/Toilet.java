@@ -14,7 +14,6 @@ import lombok.Getter;
 
 @Entity
 @Getter
-@Builder
 @Table(name = "TOILET_TB")
 public class Toilet {
 
@@ -32,6 +31,16 @@ public class Toilet {
 
     @Column(name = "y", nullable = false)
     private double y;
+
+    protected Toilet() {
+    }
+
+    @Builder
+    public Toilet(FloorPlan floorPlan, double x, double y) {
+        this.floorPlan = floorPlan;
+        this.x = x;
+        this.y = y;
+    }
 
     public static Toilet create(FloorPlan floorPlan, double x, double y) {
         return Toilet.builder()

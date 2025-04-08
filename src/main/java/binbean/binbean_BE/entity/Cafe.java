@@ -63,6 +63,22 @@ public class Cafe {
     }
 
     @Builder
+    public Cafe(User user, String cafeName, String cafeAddress, double latitude, double longitude,
+        String cafePhone, String cafeDescription, int wifiAvailable, int petAvailable, int kidsAvailable,
+        int chargerAvailable) {
+        this.user = user;
+        this.cafeName = cafeName;
+        this.cafeAddress = cafeAddress;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.cafePhone = cafePhone;
+        this.cafeDescription = cafeDescription;
+        this.wifiAvailable = wifiAvailable;
+        this.petAvailable = petAvailable;
+        this.kidsAvailable = kidsAvailable;
+        this.chargerAvailable = chargerAvailable;
+    }
+
     public static Cafe create(User user, String cafeName, String cafeAddress, double latitude,
         double longitude, String cafePhone, int wifiAvailable, int chargerAvailable, int kidsAvailable,
         int petAvailable, String cafeDescription) {

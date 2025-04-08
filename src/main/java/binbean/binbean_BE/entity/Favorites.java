@@ -11,7 +11,6 @@ import jakarta.persistence.Table;
 import lombok.Builder;
 import lombok.Getter;
 
-@Builder
 @Getter
 @Entity
 @Table(name = "FAVORITES_TB")
@@ -29,21 +28,23 @@ public class Favorites {
     @JoinColumn(name = "cafe_id", nullable = false)
     private Cafe cafe;
 
-    @Column(name = "is_favorites", nullable = false)
-    private Boolean isFavorites;
-
     @Column(name = "seats_number", nullable = false)
     private Long seatsNumber;
 
-    public void setIsFavorites(Boolean isFavorites) {
-        this.isFavorites = isFavorites;
+    protected Favorites() {
     }
 
-    public static Favorites create(User user, Cafe cafe, Long seatsNumber){
+    @Builder
+    public Favorites(User user, Cafe cafe, Long seatsNumber) {
+        this.user = user;
+        this.cafe = cafe;
+        this.seatsNumber = seatsNumber;
+    }
+
+    public static Favorites create(User user, Cafe cafe, Long seatsNumber) {
         return Favorites.builder()
             .user(user)
             .cafe(cafe)
-            .isFavorites(true)
             .seatsNumber(seatsNumber)
             .build();
     }

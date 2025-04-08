@@ -78,16 +78,19 @@ public class FloorPlanService {
     }
 
     @Transactional
-    public void saveFloorPlan(FloorPlanRegisterRequest request, Cafe cafe) {
-        FloorPlan floorPlan = FloorPlan.create(cafe, request.floorNumber(), request.maxSeats());
-        FloorList floorList = request.floorList();
+    public void saveFloorPlan(List<FloorPlanRegisterRequest> requests, Cafe cafe) {
+        for (FloorPlanRegisterRequest request : requests) {
+            FloorPlan floorPlan = FloorPlan.create(cafe, request.floorNumber(), request.maxSeats());
+            floorPlanRepository.save(floorPlan);
+            FloorList floorList = request.floorList();
 
-        borderLineRepository.saveAll(floorPlanMapper.createBorderLines(floorList, floorPlan));
-        seatsRepository.saveAll(floorPlanMapper.createSeats(floorList, floorPlan));
-        doorRepository.saveAll(floorPlanMapper.createDoors(floorList, floorPlan));
-        counterRepository.saveAll(floorPlanMapper.createCounters(floorList, floorPlan));
-        toiletRepository.saveAll(floorPlanMapper.createToilets(floorList, floorPlan));
-        windowRepository.saveAll(floorPlanMapper.createWindows(floorList, floorPlan));
+            borderLineRepository.saveAll(floorPlanMapper.createBorderLines(floorList, floorPlan));
+            seatsRepository.saveAll(floorPlanMapper.createSeats(floorList, floorPlan));
+            doorRepository.saveAll(floorPlanMapper.createDoors(floorList, floorPlan));
+            counterRepository.saveAll(floorPlanMapper.createCounters(floorList, floorPlan));
+            toiletRepository.saveAll(floorPlanMapper.createToilets(floorList, floorPlan));
+            windowRepository.saveAll(floorPlanMapper.createWindows(floorList, floorPlan));
+        }
     }
 
     @Transactional

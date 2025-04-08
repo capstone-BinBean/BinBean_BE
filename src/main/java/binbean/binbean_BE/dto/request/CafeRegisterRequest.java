@@ -29,9 +29,9 @@ public record CafeRegisterRequest(String cafeName, String cafeAddress, double la
             this.cafeDescription);
     }
 
-    public BusinessHours toBusinessHoursEntity() {
+    public BusinessHours toBusinessHoursEntity(Cafe cafe) {
 
-        return BusinessHours.create(this.monday_start, this.monday_end, this.tuesday_start, this.tuesday_end,
+        return BusinessHours.create(cafe, this.monday_start, this.monday_end, this.tuesday_start, this.tuesday_end,
             this.wednesday_start, this.wednesday_end, this.thursday_start, this.thursday_end,
             this.friday_start, this.friday_end, this.saturday_start, this.saturday_end, this.sunday_start,
             this.sunday_end);

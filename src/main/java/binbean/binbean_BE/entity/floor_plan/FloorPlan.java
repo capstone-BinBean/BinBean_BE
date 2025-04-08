@@ -44,6 +44,24 @@ public class FloorPlan {
         this.maxSeats = maxSeats;
     }
 
+    protected FloorPlan() {
+    }
+
+    @Builder
+    public FloorPlan(Cafe cafe, int floorNumber, int maxSeats) {
+        this.cafe = cafe;
+        this.floorNumber = floorNumber;
+        this.maxSeats = maxSeats;
+    }
+
+    public static FloorPlan create(Cafe cafe, int floorNumber, int maxSeats) {
+        return FloorPlan.builder()
+            .cafe(cafe)
+            .floorNumber(floorNumber)
+            .maxSeats(maxSeats)
+            .build();
+    }
+
     public FloorPlanResponse toFloorPlanDto(List<Position> borderPositions, List<Position> seatPositions,
         List<Position> doorPositions, List<Position> counterPositions, List<Position> toiletPositions,
         List<Position> windowPositions, List<Position> currentPositions) {
@@ -54,14 +72,5 @@ public class FloorPlan {
         CurrentSeats currentSeats = CurrentSeats.create(currentPositions);
 
         return FloorPlanResponse.create(floorList, this.floorNumber, currentSeats);
-    }
-
-    @Builder
-    public static FloorPlan create(Cafe cafe, int floorNumber, int maxSeats) {
-        return FloorPlan.builder()
-            .cafe(cafe)
-            .floorNumber(floorNumber)
-            .maxSeats(maxSeats)
-            .build();
     }
 }

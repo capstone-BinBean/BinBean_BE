@@ -14,7 +14,6 @@ import lombok.Getter;
 
 @Entity
 @Getter
-@Builder
 @Table(name = "DOOR_TB")
 public class Door {
 
@@ -32,6 +31,16 @@ public class Door {
 
     @Column(name = "y", nullable = false)
     private double y;
+
+    protected Door() {
+    }
+
+    @Builder
+    public Door (FloorPlan floorPlan, double x, double y) {
+        this.floorPlan = floorPlan;
+        this.x = x;
+        this.y = y;
+    }
 
     public static Door create(FloorPlan floorPlan, double x, double y) {
         return Door.builder()
