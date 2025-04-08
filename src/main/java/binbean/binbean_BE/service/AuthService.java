@@ -2,7 +2,7 @@ package binbean.binbean_BE.service;
 
 import binbean.binbean_BE.auth.UserDetailsImpl;
 import binbean.binbean_BE.dto.auth.request.RegisterRequest;
-import binbean.binbean_BE.exception.user.UserAlreadyExistException;
+import binbean.binbean_BE.exception.UserAlreadyExistException;
 import binbean.binbean_BE.entity.User;
 import binbean.binbean_BE.repository.UserRepository;
 import org.slf4j.Logger;

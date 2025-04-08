@@ -1,6 +1,5 @@
-package binbean.binbean_BE.exception.user;
+package binbean.binbean_BE.exception;
 
-import binbean.binbean_BE.exception.ClientErrorException;
 import org.springframework.http.HttpStatus;
 
 public class UserAlreadyExistException extends ClientErrorException {

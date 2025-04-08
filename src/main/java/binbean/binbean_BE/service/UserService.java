@@ -5,18 +5,19 @@ import binbean.binbean_BE.dto.request.ChangePasswordRequest;
 import binbean.binbean_BE.dto.response.FavoritesResponse;
 import binbean.binbean_BE.dto.response.SeatsResponse;
 import binbean.binbean_BE.entity.User;
+import binbean.binbean_BE.entity.floor_plan.Seats;
+import binbean.binbean_BE.exception.NotFoundException;
 import binbean.binbean_BE.exception.ResponseStatusException;
-import binbean.binbean_BE.exception.user.UserNotFoundException;
 import binbean.binbean_BE.repository.FavoritesRepository;
 import binbean.binbean_BE.repository.UserRepository;
 import binbean.binbean_BE.repository.floor_plan.FloorPlanRepository;
 import binbean.binbean_BE.repository.floor_plan.SeatsRepository;
-import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
@@ -24,17 +25,15 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final FavoritesRepository favoritesRepository;
-    private final FloorPlanRepository floorPlanRepository;
     private final SeatsRepository seatsRepository;
     private final ImageStorageService imageStorageService;
     private final BCryptPasswordEncoder passwordEncoder;
 
     public UserService(UserRepository userRepository, FavoritesRepository favoritesRepository,
-        FloorPlanRepository floorPlanRepository, SeatsRepository seatsRepository, ImageStorageService imageStorageService,
+         SeatsRepository seatsRepository, ImageStorageService imageStorageService,
         BCryptPasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.favoritesRepository = favoritesRepository;
-        this.floorPlanRepository = floorPlanRepository;
         this.seatsRepository = seatsRepository;
         this.imageStorageService = imageStorageService;
         this.passwordEncoder = passwordEncoder;
@@ -43,7 +42,7 @@ public class UserService {
     public void uploadProfileImage(MultipartFile image, User currentUser) {
         // 현재 로그인한 사용자와 DB에 등록된 사용자가 같은지 확인
         var user = userRepository.findById(currentUser.getId())
-            .orElseThrow(() -> new UserNotFoundException(currentUser.getEmail()));
+            .orElseThrow(() -> new NotFoundException(String.format(ErrorMsg.USER_NOT_FOUND_WITH_EMAIL, currentUser.getEmail())));
 
         // 기존 프로필 이미지 삭제 (존재하는 경우)
         if (user.getProfile() != null) {
@@ -58,7 +57,7 @@ public class UserService {
     public void changePassword(ChangePasswordRequest request, User currentUser) {
         // 현재 로그인한 사용자와 DB에 등록된 사용자가 같은지 확인
         var user = userRepository.findById(currentUser.getId())
-            .orElseThrow(() -> new UserNotFoundException(currentUser.getEmail()));
+            .orElseThrow(() -> new NotFoundException(String.format(ErrorMsg.USER_NOT_FOUND_WITH_EMAIL, currentUser.getEmail())));
 
         // 현재 비밀번호 검증
         if (request.currentPassword() != null) {
@@ -76,25 +75,27 @@ public class UserService {
         userRepository.save(user);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<FavoritesResponse> getFavoriteSeats(Long userId) {
         // 현재 로그인한 사용자와 DB에 등록된 사용자가 같은지 확인
         var user = userRepository.findById(userId)
-            .orElseThrow(() -> new UserNotFoundException(userId));
+            .orElseThrow(() -> new NotFoundException(String.format(ErrorMsg.USER_NOT_FOUND_WITH_ID, userId)));
+        // 즐겨찾기 카페 목록
         var favorites = favoritesRepository.findByUserId(user.getId());
 
         return favorites.stream().map(favorite -> {
-            var cafe = favorite.getCafe();
-            var floorPlans = floorPlanRepository.findByCafeId(cafe.getId());
+            var cafeId = favorite.getCafe().getId();
 
-            List<SeatsResponse> seatsList = floorPlans.stream()
-                .flatMap(floorPlan ->
-                    seatsRepository.findByFloorPlanId(floorPlan.getId()).stream()
-                        .map(seat -> new SeatsResponse(seat.getId(), floorPlan.getFloorNumber(), 0))
-                )
+            // (즐겨찾기한) 카페들의 모든 좌석을 한번에 조회 (floorPlan, cafe까지 fetch join 됨)
+            List<Seats> seats = seatsRepository.findByCafeIdWithFloorAndCafe(cafeId);
+            List<SeatsResponse> seatsList = seats.stream()
+                .map(seat -> new SeatsResponse(
+                    seat.getId(),
+                    seat.getFloorPlan().getFloorNumber(),
+                    0))
                 .toList();
 
-            return new FavoritesResponse(favorite.getCafe().getId(), favorite.getCafe().getCafeName(), seatsList);
+            return new FavoritesResponse(cafeId, favorite.getCafe().getCafeName(), seatsList);
         }).toList();
     }
 }
