@@ -85,6 +85,10 @@ public class CafeService {
         saveCafeImages(cafe, cafeImgFiles);
     }
 
+    public void registerFavorites(Long cafeId, User user) {
+
+    }
+
     private void saveCafeImages(Cafe cafe, List<MultipartFile> cafeImgFiles) {
         for (MultipartFile image : cafeImgFiles) {
             String imageUrl = imageStorageService.uploadImage(image);

@@ -76,4 +76,12 @@ public class CafeController {
         List<FloorPlanResponse> response = floorPlanService.getFloorPlan(cafeId);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
+
+    @PostMapping("/favorites/{cafe_id}")
+    public ResponseEntity<Void> registerFavorites(@PathVariable(name = "cafe_id") Long cafeId,
+        @AuthenticationPrincipal UserDetailsImpl userDetails) {
+
+        cafeService.registerFavorites(cafeId, userDetails.getUser());
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
 }
