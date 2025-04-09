@@ -5,6 +5,7 @@ import binbean.binbean_BE.dto.request.CafeRegisterRequest;
 import binbean.binbean_BE.dto.request.CafeUpdateRequest;
 import binbean.binbean_BE.dto.request.FloorPlanRegisterRequest;
 import binbean.binbean_BE.dto.response.CafeInfoResponse;
+import binbean.binbean_BE.dto.response.CafeSearchResponse;
 import binbean.binbean_BE.dto.response.ReviewResponse;
 import binbean.binbean_BE.entity.BusinessHours;
 import binbean.binbean_BE.entity.Cafe;
@@ -43,6 +44,18 @@ public class CafeService {
         this.reviewService = reviewService;
         this.floorPlanService = floorPlanService;
         this.businessHoursService = businessHoursService;
+    }
+
+    public List<CafeSearchResponse> searchCafe(String cafeName) {
+        List<Cafe> cafes = cafeRepository.findByCafeNameContaining(cafeName);
+        List<CafeSearchResponse> responses = new ArrayList<>();
+
+        for (Cafe cafe : cafes) {
+            responses.add(CafeSearchResponse.create(cafe.getId(), cafe.getCafeName(), cafe.getCafeAddress(),
+                cafe.getCafeDescription()));
+        }
+
+        return responses;
     }
 
     public void registerCafe(CafeRegisterRequest cafeRequest, List<FloorPlanRegisterRequest> floorRequest,
