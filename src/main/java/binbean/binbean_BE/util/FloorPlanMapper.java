@@ -14,63 +14,40 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class FloorPlanMapper {
-    public List<BorderLine> toBorderLines(FloorList floorList, FloorPlan floorPlan) {
+
+    public List<BorderLine> createBorderLines(FloorList floorList, FloorPlan floorPlan) {
         return floorList.borderPosition().stream()
-            .map(pos -> BorderLine.builder()
-                .floorPlan(floorPlan)
-                .x(pos.x())
-                .y(pos.y())
-                .build())
+            .map(pos -> BorderLine.create(floorPlan, pos.x(), pos.y()))
             .collect(Collectors.toList());
     }
 
-    public List<Seats> toSeats(FloorList floorList, FloorPlan floorPlan) {
+    public List<Seats> createSeats(FloorList floorList, FloorPlan floorPlan) {
         return floorList.seatPosition().stream()
-            .map(pos -> Seats.builder()
-                .floorPlan(floorPlan)
-                .x(pos.x())
-                .y(pos.y())
-                .build())
+            .map(pos -> Seats.create(floorPlan, pos.x(), pos.y()))
             .collect(Collectors.toList());
     }
 
-    public List<Door> toDoors(FloorList floorList, FloorPlan floorPlan) {
+    public List<Door> createDoors(FloorList floorList, FloorPlan floorPlan) {
         return floorList.doorPosition().stream()
-            .map(pos -> Door.builder()
-                .floorPlan(floorPlan)
-                .x(pos.x())
-                .y(pos.y())
-                .build())
+            .map(pos -> Door.create(floorPlan, pos.x(), pos.y()))
             .collect(Collectors.toList());
     }
 
-    public List<Counter> toCounters(FloorList floorList, FloorPlan floorPlan) {
+    public List<Counter> createCounters(FloorList floorList, FloorPlan floorPlan) {
         return floorList.counterPosition().stream()
-            .map(pos -> Counter.builder()
-                .floorPlan(floorPlan)
-                .x(pos.x())
-                .y(pos.y())
-                .build())
+            .map(pos -> Counter.create(floorPlan, pos.x(), pos.y()))
             .collect(Collectors.toList());
     }
 
-    public List<Toilet> toToilets(FloorList floorList, FloorPlan floorPlan) {
+    public List<Toilet> createToilets(FloorList floorList, FloorPlan floorPlan) {
         return floorList.toiletPosition().stream()
-            .map(pos -> Toilet.builder()
-                .floorPlan(floorPlan)
-                .x(pos.x())
-                .y(pos.y())
-                .build())
+            .map(pos -> Toilet.create(floorPlan, pos.x(), pos.y()))
             .collect(Collectors.toList());
     }
 
-    public List<Window> toWindows(FloorList floorList, FloorPlan floorPlan) {
+    public List<Window> createWindows(FloorList floorList, FloorPlan floorPlan) {
         return floorList.windowPosition().stream()
-            .map(pos -> Window.builder()
-                .floorPlan(floorPlan)
-                .x(pos.x())
-                .y(pos.y())
-                .build())
+            .map(pos -> Window.create(floorPlan, pos.x(), pos.y()))
             .collect(Collectors.toList());
     }
 }

@@ -25,7 +25,7 @@ public class MarkerService {
         return cafes.stream()
             .map( cafe -> {
                 var floorList = floorPlanRepository.findByCafeId(cafe.getId());
-                return CafeMarkerResponse.toDto(cafe, floorList);
+                return CafeMarkerResponse.create(cafe, floorList);
             })
             .toList();
     }

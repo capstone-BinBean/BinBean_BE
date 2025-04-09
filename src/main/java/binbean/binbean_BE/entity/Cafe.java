@@ -17,7 +17,6 @@ import lombok.Getter;
 
 @Entity
 @Getter
-@Builder
 @Table(name = "CAFE_TB")
 public class Cafe {
 
@@ -37,10 +36,10 @@ public class Cafe {
     private String cafeAddress;
 
     @Column(name = "latitude", nullable = false)
-    private Double latitude;
+    private double latitude;
 
     @Column(name = "longitude", nullable = false)
-    private Double longitude;
+    private double longitude;
 
     @Column(name = "cafe_phone", nullable = false)
     private String cafePhone;
@@ -58,15 +57,15 @@ public class Cafe {
     private int kidsAvailable;
 
     @Column(name = "charge_available", nullable = false)
-    private int chargeAvailable;
+    private int chargerAvailable;
 
-    protected Cafe() {}
+    protected Cafe() {
+    }
 
     @Builder
-    public Cafe(Long id, User user, String cafeName, String cafeAddress,
-        double latitude, double longitude, String cafePhone, String cafeDescription, int wifiAvailable, int petAvailable,
-        int kidsAvailable, int chargeAvailable) {
-        this.id = id;
+    public Cafe(User user, String cafeName, String cafeAddress, double latitude, double longitude,
+        String cafePhone, String cafeDescription, int wifiAvailable, int petAvailable, int kidsAvailable,
+        int chargerAvailable) {
         this.user = user;
         this.cafeName = cafeName;
         this.cafeAddress = cafeAddress;
@@ -77,28 +76,35 @@ public class Cafe {
         this.wifiAvailable = wifiAvailable;
         this.petAvailable = petAvailable;
         this.kidsAvailable = kidsAvailable;
-        this.chargeAvailable = chargeAvailable;
+        this.chargerAvailable = chargerAvailable;
     }
 
-    public CafeInfoResponse toCafeDto(String startTime, String endTime, double reviewAvg,
-        List<String> cafeImgUrl, List<ReviewResponse> reviewResponse, List<Long> floorPlanIds) {
-        return CafeInfoResponse.builder()
-            .cafeId(this.id)
-            .cafeName(this.cafeName)
-            .cafeAddress(this.cafeAddress)
-            .startTime(startTime)
-            .endTime(endTime)
-            .cafePhone(this.cafePhone)
-            .reviewAvg(reviewAvg)
-            .wifiAvailable(this.wifiAvailable)
-            .chargeAvailable(this.chargeAvailable)
-            .petAvailable(this.petAvailable)
-            .kidsAvailable(this.kidsAvailable)
-            .cafeDescription(this.cafeDescription)
-            .cafeImgUrl(cafeImgUrl)
-            .reviews(reviewResponse)
-            .floorPlanId(floorPlanIds)
+    public static Cafe create(User user, String cafeName, String cafeAddress, double latitude,
+        double longitude, String cafePhone, int wifiAvailable, int chargerAvailable, int kidsAvailable,
+        int petAvailable, String cafeDescription) {
+
+        return Cafe.builder()
+            .user(user)
+            .cafeName(cafeName)
+            .cafeAddress(cafeAddress)
+            .latitude(latitude)
+            .longitude(longitude)
+            .cafePhone(cafePhone)
+            .wifiAvailable(wifiAvailable)
+            .chargerAvailable(chargerAvailable)
+            .kidsAvailable(kidsAvailable)
+            .petAvailable(petAvailable)
+            .cafeDescription(cafeDescription)
             .build();
+    }
+
+    public CafeInfoResponse toCafeDto(String startTime, String endTime, List<String> cafeImgUrl,
+        double reviewAvg, List<ReviewResponse> reviewResponse, List<Long> floorPlanIds) {
+
+        return CafeInfoResponse.create(this.id, this.cafeName, this.cafeAddress, this.latitude,
+            this.longitude, startTime, endTime, this.cafePhone, this.wifiAvailable, this.chargerAvailable,
+            this.petAvailable, this.kidsAvailable, this.cafeDescription, cafeImgUrl, reviewAvg,
+            reviewResponse, floorPlanIds);
     }
 
     public void update(CafeUpdateRequest request) {
@@ -106,7 +112,7 @@ public class Cafe {
         this.cafeAddress = request.cafeAddress();
         this.cafePhone = request.cafePhone();
         this.wifiAvailable = request.wifiAvailable();
-        this.chargeAvailable = request.chargerAvailable();
+        this.chargerAvailable = request.chargerAvailable();
         this.petAvailable = request.petAvailable();
         this.kidsAvailable = request.kidsAvailable();
         this.cafeDescription = request.cafeDescription();

@@ -14,7 +14,6 @@ import lombok.Getter;
 
 @Entity
 @Getter
-@Builder
 @Table(name = "SEATS_TB")
 public class Seats {
 
@@ -33,7 +32,25 @@ public class Seats {
     @Column(name = "y", nullable = false)
     private double y;
 
-    public Position toPosition() {
+    protected Seats() {
+    }
+
+    @Builder
+    public Seats(FloorPlan floorPlan, double x, double y) {
+        this.floorPlan = floorPlan;
+        this.x = x;
+        this.y = y;
+    }
+
+    public static Seats create(FloorPlan floorPlan, double x, double y) {
+        return Seats.builder()
+            .floorPlan(floorPlan)
+            .x(x)
+            .y(y)
+            .build();
+    }
+
+    public Position toPositionEntity() {
         return Position.builder()
             .x(this.x)
             .y(this.y)

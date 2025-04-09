@@ -62,7 +62,7 @@ public class FloorPlanService {
         this.floorPlanResponseMapper = floorPlanResponseMapper;
     }
 
-    public List<Long> getFloorPlanIdByCafeId(Cafe cafe) {
+    public List<Long> getFloorPlanIdByCafe(Cafe cafe) {
         List<Long> floorPlanId = new ArrayList<>();
         List<FloorPlan> floorPlans = floorPlanRepository.findByCafeId(cafe.getId());
 
@@ -78,23 +78,19 @@ public class FloorPlanService {
     }
 
     @Transactional
-    public void saveFloorPlan(FloorPlanRegisterRequest floorRequest, Cafe cafe) {
-        FloorPlan floorPlan = floorPlanRepository.save(
-            FloorPlan.builder()
-                .cafe(cafe)
-                .floorNumber(floorRequest.floorNumber())
-                .maxSeats(floorRequest.maxSeats())
-                .build()
-        );
+    public void saveFloorPlan(List<FloorPlanRegisterRequest> requests, Cafe cafe) {
+        for (FloorPlanRegisterRequest request : requests) {
+            FloorPlan floorPlan = FloorPlan.create(cafe, request.floorNumber(), request.maxSeats());
+            floorPlanRepository.save(floorPlan);
+            FloorList floorList = request.floorList();
 
-        FloorList floorList = floorRequest.floorList();
-
-        borderLineRepository.saveAll(floorPlanMapper.toBorderLines(floorList, floorPlan));
-        seatsRepository.saveAll(floorPlanMapper.toSeats(floorList, floorPlan));
-        doorRepository.saveAll(floorPlanMapper.toDoors(floorList, floorPlan));
-        counterRepository.saveAll(floorPlanMapper.toCounters(floorList, floorPlan));
-        toiletRepository.saveAll(floorPlanMapper.toToilets(floorList, floorPlan));
-        windowRepository.saveAll(floorPlanMapper.toWindows(floorList, floorPlan));
+            borderLineRepository.saveAll(floorPlanMapper.createBorderLines(floorList, floorPlan));
+            seatsRepository.saveAll(floorPlanMapper.createSeats(floorList, floorPlan));
+            doorRepository.saveAll(floorPlanMapper.createDoors(floorList, floorPlan));
+            counterRepository.saveAll(floorPlanMapper.createCounters(floorList, floorPlan));
+            toiletRepository.saveAll(floorPlanMapper.createToilets(floorList, floorPlan));
+            windowRepository.saveAll(floorPlanMapper.createWindows(floorList, floorPlan));
+        }
     }
 
     @Transactional
@@ -110,23 +106,14 @@ public class FloorPlanService {
             floorPlan.setMaxSeats(request.maxSeats());
             floorPlanRepository.save(floorPlan);
 
-            List<BorderLine> borderLines = floorPlanMapper.toBorderLines(request.floorList(), floorPlan);
-            borderLineRepository.saveAll(borderLines);
+            FloorList floorList = request.floorList();
 
-            List<Seats> seats = floorPlanMapper.toSeats(request.floorList(), floorPlan);
-            seatsRepository.saveAll(seats);
-
-            List<Door> doors = floorPlanMapper.toDoors(request.floorList(), floorPlan);
-            doorRepository.saveAll(doors);
-
-            List<Counter> counters = floorPlanMapper.toCounters(request.floorList(), floorPlan);
-            counterRepository.saveAll(counters);
-
-            List<Toilet> toilets = floorPlanMapper.toToilets(request.floorList(), floorPlan);
-            toiletRepository.saveAll(toilets);
-
-            List<Window> windows = floorPlanMapper.toWindows(request.floorList(), floorPlan);
-            windowRepository.saveAll(windows);
+            borderLineRepository.saveAll(floorPlanMapper.createBorderLines(floorList, floorPlan));
+            seatsRepository.saveAll(floorPlanMapper.createSeats(floorList, floorPlan));
+            doorRepository.saveAll(floorPlanMapper.createDoors(floorList, floorPlan));
+            counterRepository.saveAll(floorPlanMapper.createCounters(floorList, floorPlan));
+            toiletRepository.saveAll(floorPlanMapper.createToilets(floorList, floorPlan));
+            windowRepository.saveAll(floorPlanMapper.createWindows(floorList, floorPlan));
         }
     }
 
@@ -134,7 +121,7 @@ public class FloorPlanService {
         List<FloorPlan> floorPlans = floorPlanRepository.findByCafeId(cafeId);
 
         return floorPlans.stream()
-            .map(floorPlanResponseMapper::toFloorPlanResponse)
+            .map(floorPlanResponseMapper::floorPlanResponse)
             .collect(Collectors.toList());
     }
 }

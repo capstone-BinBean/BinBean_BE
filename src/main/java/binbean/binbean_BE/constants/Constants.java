@@ -40,5 +40,7 @@ public class Constants {
         public static final String ACCESS_DENIED = "접근 권한이 없습니다.";
         public static final String PASSWORD_NOT_MATCH = "현재 비밀번호가 일치하지 않습니다.";
         public static final String PASSWORD_NOT_SERVICE = "소셜 로그인 계정은 비밀번호를 변경할 수 없습니다.";
+        public static final String FAVORITE_NOT_FOUND_WITH_USER_AND_CAFE = "즐겨찾기를 찾을 수 없습니다.";
+        public static final String CAFE_NOT_FOUND = "해당 카페를 찾을 수 없습니다.";
     }
 }
