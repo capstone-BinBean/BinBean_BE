@@ -30,4 +30,18 @@ public class ReviewImg {
 
     protected ReviewImg() {
     }
+
+    @Builder
+    public ReviewImg(Review review, String reviewImgUrl) {
+        this.review = review;
+        this.reviewImgUrl = reviewImgUrl;
+    }
+
+    public static ReviewImg create(Review review, String reviewImgUrl) {
+
+        return ReviewImg.builder()
+            .review(review)
+            .reviewImgUrl(reviewImgUrl)
+            .build();
+    }
 }

@@ -1,5 +1,6 @@
 package binbean.binbean_BE.service;
 
+import binbean.binbean_BE.constants.Constants.ErrorMsg;
 import binbean.binbean_BE.dto.OperatingHours;
 import binbean.binbean_BE.dto.request.CafeRegisterRequest;
 import binbean.binbean_BE.dto.request.CafeUpdateRequest;
@@ -72,7 +73,7 @@ public class CafeService {
 
     public CafeInfoResponse getCafeInfo(Long cafeId) {
         Cafe cafe = cafeRepository.findById(cafeId)
-            .orElseThrow(() -> new NotFoundException("Cafe not found with id: " + cafeId));
+            .orElseThrow(() -> new NotFoundException(String.format(ErrorMsg.CAFE_NOT_FOUND)));
 
         OperatingHours operatingHours = businessHoursService.getBusinessHoursForToday(cafe);
         List<String> cafeImgUrl = getCafeImageUrls(cafe);
@@ -87,7 +88,7 @@ public class CafeService {
     public void updateCafeInfo(CafeUpdateRequest request, List<MultipartFile> cafeImgFiles, User user) {
 
         Cafe cafe = cafeRepository.findByUser(user)
-            .orElseThrow(() -> new NotFoundException("The user's cafe does not exist."));
+            .orElseThrow(() -> new NotFoundException("The user's cafe does not exist.")); // -> 403
         BusinessHours businessHours = businessHoursRepository.findByCafeId(cafe.getId())
             .orElseThrow(() -> new NotFoundException("There is no registered businessHorus."));
 

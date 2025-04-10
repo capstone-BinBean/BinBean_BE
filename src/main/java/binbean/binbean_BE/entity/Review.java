@@ -41,7 +41,29 @@ public class Review {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
+    public void setCreatedAt() {
+        this.createdAt = LocalDateTime.now();
+    }
+
     protected Review() {
+    }
+
+    @Builder
+    public Review(Cafe cafe, User user, String reviewText, double reviewScore) {
+        this.cafe = cafe;
+        this.user = user;
+        this.reviewText = reviewText;
+        this.reviewScore = reviewScore;
+    }
+
+    public static Review create(Cafe cafe, User user, String reviewText, double reviewScore) {
+
+        return Review.builder()
+            .cafe(cafe)
+            .user(user)
+            .reviewText(reviewText)
+            .reviewScore(reviewScore)
+            .build();
     }
 
     public ReviewResponse toReviewDto(List<String> reviewImgUrls) {
