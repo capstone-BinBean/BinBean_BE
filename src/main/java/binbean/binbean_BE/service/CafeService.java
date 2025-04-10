@@ -78,7 +78,7 @@ public class CafeService {
         OperatingHours operatingHours = businessHoursService.getBusinessHoursForToday(cafe);
         List<String> cafeImgUrl = getCafeImageUrls(cafe);
         double reviewAvg = reviewService.getReviewAvg(cafe);
-        List<ReviewResponse> reviewResponse = reviewService.getReview(cafe);
+        List<ReviewResponse> reviewResponse = reviewService.getReviewByCafe(cafe);
         List<Long> floorPlanId = floorPlanService.getFloorPlanIdByCafe(cafe);
 
         return cafe.toCafeDto(operatingHours.startTime(), operatingHours.endTime(), cafeImgUrl, reviewAvg,

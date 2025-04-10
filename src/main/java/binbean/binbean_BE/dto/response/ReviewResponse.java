@@ -10,6 +10,7 @@ public record ReviewResponse(LocalDateTime createdAt, String reviewer, String re
 
     public static ReviewResponse create(LocalDateTime createdAt, String nickname, String profile,
         String reviewText, double reviewScore, List<String> reviewImgUrl) {
+
         return ReviewResponse.builder()
             .createdAt(createdAt)
             .reviewer(nickname)

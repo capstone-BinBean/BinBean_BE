@@ -10,7 +10,6 @@ import binbean.binbean_BE.exception.NotFoundException;
 import binbean.binbean_BE.exception.ResponseStatusException;
 import binbean.binbean_BE.repository.FavoritesRepository;
 import binbean.binbean_BE.repository.UserRepository;
-import binbean.binbean_BE.repository.floor_plan.FloorPlanRepository;
 import binbean.binbean_BE.repository.floor_plan.SeatsRepository;
 import java.util.List;
 import java.util.Optional;

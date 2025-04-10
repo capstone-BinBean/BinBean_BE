@@ -30,7 +30,21 @@ public class ReviewService {
         this.cafeRepository = cafeRepository;
     }
 
-    public List<ReviewResponse> getReview(Cafe cafe) {
+    public List<ReviewResponse> getReviewByUser(User user) {
+        List<ReviewResponse> responses = new ArrayList<>();
+        List<Review> reviews = reviewRepository.findByCafeId(user.getId());
+        if (reviews.isEmpty()) {
+            throw new NotFoundException("Review not found");
+        }
+
+        for (Review review : reviews) {
+            responses.add(convertReviewToDto(review));
+        }
+
+        return responses;
+    }
+
+    public List<ReviewResponse> getReviewByCafe(Cafe cafe) {
         List<ReviewResponse> responses = new ArrayList<>();
         List<Review> reviews = reviewRepository.findByCafeId(cafe.getId());
         if (reviews.isEmpty()) {

@@ -1,7 +1,6 @@
 package binbean.binbean_BE.dto.response;
 
 import binbean.binbean_BE.entity.Favorites;
-import binbean.binbean_BE.repository.FavoritesRepository;
 import java.util.List;
 import lombok.Builder;
 
