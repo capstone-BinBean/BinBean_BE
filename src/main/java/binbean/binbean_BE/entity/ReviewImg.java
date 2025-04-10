@@ -13,7 +13,6 @@ import lombok.Getter;
 
 @Entity
 @Getter
-@Builder
 @Table(name = "REVIEW_IMG_TB")
 public class ReviewImg {
 
@@ -28,4 +27,7 @@ public class ReviewImg {
 
     @Column(name = "review_img_url", nullable = false)
     private String reviewImgUrl;
+
+    protected ReviewImg() {
+    }
 }

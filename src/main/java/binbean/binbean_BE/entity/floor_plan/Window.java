@@ -14,7 +14,6 @@ import lombok.Getter;
 
 @Entity
 @Getter
-@Builder
 @Table(name = "WINDOW_TB")
 public class Window {
 
@@ -33,7 +32,25 @@ public class Window {
     @Column(name = "y", nullable = false)
     private double y;
 
-    public Position toPosition() {
+    protected Window() {
+    }
+
+    @Builder
+    public Window(FloorPlan floorPlan, double x, double y) {
+        this.floorPlan = floorPlan;
+        this.x = x;
+        this.y = y;
+    }
+
+    public static Window create(FloorPlan floorPlan, double x, double y) {
+        return Window.builder()
+            .floorPlan(floorPlan)
+            .x(x)
+            .y(y)
+            .build();
+    }
+
+    public Position toPositionEntity() {
         return Position.builder()
             .x(this.x)
             .y(this.y)

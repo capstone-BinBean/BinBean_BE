@@ -14,7 +14,6 @@ import lombok.Getter;
 
 @Entity
 @Getter
-@Builder
 @Table(name = "COUNTER_TB")
 public class Counter {
 
@@ -33,7 +32,25 @@ public class Counter {
     @Column(name = "y", nullable = false)
     private double y;
 
-    public Position toPosition() {
+    protected Counter() {
+    }
+
+    @Builder
+    public Counter(FloorPlan floorPlan, double x, double y) {
+        this.floorPlan = floorPlan;
+        this.x = x;
+        this.y = y;
+    }
+
+    public static Counter create(FloorPlan floorPlan, double x, double y) {
+        return Counter.builder()
+            .floorPlan(floorPlan)
+            .x(x)
+            .y(y)
+            .build();
+    }
+
+    public Position toPositionEntity() {
         return Position.builder()
             .x(this.x)
             .y(this.y)

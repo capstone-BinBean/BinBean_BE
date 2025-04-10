@@ -8,7 +8,7 @@ public record FloorSeatsResponse(
     int maxSeats,
     int currentSeats
 ) {
-    public static FloorSeatsResponse toDto(FloorPlan floorPlan) {
+    public static FloorSeatsResponse create(FloorPlan floorPlan) {
         return FloorSeatsResponse.builder()
             .maxSeats(floorPlan.getMaxSeats())
             .currentSeats(floorPlan.getCurrentSeats())

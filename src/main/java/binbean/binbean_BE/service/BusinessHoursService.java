@@ -1,6 +1,6 @@
 package binbean.binbean_BE.service;
 
-import binbean.binbean_BE.dto.BusinessHoursDto;
+import binbean.binbean_BE.dto.OperatingHours;
 import binbean.binbean_BE.entity.BusinessHours;
 import binbean.binbean_BE.entity.Cafe;
 import binbean.binbean_BE.exception.NotFoundException;
@@ -18,7 +18,7 @@ public class BusinessHoursService {
         this.businessHoursRepository = businessHoursRepository;
     }
 
-    public BusinessHoursDto getBusinessHoursForToday(Cafe cafe) {
+    public OperatingHours getBusinessHoursForToday(Cafe cafe) {
         BusinessHours businessHours = businessHoursRepository.findByCafeId(cafe.getId())
             .orElseThrow(() -> new NotFoundException("There is no registered businessHorus."));
 
@@ -27,9 +27,10 @@ public class BusinessHoursService {
         return getHoursForDay(businessHours, today);
     }
 
-    private BusinessHoursDto getHoursForDay(BusinessHours businessHours, DayOfWeek day) {
+    private OperatingHours getHoursForDay(BusinessHours businessHours, DayOfWeek day) {
         String startTime;
         String endTime;
+
         if (day == DayOfWeek.MONDAY) {
             startTime = businessHours.getMondayStart();
             endTime = businessHours.getMondayEnd();
@@ -54,6 +55,7 @@ public class BusinessHoursService {
         } else {
             throw new IllegalStateException("Unexpected value: " + day);
         }
-        return new BusinessHoursDto(startTime, endTime);
+
+        return OperatingHours.create(startTime, endTime);
     }
 }

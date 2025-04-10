@@ -45,5 +45,7 @@ public class Constants {
         public static final String MASTER_KEY_DECRYPT_ERROR = "AES 키 복호화 실패";
         public static final String AES_KEY_ENCRYPT_ERROR = "AES 기반 암호화 실패";
         public static final String AES_KEY_DECRYPT_ERROR = "AES 기반 복호화 실패";
+        public static final String FAVORITE_NOT_FOUND_WITH_USER_AND_CAFE = "즐겨찾기를 찾을 수 없습니다.";
+        public static final String CAFE_NOT_FOUND = "해당 카페를 찾을 수 없습니다.";
     }
 }

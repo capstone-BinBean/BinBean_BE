@@ -3,11 +3,13 @@ package binbean.binbean_BE.controller;
 import binbean.binbean_BE.auth.UserDetailsImpl;
 import binbean.binbean_BE.dto.request.CafeRegisterRequest;
 import binbean.binbean_BE.dto.request.CafeUpdateRequest;
+import binbean.binbean_BE.dto.request.FavoritesRequest;
 import binbean.binbean_BE.dto.request.FloorPlanRegisterRequest;
 import binbean.binbean_BE.dto.request.FloorPlanUpdateRequest;
 import binbean.binbean_BE.dto.response.CafeInfoResponse;
 import binbean.binbean_BE.dto.response.FloorPlanResponse;
 import binbean.binbean_BE.service.CafeService;
+import binbean.binbean_BE.service.FavoritesService;
 import binbean.binbean_BE.service.FloorPlanService;
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -30,15 +32,18 @@ public class CafeController {
 
     private final CafeService cafeService;
     private final FloorPlanService floorPlanService;
+    private final FavoritesService favoritesService;
 
-    public CafeController(CafeService cafeService, FloorPlanService floorPlanService) {
+    public CafeController(CafeService cafeService, FloorPlanService floorPlanService,
+        FavoritesService favoritesService) {
         this.cafeService = cafeService;
         this.floorPlanService = floorPlanService;
+        this.favoritesService = favoritesService;
     }
 
     @PostMapping(value = "/registration", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<Void> registerCafe(@RequestPart("cafe") CafeRegisterRequest cafeRequest,
-        @RequestPart("floorPlan") FloorPlanRegisterRequest floorRequest,
+        @RequestPart("floorPlan") List<FloorPlanRegisterRequest> floorRequest,
         @RequestPart(value = "cafeImg", required = false) List<MultipartFile> cafeImgFiles,
         @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
@@ -75,5 +80,13 @@ public class CafeController {
 
         List<FloorPlanResponse> response = floorPlanService.getFloorPlan(cafeId);
         return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @PostMapping("/favorites")
+    public ResponseEntity<Void> toggleFavorites(@RequestBody FavoritesRequest request,
+        @AuthenticationPrincipal UserDetailsImpl userDetails) {
+
+        favoritesService.toggleFavorites(request, userDetails.getUser());
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }

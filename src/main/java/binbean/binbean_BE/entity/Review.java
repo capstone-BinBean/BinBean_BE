@@ -16,7 +16,6 @@ import lombok.Getter;
 
 @Entity
 @Getter
-@Builder
 @Table(name = "REVIEW_TB")
 public class Review {
 
@@ -42,14 +41,12 @@ public class Review {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
+    protected Review() {
+    }
+
     public ReviewResponse toReviewDto(List<String> reviewImgUrls) {
-        return ReviewResponse.builder()
-            .createAt(this.createdAt)
-            .reviewer(this.user.getNickname())
-            .reviewerProfileUrl(this.user.getProfile())
-            .reviewText(this.reviewText)
-            .reviewScore(this.reviewScore)
-            .reviewImgUrl(reviewImgUrls)
-            .build();
+
+        return ReviewResponse.create(this.createdAt, this.user.getNickname(), this.user.getProfile(),
+            this.reviewText, this.reviewScore, reviewImgUrls);
     }
 }

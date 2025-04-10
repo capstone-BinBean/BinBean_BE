@@ -14,7 +14,6 @@ import lombok.Getter;
 
 @Entity
 @Getter
-@Builder
 @Table(name = "BUSINESS_HOURS_TB")
 public class BusinessHours {
 
@@ -69,7 +68,56 @@ public class BusinessHours {
     @Column(name = "sunday_end", nullable = false)
     private String sundayEnd;
 
-    public void update(CafeUpdateRequest request){
+    protected BusinessHours() {
+    }
+
+    @Builder
+    public BusinessHours(Cafe cafe, String mondayStart, String mondayEnd, String tuesdayStart, String tuesdayEnd,
+        String wednesdayStart, String wednesdayEnd, String thursdayStart, String thursdayEnd,
+        String fridayStart, String fridayEnd, String saturdayStart, String saturdayEnd, String sundayStart,
+        String sundayEnd) {
+        this.cafe = cafe;
+        this.mondayStart = mondayStart;
+        this.mondayEnd = mondayEnd;
+        this.tuesdayStart = tuesdayStart;
+        this.tuesdayEnd = tuesdayEnd;
+        this.wednesdayStart = wednesdayStart;
+        this.wednesdayEnd = wednesdayEnd;
+        this.thursdayStart = thursdayStart;
+        this.thursdayEnd = thursdayEnd;
+        this.fridayStart = fridayStart;
+        this.fridayEnd = fridayEnd;
+        this.saturdayStart = saturdayStart;
+        this.saturdayEnd = saturdayEnd;
+        this.sundayStart = sundayStart;
+        this.sundayEnd = sundayEnd;
+    }
+
+    public static BusinessHours create(Cafe cafe, String mondayStart, String mondayEnd, String tuesdayStart,
+        String tuesdayEnd, String wednesdayStart, String wednesdayEnd, String thursdayStart,
+        String thursdayEnd, String fridayStart, String fridayEnd, String saturdayStart, String saturdayEnd,
+        String sundayStart, String sundayEnd) {
+
+        return BusinessHours.builder()
+            .cafe(cafe)
+            .mondayStart(mondayStart)
+            .mondayEnd(mondayEnd)
+            .tuesdayStart(tuesdayStart)
+            .tuesdayEnd(tuesdayEnd)
+            .wednesdayStart(wednesdayStart)
+            .wednesdayEnd(wednesdayEnd)
+            .thursdayStart(thursdayStart)
+            .thursdayEnd(thursdayEnd)
+            .fridayStart(fridayStart)
+            .fridayEnd(fridayEnd)
+            .saturdayStart(saturdayStart)
+            .saturdayEnd(saturdayEnd)
+            .sundayStart(sundayStart)
+            .sundayEnd(sundayEnd)
+            .build();
+    }
+
+    public void update(CafeUpdateRequest request) {
         this.mondayStart = request.mondayStart();
         this.mondayEnd = request.mondayEnd();
         this.tuesdayStart = request.tuesdayStart();

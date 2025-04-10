@@ -1,6 +1,6 @@
 package binbean.binbean_BE.service;
 
-import binbean.binbean_BE.dto.BusinessHoursDto;
+import binbean.binbean_BE.dto.OperatingHours;
 import binbean.binbean_BE.dto.request.CafeRegisterRequest;
 import binbean.binbean_BE.dto.request.CafeUpdateRequest;
 import binbean.binbean_BE.dto.request.FloorPlanRegisterRequest;
@@ -45,17 +45,15 @@ public class CafeService {
         this.businessHoursService = businessHoursService;
     }
 
-    public void registerCafe(CafeRegisterRequest cafeRequest, FloorPlanRegisterRequest floorRequest,
+    public void registerCafe(CafeRegisterRequest cafeRequest, List<FloorPlanRegisterRequest> floorRequest,
         List<MultipartFile> cafeImgFiles, User user) {
-
         Cafe cafe = cafeRequest.toCafeEntity(user);
         cafeRepository.save(cafe);
 
-        BusinessHours businessHours = cafeRequest.toBusinessHoursEntity();
+        BusinessHours businessHours = cafeRequest.toBusinessHoursEntity(cafe);
         businessHoursRepository.save(businessHours);
 
         floorPlanService.saveFloorPlan(floorRequest, cafe);
-
         saveCafeImages(cafe, cafeImgFiles);
     }
 
@@ -63,14 +61,14 @@ public class CafeService {
         Cafe cafe = cafeRepository.findById(cafeId)
             .orElseThrow(() -> new NotFoundException("Cafe not found with id: " + cafeId));
 
-        BusinessHoursDto businessHoursDto = businessHoursService.getBusinessHoursForToday(cafe);
-        double reviewAvg = reviewService.getReviewAvg(cafe);
+        OperatingHours operatingHours = businessHoursService.getBusinessHoursForToday(cafe);
         List<String> cafeImgUrl = getCafeImageUrls(cafe);
+        double reviewAvg = reviewService.getReviewAvg(cafe);
         List<ReviewResponse> reviewResponse = reviewService.getReview(cafe);
-        List<Long> floorPlanId = floorPlanService.getFloorPlanIdByCafeId(cafe);
+        List<Long> floorPlanId = floorPlanService.getFloorPlanIdByCafe(cafe);
 
-        return cafe.toCafeDto(businessHoursDto.getStartTime(), businessHoursDto.getEndTime(), reviewAvg,
-            cafeImgUrl, reviewResponse, floorPlanId);
+        return cafe.toCafeDto(operatingHours.startTime(), operatingHours.endTime(), cafeImgUrl, reviewAvg,
+            reviewResponse, floorPlanId);
     }
 
     public void updateCafeInfo(CafeUpdateRequest request, List<MultipartFile> cafeImgFiles, User user) {
@@ -88,7 +86,7 @@ public class CafeService {
     private void saveCafeImages(Cafe cafe, List<MultipartFile> cafeImgFiles) {
         for (MultipartFile image : cafeImgFiles) {
             String imageUrl = imageStorageService.uploadImage(image);
-            CafeImg cafeImg = CafeImg.toEntity(cafe, imageUrl);
+            CafeImg cafeImg = CafeImg.create(cafe, imageUrl);
             cafeImgRepository.save(cafeImg);
         }
     }

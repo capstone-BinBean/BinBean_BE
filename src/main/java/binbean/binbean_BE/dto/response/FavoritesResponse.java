@@ -12,7 +12,7 @@ public record FavoritesResponse (
     List<SeatsResponse> seatsList
 ){
 
-    public static FavoritesResponse toDto(Favorites favorites, List<SeatsResponse> seatsList) {
+    public static FavoritesResponse create(Favorites favorites, List<SeatsResponse> seatsList) {
         return FavoritesResponse.builder()
             .cafeId(favorites.getCafe().getId())
             .cafeName(favorites.getCafe().getCafeName())

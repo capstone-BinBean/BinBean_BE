@@ -13,13 +13,13 @@ public record CafeMarkerResponse(
     Double longitude,
     List<FloorSeatsResponse> floorSeats
 ) {
-    public static CafeMarkerResponse toDto(Cafe cafe, List<FloorPlan> floorList) {
+    public static CafeMarkerResponse create(Cafe cafe, List<FloorPlan> floorList) {
         return CafeMarkerResponse.builder()
             .cafeId(cafe.getId())
             .cafeName(cafe.getCafeName())
             .latitude(cafe.getLatitude())
             .longitude(cafe.getLongitude())
-            .floorSeats(floorList.stream().map(FloorSeatsResponse::toDto).toList())
+            .floorSeats(floorList.stream().map(FloorSeatsResponse::create).toList())
             .build();
     }
 }
