@@ -7,6 +7,7 @@ import binbean.binbean_BE.dto.request.FavoritesRequest;
 import binbean.binbean_BE.dto.request.FloorPlanRegisterRequest;
 import binbean.binbean_BE.dto.request.FloorPlanUpdateRequest;
 import binbean.binbean_BE.dto.response.CafeInfoResponse;
+import binbean.binbean_BE.dto.response.CafeSearchResponse;
 import binbean.binbean_BE.dto.response.FloorPlanResponse;
 import binbean.binbean_BE.service.CafeService;
 import binbean.binbean_BE.service.FavoritesService;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -41,6 +43,36 @@ public class CafeController {
         this.favoritesService = favoritesService;
     }
 
+    @GetMapping
+    public ResponseEntity<List<CafeSearchResponse>> searchCafe(
+        @RequestParam(name = "cafeName") String cafeName) {
+
+        List<CafeSearchResponse> responses = cafeService.searchCafe(cafeName);
+        return ResponseEntity.status(HttpStatus.OK).body(responses);
+    }
+
+    @GetMapping("/floor-plan/{cafe_id}")
+    public ResponseEntity<List<FloorPlanResponse>> getFloorPlan(@PathVariable(name = "cafe_id") Long cafeId) {
+
+        List<FloorPlanResponse> response = floorPlanService.getFloorPlan(cafeId);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @GetMapping("/{cafe_id}")
+    public ResponseEntity<CafeInfoResponse> getCafeInfo(@PathVariable(name = "cafe_id") Long cafeId) {
+
+        CafeInfoResponse response = cafeService.getCafeInfo(cafeId);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @PostMapping("/favorites")
+    public ResponseEntity<Void> toggleFavorites(@RequestBody FavoritesRequest request,
+        @AuthenticationPrincipal UserDetailsImpl userDetails) {
+
+        favoritesService.toggleFavorites(request, userDetails.getUser());
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
     @PostMapping(value = "/registration", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<Void> registerCafe(@RequestPart("cafe") CafeRegisterRequest cafeRequest,
         @RequestPart("floorPlan") List<FloorPlanRegisterRequest> floorRequest,
@@ -49,13 +81,6 @@ public class CafeController {
 
         cafeService.registerCafe(cafeRequest, floorRequest, cafeImgFiles, userDetails.getUser());
         return ResponseEntity.status(HttpStatus.CREATED).build();
-    }
-
-    @GetMapping("/{cafe_id}")
-    public ResponseEntity<CafeInfoResponse> getCafeInfo(@PathVariable(name = "cafe_id") Long cafeId) {
-
-        CafeInfoResponse response = cafeService.getCafeInfo(cafeId);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @PutMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
@@ -73,20 +98,5 @@ public class CafeController {
 
         floorPlanService.updateFloorPlan(requests, userDetails.getUser());
         return ResponseEntity.status(HttpStatus.OK).build();
-    }
-
-    @GetMapping("/floor-plan/{cafe_id}")
-    public ResponseEntity<List<FloorPlanResponse>> getFloorPlan(@PathVariable(name = "cafe_id") Long cafeId) {
-
-        List<FloorPlanResponse> response = floorPlanService.getFloorPlan(cafeId);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
-    }
-
-    @PostMapping("/favorites")
-    public ResponseEntity<Void> toggleFavorites(@RequestBody FavoritesRequest request,
-        @AuthenticationPrincipal UserDetailsImpl userDetails) {
-
-        favoritesService.toggleFavorites(request, userDetails.getUser());
-        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }
