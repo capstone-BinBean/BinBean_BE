@@ -45,3 +45,9 @@ src/**/application-dev.yml
 application-prod.yml
 
 src/**/application-prod.yml
+
+### AESKeyGenerator.java ###
+AESKeyGenerator.java
+
+**/AESKeyGenerator.java
+

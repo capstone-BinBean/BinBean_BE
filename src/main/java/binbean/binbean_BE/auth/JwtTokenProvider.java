@@ -1,6 +1,8 @@
 package binbean.binbean_BE.auth;
 
+import binbean.binbean_BE.constants.Constants.ErrorMsg;
 import binbean.binbean_BE.dto.auth.TokenDto;
+import binbean.binbean_BE.encryption.AESUtils;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jws;
@@ -36,8 +38,13 @@ public class JwtTokenProvider {
     @Value("${jwt.token.refresh-expiration-time}")
     private long refreshExpirationTime;
 
-    public JwtTokenProvider(@Value("${jwt.secret-key}") String secretKey) {
-        this.key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
+    public JwtTokenProvider(@Value("${jwt.secret-key}") String secretKey, AESUtils aesUtils) {
+        try {
+            String decryptedSecretKey = aesUtils.decryptWithAesKey(secretKey);
+            this.key = Keys.hmacShaKeyFor(decryptedSecretKey.getBytes(StandardCharsets.UTF_8));
+        } catch (Exception e) {
+            throw new RuntimeException(ErrorMsg.JWT_SECRET_DECRYPT_ERROR, e);
+        }
     }
 
     /**
