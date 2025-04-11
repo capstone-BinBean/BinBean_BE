@@ -43,6 +43,7 @@ public class Window {
     }
 
     public static Window create(FloorPlan floorPlan, double x, double y) {
+
         return Window.builder()
             .floorPlan(floorPlan)
             .x(x)
@@ -50,10 +51,8 @@ public class Window {
             .build();
     }
 
-    public Position toPositionEntity() {
-        return Position.builder()
-            .x(this.x)
-            .y(this.y)
-            .build();
+    public Position toPositionDto(){
+
+        return Position.create(this.x, this.y);
     }
 }

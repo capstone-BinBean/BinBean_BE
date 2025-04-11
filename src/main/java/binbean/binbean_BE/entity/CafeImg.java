@@ -1,5 +1,6 @@
 package binbean.binbean_BE.entity;
 
+import binbean.binbean_BE.dto.ImgUrl;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -42,5 +43,10 @@ public class CafeImg {
             .cafe(cafe)
             .cafeImgUrl(cafeImgUrl)
             .build();
+    }
+
+    public ImgUrl toImgUrlDto() {
+
+        return ImgUrl.create(this.cafeImgUrl);
     }
 }

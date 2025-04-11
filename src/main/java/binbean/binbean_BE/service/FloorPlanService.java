@@ -1,6 +1,7 @@
 package binbean.binbean_BE.service;
 
 import binbean.binbean_BE.dto.FloorList;
+import binbean.binbean_BE.dto.ObjectId;
 import binbean.binbean_BE.dto.request.FloorPlanRegisterRequest;
 import binbean.binbean_BE.dto.request.FloorPlanUpdateRequest;
 import binbean.binbean_BE.dto.response.FloorPlanResponse;
@@ -56,8 +57,8 @@ public class FloorPlanService {
         this.floorPlanResponseMapper = floorPlanResponseMapper;
     }
 
-    public List<Long> getFloorPlanIdByCafe(Cafe cafe) {
-        List<Long> floorPlanId = new ArrayList<>();
+    public List<ObjectId> getFloorPlanIdByCafe(Cafe cafe) {
+        List<ObjectId> floorPlanId = new ArrayList<>();
         List<FloorPlan> floorPlans = floorPlanRepository.findByCafeId(cafe.getId());
 
         if (floorPlans.isEmpty()) {
@@ -65,7 +66,7 @@ public class FloorPlanService {
         }
 
         for (FloorPlan floorPlan : floorPlans) {
-            floorPlanId.add(floorPlan.getId());
+            floorPlanId.add(floorPlan.toObjectIdDto());
         }
 
         return floorPlanId;

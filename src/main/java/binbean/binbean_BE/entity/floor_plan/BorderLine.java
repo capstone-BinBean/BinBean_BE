@@ -11,6 +11,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Builder;
 import lombok.Getter;
+import org.springframework.security.core.parameters.P;
 
 @Entity
 @Getter
@@ -43,6 +44,7 @@ public class BorderLine {
     }
 
     public static BorderLine create(FloorPlan floorPlan, double x, double y) {
+
         return BorderLine.builder()
             .floorPlan(floorPlan)
             .x(x)
@@ -50,10 +52,8 @@ public class BorderLine {
             .build();
     }
 
-    public Position toPositionEntity() {
-        return Position.builder()
-            .x(this.x)
-            .y(this.y)
-            .build();
+    public Position toPositionDto(){
+
+        return Position.create(this.x, this.y);
     }
 }

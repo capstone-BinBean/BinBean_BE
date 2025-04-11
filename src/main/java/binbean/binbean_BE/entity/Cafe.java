@@ -1,5 +1,7 @@
 package binbean.binbean_BE.entity;
 
+import binbean.binbean_BE.dto.ImgUrl;
+import binbean.binbean_BE.dto.ObjectId;
 import binbean.binbean_BE.dto.request.CafeUpdateRequest;
 import binbean.binbean_BE.dto.response.CafeInfoResponse;
 import binbean.binbean_BE.dto.response.ReviewResponse;
@@ -98,8 +100,8 @@ public class Cafe {
             .build();
     }
 
-    public CafeInfoResponse toCafeDto(String startTime, String endTime, List<String> cafeImgUrl,
-        double reviewAvg, List<ReviewResponse> reviewResponse, List<Long> floorPlanIds) {
+    public CafeInfoResponse toCafeDto(String startTime, String endTime, List<ImgUrl> cafeImgUrl,
+        double reviewAvg, List<ReviewResponse> reviewResponse, List<ObjectId> floorPlanIds) {
 
         return CafeInfoResponse.create(this.id, this.cafeName, this.cafeAddress, this.latitude,
             this.longitude, startTime, endTime, this.cafePhone, this.wifiAvailable, this.chargerAvailable,

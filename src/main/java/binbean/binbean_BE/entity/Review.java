@@ -1,5 +1,6 @@
 package binbean.binbean_BE.entity;
 
+import binbean.binbean_BE.dto.ImgUrl;
 import binbean.binbean_BE.dto.response.ReviewResponse;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -66,7 +67,7 @@ public class Review {
             .build();
     }
 
-    public ReviewResponse toReviewDto(List<String> reviewImgUrls) {
+    public ReviewResponse toReviewDto(List<ImgUrl> reviewImgUrls) {
 
         return ReviewResponse.create(this.createdAt, this.user.getNickname(), this.user.getProfile(),
             this.reviewText, this.reviewScore, reviewImgUrls);

@@ -43,6 +43,7 @@ public class Counter {
     }
 
     public static Counter create(FloorPlan floorPlan, double x, double y) {
+
         return Counter.builder()
             .floorPlan(floorPlan)
             .x(x)
@@ -50,10 +51,8 @@ public class Counter {
             .build();
     }
 
-    public Position toPositionEntity() {
-        return Position.builder()
-            .x(this.x)
-            .y(this.y)
-            .build();
+    public Position toPositionDto(){
+
+        return Position.create(this.x, this.y);
     }
 }
