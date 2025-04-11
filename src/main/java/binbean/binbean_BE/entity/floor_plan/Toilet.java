@@ -43,6 +43,7 @@ public class Toilet {
     }
 
     public static Toilet create(FloorPlan floorPlan, double x, double y) {
+
         return Toilet.builder()
             .floorPlan(floorPlan)
             .x(x)
@@ -50,10 +51,8 @@ public class Toilet {
             .build();
     }
 
-    public Position toPositionEntity() {
-        return Position.builder()
-            .x(this.x)
-            .y(this.y)
-            .build();
+    public Position toPositionDto(){
+
+        return Position.create(this.x, this.y);
     }
 }

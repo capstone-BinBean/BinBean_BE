@@ -1,8 +1,5 @@
 package binbean.binbean_BE.constants;
 
-import java.util.List;
-import java.util.Set;
-
 public class Constants {
     private Constants() {}
 

@@ -1,5 +1,6 @@
 package binbean.binbean_BE.entity;
 
+import binbean.binbean_BE.dto.ImgUrl;
 import binbean.binbean_BE.dto.response.ReviewResponse;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -41,10 +42,32 @@ public class Review {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
+    public void setCreatedAt() {
+        this.createdAt = LocalDateTime.now();
+    }
+
     protected Review() {
     }
 
-    public ReviewResponse toReviewDto(List<String> reviewImgUrls) {
+    @Builder
+    public Review(Cafe cafe, User user, String reviewText, double reviewScore) {
+        this.cafe = cafe;
+        this.user = user;
+        this.reviewText = reviewText;
+        this.reviewScore = reviewScore;
+    }
+
+    public static Review create(Cafe cafe, User user, String reviewText, double reviewScore) {
+
+        return Review.builder()
+            .cafe(cafe)
+            .user(user)
+            .reviewText(reviewText)
+            .reviewScore(reviewScore)
+            .build();
+    }
+
+    public ReviewResponse toReviewDto(List<ImgUrl> reviewImgUrls) {
 
         return ReviewResponse.create(this.createdAt, this.user.getNickname(), this.user.getProfile(),
             this.reviewText, this.reviewScore, reviewImgUrls);

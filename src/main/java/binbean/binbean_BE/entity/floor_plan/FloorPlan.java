@@ -2,6 +2,7 @@ package binbean.binbean_BE.entity.floor_plan;
 
 import binbean.binbean_BE.dto.CurrentSeats;
 import binbean.binbean_BE.dto.FloorList;
+import binbean.binbean_BE.dto.ObjectId;
 import binbean.binbean_BE.dto.Position;
 import binbean.binbean_BE.dto.response.FloorPlanResponse;
 import binbean.binbean_BE.entity.Cafe;
@@ -72,5 +73,10 @@ public class FloorPlan {
         CurrentSeats currentSeats = CurrentSeats.create(currentPositions);
 
         return FloorPlanResponse.create(floorList, this.floorNumber, currentSeats);
+    }
+
+    public ObjectId toObjectIdDto() {
+
+        return ObjectId.create(this.id);
     }
 }

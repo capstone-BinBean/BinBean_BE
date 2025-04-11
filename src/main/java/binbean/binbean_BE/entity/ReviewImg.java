@@ -1,5 +1,6 @@
 package binbean.binbean_BE.entity;
 
+import binbean.binbean_BE.dto.ImgUrl;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -29,5 +30,24 @@ public class ReviewImg {
     private String reviewImgUrl;
 
     protected ReviewImg() {
+    }
+
+    @Builder
+    public ReviewImg(Review review, String reviewImgUrl) {
+        this.review = review;
+        this.reviewImgUrl = reviewImgUrl;
+    }
+
+    public static ReviewImg create(Review review, String reviewImgUrl) {
+
+        return ReviewImg.builder()
+            .review(review)
+            .reviewImgUrl(reviewImgUrl)
+            .build();
+    }
+
+    public ImgUrl toImgUrlDto() {
+
+        return ImgUrl.create(this.reviewImgUrl);
     }
 }

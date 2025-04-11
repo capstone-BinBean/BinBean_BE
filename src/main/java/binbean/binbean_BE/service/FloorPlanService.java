@@ -1,18 +1,13 @@
 package binbean.binbean_BE.service;
 
 import binbean.binbean_BE.dto.FloorList;
+import binbean.binbean_BE.dto.ObjectId;
 import binbean.binbean_BE.dto.request.FloorPlanRegisterRequest;
 import binbean.binbean_BE.dto.request.FloorPlanUpdateRequest;
 import binbean.binbean_BE.dto.response.FloorPlanResponse;
 import binbean.binbean_BE.entity.Cafe;
 import binbean.binbean_BE.entity.User;
-import binbean.binbean_BE.entity.floor_plan.BorderLine;
-import binbean.binbean_BE.entity.floor_plan.Counter;
-import binbean.binbean_BE.entity.floor_plan.Door;
 import binbean.binbean_BE.entity.floor_plan.FloorPlan;
-import binbean.binbean_BE.entity.floor_plan.Seats;
-import binbean.binbean_BE.entity.floor_plan.Toilet;
-import binbean.binbean_BE.entity.floor_plan.Window;
 import binbean.binbean_BE.exception.NotFoundException;
 import binbean.binbean_BE.repository.CafeRepository;
 import binbean.binbean_BE.repository.floor_plan.BorderLineRepository;
@@ -62,8 +57,8 @@ public class FloorPlanService {
         this.floorPlanResponseMapper = floorPlanResponseMapper;
     }
 
-    public List<Long> getFloorPlanIdByCafe(Cafe cafe) {
-        List<Long> floorPlanId = new ArrayList<>();
+    public List<ObjectId> getFloorPlanIdByCafe(Cafe cafe) {
+        List<ObjectId> floorPlanId = new ArrayList<>();
         List<FloorPlan> floorPlans = floorPlanRepository.findByCafeId(cafe.getId());
 
         if (floorPlans.isEmpty()) {
@@ -71,7 +66,7 @@ public class FloorPlanService {
         }
 
         for (FloorPlan floorPlan : floorPlans) {
-            floorPlanId.add(floorPlan.getId());
+            floorPlanId.add(floorPlan.toObjectIdDto());
         }
 
         return floorPlanId;
