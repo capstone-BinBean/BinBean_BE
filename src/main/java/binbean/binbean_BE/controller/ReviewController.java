@@ -34,7 +34,7 @@ public class ReviewController {
     }
 
     @PostMapping("/{cafe_id}")
-    public ResponseEntity<Void> registerReview(@PathVariable(name = "cafeId") Long cafeId,
+    public ResponseEntity<Void> registerReview(@PathVariable(name = "cafe_id") Long cafeId,
         @RequestBody ReviewRegisterRequest request, @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
         reviewService.registerReview(cafeId, request, userDetails.getUser());
