@@ -1,12 +1,13 @@
 package binbean.binbean_BE.dto.request;
 
+import binbean.binbean_BE.dto.ImgUrl;
 import binbean.binbean_BE.entity.Cafe;
 import binbean.binbean_BE.entity.Review;
 import binbean.binbean_BE.entity.ReviewImg;
 import binbean.binbean_BE.entity.User;
 import java.util.List;
 
-public record ReviewRegisterRequest(String reviewText, double reviewScore, List<String> reviewImgUrlList) {
+public record ReviewRegisterRequest(String reviewText, double reviewScore, List<ImgUrl> reviewImgUrlList) {
 
     public Review toReviewEntity(Cafe cafe, User user) {
 

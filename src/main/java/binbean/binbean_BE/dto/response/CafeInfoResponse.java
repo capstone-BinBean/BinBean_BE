@@ -1,5 +1,6 @@
 package binbean.binbean_BE.dto.response;
 
+import binbean.binbean_BE.dto.ImgUrl;
 import java.util.List;
 import lombok.Builder;
 
@@ -7,13 +8,13 @@ import lombok.Builder;
 public record CafeInfoResponse(Long cafeId, String cafeName, String cafeAddress, double latitude,
                                double longitude, String startTime, String endTime, String cafePhone,
                                int wifiAvailable, int chargerAvailable, int petAvailable, int kidsAvailable,
-                               String cafeDescription, List<String> cafeImgUrl, double reviewAvg,
+                               String cafeDescription, List<ImgUrl> cafeImgUrl, double reviewAvg,
                                List<ReviewResponse> reviewResponse, List<Long> floorPlanId) {
 
     public static CafeInfoResponse create(Long cafeId, String cafeName, String cafeAddress, double latitude,
         double longitude, String startTime, String endTime, String cafePhone, int wifiAvailable,
         int chargerAvailable, int petAvailable, int kidsAvailable, String cafeDescription,
-        List<String> cafeImgUrl, double reviewAvg, List<ReviewResponse> reviewResponse,
+        List<ImgUrl> cafeImgUrl, double reviewAvg, List<ReviewResponse> reviewResponse,
         List<Long> floorPlanIds) {
 
         return CafeInfoResponse.builder()
