@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 @Component
 public class JwtTokenProvider {
@@ -127,6 +128,14 @@ public class JwtTokenProvider {
             logger.error("JWT Exception: ", e);
             throw new JwtException("Invalid JWT token", e); // 일반적인 JWT 오류 예외 던지기
         }
+    }
+
+    /**
+     * refreshToken 토큰 검증
+     * redis에 저장된 토큰을 불러와서 비교
+     */
+    public boolean validateRefreshToken(String refreshToken, String redisRefreshToken) {
+        return StringUtils.hasText(refreshToken) && refreshToken.equals(redisRefreshToken);
     }
 
     // 액세스 토큰 헤더 설정
