@@ -17,7 +17,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -108,23 +110,9 @@ public class JwtUsernamePasswordAuthFilter extends UsernamePasswordAuthenticatio
         // 헤더에 액세스 토큰 추가
         jwtTokenProvider.setHeaderAccessToken(response, accessToken);
 
-        /** 리프레쉬 토큰을 HttpOnly 쿠키에 저장
-         * 헤더에 직접 리프레쉬 토큰 저장하지 않고 (보안 낮출 가능성 유)
-         * HttpOnly 쿠키를 사용하면 자동으로 요청 시 전달
-         */
-//        ResponseCookie refreshTokenCookie = ResponseCookie.from("refreshToken", refreshToken)
-//            .httpOnly(true) // 자바스크립트에서 접근 불가능
-//            .secure(true) // HTTPS에서만 전송 가능
-//            .sameSite("Lax") // CSRF 공격 방지
-//            .path("/")
-//            .maxAge(jwtTokenProvider.getRefreshExpirationTime())
-//            .build();
-
-//        response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
-
-        // FIXME: Redis에 Refresh Token 저장
-//        redisService.setStringValue(userDetails.getUsername(), refreshToken,
-//            jwtTokenProvider.getRefreshExpirationTime());
+        // Redis에 Refresh Token 저장 (key = email)
+        redisService.setStringValue(userDetails.getUsername(), refreshToken,
+            jwtTokenProvider.getRefreshExpirationTime());
 
         setResponseEncoding(response);
         String jsonResponse = objectMapper.writeValueAsString(tokenDto);

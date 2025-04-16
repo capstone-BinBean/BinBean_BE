@@ -44,5 +44,8 @@ public class Constants {
         public static final String AES_KEY_DECRYPT_ERROR = "AES 기반 복호화 실패";
         public static final String FAVORITE_NOT_FOUND_WITH_USER_AND_CAFE = "즐겨찾기를 찾을 수 없습니다.";
         public static final String CAFE_NOT_FOUND = "해당 카페를 찾을 수 없습니다.";
+        public static final String LOGIN_EXPIRED = "로그인이 만료되었습니다. 다시 로그인해주세요.";
+        public static final String REFRESH_EXPIRED = "리프레시 토큰이 유효하지 않습니다.";
+
     }
 }

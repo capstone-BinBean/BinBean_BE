@@ -3,6 +3,7 @@ package binbean.binbean_BE.auth.filter;
 import binbean.binbean_BE.auth.JwtTokenProvider;
 import binbean.binbean_BE.auth.UserDetailsImpl;
 import binbean.binbean_BE.constants.Constants.LoggingMsg;
+import binbean.binbean_BE.infra.RedisService;
 import binbean.binbean_BE.service.AuthService;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -23,10 +24,13 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final AuthService authService;
+    private final RedisService redisService;
 
-    public JwtVerificationFilter(JwtTokenProvider jwtTokenProvider, AuthService authService) {
+    public JwtVerificationFilter(JwtTokenProvider jwtTokenProvider, AuthService authService,
+        RedisService redisService) {
         this.jwtTokenProvider = jwtTokenProvider;
         this.authService = authService;
+        this.redisService = redisService;
     }
 
     @Override
