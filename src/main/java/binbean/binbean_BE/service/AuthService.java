@@ -5,6 +5,7 @@ import binbean.binbean_BE.auth.UserDetailsImpl;
 import binbean.binbean_BE.constants.Constants.ErrorMsg;
 import binbean.binbean_BE.dto.auth.TokenDto;
 import binbean.binbean_BE.dto.auth.request.RegisterRequest;
+import binbean.binbean_BE.encryption.AESUtils;
 import binbean.binbean_BE.exception.UnauthorizedException;
 import binbean.binbean_BE.exception.UserAlreadyExistException;
 import binbean.binbean_BE.entity.User;
@@ -28,13 +29,15 @@ public class AuthService implements UserDetailsService {
     private final BCryptPasswordEncoder passwordEncoder;
     private final RedisService redisService;
     private final JwtTokenProvider jwtTokenProvider;
+    private final AESUtils aesUtils;
 
     public AuthService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder,
-        RedisService redisService, JwtTokenProvider jwtTokenProvider) {
+        RedisService redisService, JwtTokenProvider jwtTokenProvider, AESUtils aesUtils) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.redisService = redisService;
         this.jwtTokenProvider = jwtTokenProvider;
+        this.aesUtils = aesUtils;
     }
 
     @Override
@@ -60,15 +63,18 @@ public class AuthService implements UserDetailsService {
     }
 
     /**
-     * 액세스 토큰 만료 시 회원 검증 후, 리프레쉬 토큰을 검증해서 액세스 토큰과 리프레쉬 토큰을 재발급
+     * 액세스 토큰 만료 시 회원 검증 후, 전달받은 암호화된 리프레쉬 토큰을 복호화/검증해서 액세스 토큰과 리프레쉬 토큰을 재발급
      */
-    public TokenDto reissue(String refreshToken) {
+    public TokenDto reissue(String encryptedRefreshToken) {
+        // refreshToken 복호화
+        String refreshToken = aesUtils.decryptWithAesKey(encryptedRefreshToken);
+
         // refreshToken 유효성, 만료 검사
         jwtTokenProvider.validateToken(refreshToken);
         String username = jwtTokenProvider.getUsername(refreshToken);
 
-        String refreshTokenInRedis = redisService.getValues(username)
-            .orElseThrow(UnauthorizedException::new);
+        String refreshTokenInRedis = aesUtils.decryptWithAesKey(redisService.getValues(username)
+            .orElseThrow(UnauthorizedException::new));
 
         // redis에 저장된 토큰과 같은지를 비교 (같지 않으면 삭제 및 재로그인 요청)
         if (!jwtTokenProvider.validateRefreshToken(refreshToken, refreshTokenInRedis)) {
@@ -81,6 +87,9 @@ public class AuthService implements UserDetailsService {
         // 액세스 토큰 재발급 및 redis 업데이트
         redisService.deleteValues(username);
         var tokenDto = jwtTokenProvider.generateToken(userDetails);
+        // 새로 갱신된 refresh token 암호화
+        tokenDto.setEncryptedRefreshToken(aesUtils.encryptWithAesKey(refreshToken));
+
         // redis에 refresh token 저장
         redisService.setStringValue(userDetails.getUsername(), tokenDto.getRefreshToken(),
             jwtTokenProvider.getRefreshExpirationTime());
@@ -101,6 +110,4 @@ public class AuthService implements UserDetailsService {
         return userRepository.findByEmail(email)
             .orElseThrow(() -> new UsernameNotFoundException(email));
     }
-
-
 }

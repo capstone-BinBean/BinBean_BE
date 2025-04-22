@@ -47,7 +47,6 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
-
         try {
             var securityContext = SecurityContextHolder.getContext();
 

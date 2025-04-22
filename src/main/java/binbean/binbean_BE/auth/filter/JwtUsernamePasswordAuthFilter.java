@@ -114,14 +114,13 @@ public class JwtUsernamePasswordAuthFilter extends UsernamePasswordAuthenticatio
         TokenDto tokenDto = jwtTokenProvider.generateToken(userDetails);
         String accessToken = tokenDto.getAccessToken();
         String refreshToken = tokenDto.getRefreshToken();
-        String encryptedRefreshToken = aesUtils.encryptWithAesKey(refreshToken);
-        tokenDto.setEncryptedRefreshToken(encryptedRefreshToken);
+        tokenDto.setEncryptedRefreshToken(aesUtils.encryptWithAesKey(refreshToken));
 
         // 헤더에 액세스 토큰 추가
         jwtTokenProvider.setHeaderAccessToken(response, accessToken);
 
         // Redis에 Refresh Token 저장 (key = email)
-        redisService.setStringValue(userDetails.getUsername(), encryptedRefreshToken,
+        redisService.setStringValue(userDetails.getUsername(), tokenDto.getRefreshToken(),
             jwtTokenProvider.getRefreshExpirationTime());
 
         setResponseEncoding(response);
