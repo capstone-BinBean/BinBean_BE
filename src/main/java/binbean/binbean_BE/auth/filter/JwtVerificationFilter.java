@@ -27,13 +27,10 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final AuthService authService;
-    private final RedisService redisService;
 
-    public JwtVerificationFilter(JwtTokenProvider jwtTokenProvider, AuthService authService,
-        RedisService redisService) {
+    public JwtVerificationFilter(JwtTokenProvider jwtTokenProvider, AuthService authService) {
         this.jwtTokenProvider = jwtTokenProvider;
         this.authService = authService;
-        this.redisService = redisService;
     }
 
     @Override
