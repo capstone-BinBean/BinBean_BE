@@ -3,6 +3,7 @@ package binbean.binbean_BE.service;
 import binbean.binbean_BE.auth.JwtTokenProvider;
 import binbean.binbean_BE.auth.UserDetailsImpl;
 import binbean.binbean_BE.constants.Constants.ErrorMsg;
+import binbean.binbean_BE.constants.Constants.LoggingMsg;
 import binbean.binbean_BE.dto.auth.TokenDto;
 import binbean.binbean_BE.dto.auth.request.RegisterRequest;
 import binbean.binbean_BE.encryption.AESUtils;
@@ -121,8 +122,9 @@ public class AuthService implements UserDetailsService {
         redisService.deleteValues(username);
 
         // 사용자가 로그아웃했음을 기록하기 위해 Access Token을 Redis에 저장
+        // redis의 TTL 기능에 의해 Access Token의 유효시간이 만료되면 자동으로 redis에서 삭제됨
         long expTime = jwtTokenProvider.getRemainingValidityTime(accessToken);
-        redisService.setStringValue(accessToken, "logout", expTime);
+        redisService.setStringValue(accessToken, LoggingMsg.LOGOUT_FLAG, expTime);
     }
 
     /**
