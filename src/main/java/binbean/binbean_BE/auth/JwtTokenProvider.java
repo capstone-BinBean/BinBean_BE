@@ -6,6 +6,7 @@ import binbean.binbean_BE.encryption.AESUtils;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.Jwt;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -154,5 +155,20 @@ public class JwtTokenProvider {
 
     public long getRefreshExpirationTime() {
         return refreshExpirationTime;
+    }
+
+    /**
+     * 토큰의 남은 유효시간 반환
+     */
+    public long getRemainingValidityTime(String token) {
+        Claims claims = Jwts.parser()
+            .verifyWith(key)
+            .build()
+            .parseSignedClaims(token)
+            .getPayload();
+
+        long exp = claims.getExpiration().getTime();
+        long now = Instant.now().getEpochSecond();
+        return Math.max(exp - now, 0);
     }
 }

@@ -97,6 +97,35 @@ public class AuthService implements UserDetailsService {
     }
 
     /**
+     * 사용자가 로그아웃한 후에도, Access Token을 다시 사용해서 요청을 보낼 가능성이 있음
+     * 그리하여 Redis에서 "logout" 값이 있으면, 해당 토큰은 더 이상 사용할 수 없도록 체크
+     * 로그아웃 후 기존 Access Token이 유효해도 사용 불가 (로그아웃된 토큰 차단)
+     * 키 : accessToken, 값: "logout"
+     */
+    public void logout(String accessToken, String encryptedRefreshToken) {
+        // 액세스 토큰 유효성 검사
+        jwtTokenProvider.validateToken(accessToken);
+        String username = jwtTokenProvider.getUsername(accessToken);
+
+        // refresh token 복호화 및 redis에서 조회
+        String refreshToken = aesUtils.decryptWithAesKey(encryptedRefreshToken);
+        String refreshTokenInRedis = aesUtils.decryptWithAesKey(redisService.getValues(username)
+            .orElseThrow(UnauthorizedException::new));
+
+        // 요청받은 refreshToken과 레디스에 저장된 refreshToken이 동일한지 추가 검증
+        if (!refreshToken.equals(refreshTokenInRedis)) {
+            throw new UnauthorizedException();
+        }
+
+        // redis에 저장되어있는 refreshToken 삭제 (로그아웃 후 더 이상 재발급 요청 불가)
+        redisService.deleteValues(username);
+
+        // 사용자가 로그아웃했음을 기록하기 위해 Access Token을 Redis에 저장
+        long expTime = jwtTokenProvider.getRemainingValidityTime(accessToken);
+        redisService.setStringValue(accessToken, "logout", expTime);
+    }
+
+    /**
      * 소셜 로그인일 경우, password를 null로 보냄
      */
     private String encodePassword(String password) {
