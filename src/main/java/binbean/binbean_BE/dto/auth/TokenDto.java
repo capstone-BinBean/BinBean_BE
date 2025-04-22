@@ -10,4 +10,8 @@ public class TokenDto {
     private String accessToken;
     private String refreshToken;
     private String authType;
+
+    public void setEncryptedRefreshToken(String encryptedRefreshToken) {
+        this.refreshToken = encryptedRefreshToken;
+    }
 }
