@@ -6,6 +6,7 @@ import binbean.binbean_BE.auth.filter.JwtUsernamePasswordAuthFilter;
 import binbean.binbean_BE.auth.filter.JwtVerificationFilter;
 import binbean.binbean_BE.auth.filter.UrlBasedAuthenticationFilter;
 import binbean.binbean_BE.constants.Constants.URL;
+import binbean.binbean_BE.encryption.AESUtils;
 import binbean.binbean_BE.infra.RedisService;
 import binbean.binbean_BE.service.AuthService;
 import java.util.List;
@@ -38,16 +39,21 @@ public class SecurityConfig {
     private final JwtExceptionFilter jwtExceptionFilter;
     private final AuthService authService;
     private final RedisService redisService;
+    private final AESUtils aesUtils;
 
     // AuthenticationManager의 Bean을 얻기 위한 authConfiguration 객체
     private final AuthenticationConfiguration authenticationConfiguration;
 
-    public SecurityConfig(JwtVerificationFilter jwtVerificationFilter, JwtExceptionFilter jwtExceptionFilter, AuthService authService,  AuthenticationConfiguration authenticationConfiguration, RedisService redisService) {
+    public SecurityConfig(JwtVerificationFilter jwtVerificationFilter,
+        JwtExceptionFilter jwtExceptionFilter, AuthService authService,
+        AuthenticationConfiguration authenticationConfiguration,
+        RedisService redisService, AESUtils aesUtils) {
         this.jwtVerificationFilter = jwtVerificationFilter;
         this.jwtExceptionFilter = jwtExceptionFilter;
         this.authService = authService;
         this.redisService = redisService;
         this.authenticationConfiguration = authenticationConfiguration;
+        this.aesUtils = aesUtils;
     }
 
     /**
@@ -61,7 +67,7 @@ public class SecurityConfig {
     @Bean
     public JwtUsernamePasswordAuthFilter jwtUsernamePasswordAuthFilter(AuthenticationManager authenticationManager, JwtTokenProvider jwtTokenProvider, RedisService redisService)
         throws Exception {
-        var filter = new JwtUsernamePasswordAuthFilter(authenticationManager, authService, jwtTokenProvider, redisService);
+        var filter = new JwtUsernamePasswordAuthFilter(authenticationManager, authService, jwtTokenProvider, redisService, aesUtils);
         filter.setAuthenticationManager(authenticationManager());
         return filter;
     }
@@ -93,11 +99,11 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtTokenProvider jwtTokenProvider) throws Exception {
         // 일반 로그인 필터 (일반 로그인 경로에만 적용)
-        JwtUsernamePasswordAuthFilter loginFilter = new JwtUsernamePasswordAuthFilter(authenticationManager(), authService, jwtTokenProvider, redisService);
+        JwtUsernamePasswordAuthFilter loginFilter = new JwtUsernamePasswordAuthFilter(authenticationManager(), authService, jwtTokenProvider, redisService, aesUtils);
         loginFilter.setFilterProcessesUrl(URL.NORMAL_LOGIN_URL);
 
         // 카카오 로그인 필터 (카카오 로그인 경로에만 적용)
-        JwtUsernamePasswordAuthFilter socialLoginFilter = new JwtUsernamePasswordAuthFilter(authenticationManager(), authService, jwtTokenProvider, redisService);
+        JwtUsernamePasswordAuthFilter socialLoginFilter = new JwtUsernamePasswordAuthFilter(authenticationManager(), authService, jwtTokenProvider, redisService, aesUtils);
         socialLoginFilter.setFilterProcessesUrl(URL.KAKAO_LOGIN_URL);
 
         // OncePerRequestFilter 등록하여 경로에 따라 필터를 분기 처리

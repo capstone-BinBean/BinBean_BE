@@ -6,6 +6,7 @@ import binbean.binbean_BE.constants.Constants.ErrorMsg;
 import binbean.binbean_BE.constants.Constants.URL;
 import binbean.binbean_BE.dto.auth.TokenDto;
 import binbean.binbean_BE.dto.auth.request.LoginRequest;
+import binbean.binbean_BE.encryption.AESUtils;
 import binbean.binbean_BE.exception.ErrorResponse;
 import binbean.binbean_BE.infra.RedisService;
 import binbean.binbean_BE.service.AuthService;
@@ -17,6 +18,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -43,14 +45,20 @@ public class JwtUsernamePasswordAuthFilter extends UsernamePasswordAuthenticatio
     private final JwtTokenProvider jwtTokenProvider;
     private final AuthService authService;
     private final RedisService redisService;
+    private final AESUtils aesUtils;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+    @Value("${aes.key}")
+    private static String encryptedAesKey;
+
     public JwtUsernamePasswordAuthFilter(AuthenticationManager authenticationManager,
-        AuthService authService, JwtTokenProvider jwtTokenProvider, RedisService redisService) {
+        AuthService authService, JwtTokenProvider jwtTokenProvider, RedisService redisService,
+        AESUtils aesUtils) {
         this.authenticationManager = authenticationManager;
         this.jwtTokenProvider = jwtTokenProvider;
         this.authService = authService;
         this.redisService = redisService;
+        this.aesUtils = aesUtils;
     }
 
     /**
@@ -106,18 +114,20 @@ public class JwtUsernamePasswordAuthFilter extends UsernamePasswordAuthenticatio
         TokenDto tokenDto = jwtTokenProvider.generateToken(userDetails);
         String accessToken = tokenDto.getAccessToken();
         String refreshToken = tokenDto.getRefreshToken();
+        tokenDto.setEncryptedRefreshToken(aesUtils.encryptWithAesKey(refreshToken));
 
         // 헤더에 액세스 토큰 추가
         jwtTokenProvider.setHeaderAccessToken(response, accessToken);
 
         // Redis에 Refresh Token 저장 (key = email)
-        redisService.setStringValue(userDetails.getUsername(), refreshToken,
+        redisService.setStringValue(userDetails.getUsername(), tokenDto.getRefreshToken(),
             jwtTokenProvider.getRefreshExpirationTime());
 
         setResponseEncoding(response);
         String jsonResponse = objectMapper.writeValueAsString(tokenDto);
         response.getWriter().write(jsonResponse);
     }
+
     private void setErrorResponse(HttpServletResponse response, HttpStatus status, String message) {
         response.setStatus(status.value());
         setResponseEncoding(response);

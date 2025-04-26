@@ -26,6 +26,7 @@ public class Constants {
 
     public static class LoggingMsg {
         public static final String ACCESS_TOKEN_MISSING = "Access token is missing in request: ";
+        public static final String LOGOUT_FLAG = "logout";
     }
 
     public static class ErrorMsg {
@@ -46,6 +47,5 @@ public class Constants {
         public static final String CAFE_NOT_FOUND = "해당 카페를 찾을 수 없습니다.";
         public static final String LOGIN_EXPIRED = "로그인이 만료되었습니다. 다시 로그인해주세요.";
         public static final String REFRESH_EXPIRED = "리프레시 토큰이 유효하지 않습니다.";
-
     }
 }
