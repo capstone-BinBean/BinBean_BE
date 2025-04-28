@@ -86,7 +86,9 @@ public class JwtUsernamePasswordAuthFilter extends UsernamePasswordAuthenticatio
      */
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) {
-        if (failed instanceof BadCredentialsException) {
+        if (failed instanceof UsernameNotFoundException) {
+            setErrorResponse(response, HttpStatus.NOT_FOUND, ErrorMsg.USER_NOT_FOUND);
+        } else if (failed instanceof BadCredentialsException) {
             setErrorResponse(response, HttpStatus.UNAUTHORIZED, ErrorMsg.INVALID_CREDENTIALS);
         } else {
             setErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR, failed.getMessage());

@@ -18,6 +18,7 @@ import binbean.binbean_BE.constants.Constants.ErrorMsg;
 import binbean.binbean_BE.dto.auth.TokenDto;
 import binbean.binbean_BE.dto.auth.request.LoginRequest;
 import binbean.binbean_BE.dto.auth.request.RegisterRequest;
+import binbean.binbean_BE.dto.auth.request.SocialLoginRequest;
 import binbean.binbean_BE.encryption.AESUtils;
 import binbean.binbean_BE.enums.user.Role;
 import binbean.binbean_BE.exception.UserAlreadyExistException;
@@ -227,5 +228,38 @@ public class AuthIntegrationTest {
             .andExpect(jsonPath("$.message").value("이메일 또는 비밀번호가 올바르지 않습니다."));
 
         then(authenticationManager).should(times(1)).authenticate(any(UsernamePasswordAuthenticationToken.class));
+    }
+
+    @Test
+    @DisplayName("소셜 로그인 성공하면 200 상태 코드와 함께 accessToken과 refreshToken을 반환한다")
+    void social_Login_Success_Returns_OK() throws Exception {
+        //given
+        SocialLoginRequest request = StubData.MockAuth.getSocialLoginRequest();
+        // 반환될 토큰 정보
+        TokenDto tokenDto = StubData.MockAuth.getTokenDto();
+
+        UserDetailsImpl userDetails = new UserDetailsImpl(StubData.MockUser.getUserDetails().getUser());
+
+        // JwtUsernamePasswordAuthFilter의 authenticateSocialLogin 메서드에 따른 mock 처리
+        // authenticationManager 대신 loadUserByUsername 메서드를 통해 사용자 인증 처리
+        given(authService.loadUserByUsername(request.email())).willReturn(userDetails);
+        given(jwtTokenProvider.generateToken(any(UserDetailsImpl.class))).willReturn(tokenDto);
+
+        String jsonRequest = ObjectMapperUtils.toJsonString(request);
+
+        // when
+        ResultActions result = mockMvc.perform(post("/api/auths/kakao/login")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(jsonRequest));
+
+        // then
+        result.andExpect(status().isOk())
+            .andExpect(jsonPath("$.authType").value("Authorization"))
+            .andExpect(jsonPath("$.accessToken").value(tokenDto.getAccessToken()))
+            .andExpect(jsonPath("$.refreshToken").value(tokenDto.getRefreshToken()))
+            .andExpect(jsonPath("$.grantType").value("Bearer"));
+
+        then(authService).should(times(1)).loadUserByUsername(request.email());
+        then(jwtTokenProvider).should(times(1)).generateToken(any(UserDetailsImpl.class));
     }
 }

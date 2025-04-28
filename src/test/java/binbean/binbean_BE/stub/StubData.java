@@ -4,6 +4,7 @@ import binbean.binbean_BE.auth.UserDetailsImpl;
 import binbean.binbean_BE.dto.auth.TokenDto;
 import binbean.binbean_BE.dto.auth.request.LoginRequest;
 import binbean.binbean_BE.dto.auth.request.RegisterRequest;
+import binbean.binbean_BE.dto.auth.request.SocialLoginRequest;
 import binbean.binbean_BE.entity.User;
 import binbean.binbean_BE.enums.user.Role;
 
@@ -31,6 +32,12 @@ public class StubData {
             return new LoginRequest(
                 "test@email.com",
                 "dldl"
+            );
+        }
+
+        public static SocialLoginRequest getSocialLoginRequest() {
+            return new SocialLoginRequest(
+                "test@email.com"
             );
         }
 
