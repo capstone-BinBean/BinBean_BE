@@ -26,12 +26,12 @@ import binbean.binbean_BE.dto.auth.request.RegisterRequest;
 import binbean.binbean_BE.encryption.AESUtils;
 import binbean.binbean_BE.enums.user.Role;
 import binbean.binbean_BE.exception.UserAlreadyExistException;
+import binbean.binbean_BE.helper.ObjectMapperUtils;
 import binbean.binbean_BE.infra.RedisService;
 import binbean.binbean_BE.service.AuthService;
 import binbean.binbean_BE.service.UserService;
 import binbean.binbean_BE.stub.StubData;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.ArrayList;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -45,12 +45,10 @@ import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.util.UriComponentsBuilder;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -108,7 +106,7 @@ public class AuthIntegrationTest {
             "testNickName",
             "",
             Role.ROLE_USER);
-        String jsonRequest = new ObjectMapper().writeValueAsString(request);
+        String jsonRequest = ObjectMapperUtils.toJsonString(request);
 
         // when
         ResultActions result = mockMvc.perform(post("/api/auths/registration")
@@ -134,7 +132,7 @@ public class AuthIntegrationTest {
         doThrow(new UserAlreadyExistException(request.email()))
             .when(authService).registerUser(any(RegisterRequest.class));
 
-        String jsonRequest = new ObjectMapper().writeValueAsString(request);
+        String jsonRequest = ObjectMapperUtils.toJsonString(request);
 
         // when
         ResultActions result = mockMvc.perform(post("/api/auths/registration")
@@ -158,7 +156,7 @@ public class AuthIntegrationTest {
         doThrow(new UserAlreadyExistException(request.nickname()))
             .when(authService).registerUser(any(RegisterRequest.class));
 
-        String jsonRequest = new ObjectMapper().writeValueAsString(request);
+        String jsonRequest = ObjectMapperUtils.toJsonString(request);
 
         // when
         ResultActions result = mockMvc.perform(post("/api/auths/registration")
@@ -194,7 +192,7 @@ public class AuthIntegrationTest {
         // Mocking the jwtTokenProvider to generate tokens
         given(jwtTokenProvider.generateToken(any(UserDetailsImpl.class))).willReturn(tokenDto);
 
-        String jsonRequest = new ObjectMapper().writeValueAsString(request);
+        String jsonRequest = ObjectMapperUtils.toJsonString(request);
 
         // when
         ResultActions result = mockMvc.perform(post("/api/auths/login")
