@@ -13,11 +13,14 @@ public class Constants {
     public static class URL {
         // SecurityConfig 허용하는 URL
         public static final String[] ALLOWED_URLS = {
-            "/api/auths/registration",
+            URL.REGISTER_URL,
             URL.NORMAL_LOGIN_URL,
-            URL.KAKAO_LOGIN_URL};
+            URL.KAKAO_LOGIN_URL,
+            URL.REISSUE_URL};
+        public static final String REGISTER_URL = "/api/auths/registration";
         public static final String KAKAO_LOGIN_URL = "/api/auths/kakao/login";
         public static final String NORMAL_LOGIN_URL = "/api/auths/login";
+        public static final String REISSUE_URL = "/api/auths/reissue";
     }
 
     public static class User {
