@@ -113,7 +113,7 @@ public class SecurityConfig {
             )
             .csrf(AbstractHttpConfigurer::disable)
             .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class)
-            .addFilterBefore(jwtVerificationFilter, JwtUsernamePasswordAuthFilter.class)
+            .addFilterAfter(jwtVerificationFilter, JwtUsernamePasswordAuthFilter.class)
             .addFilterBefore(jwtExceptionFilter, JwtVerificationFilter.class)
             .httpBasic(HttpBasicConfigurer::disable)
             .formLogin(FormLoginConfigurer::disable);
