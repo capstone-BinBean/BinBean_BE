@@ -5,8 +5,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.data.redis.connection.ReactiveStreamCommands.AddStreamRecord.body;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -42,6 +44,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -171,43 +175,40 @@ public class AuthIntegrationTest {
     }
 
     @Test
-    @DisplayName("로그인 성공하면 200 상태 코드를 반환한다")
+    @DisplayName("로그인 성공하면 200 상태 코드와 함께 accessToken과 refreshToken을 반환한다")
     void login_Success_Returns_OK() throws Exception {
-//        //given
-//        LoginRequest request = StubData.MockAuth.getLoginRequest();
-//
-//        TokenDto tokenDto = TokenDto.builder()
-//            .grantType("Bearer")
-//            .accessToken("eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJxd2Vyb0BnbWFpbC5jb20iLCJpYXQiOjE3NDU4MjM3MTgsImV4cCI6MTc0NTgzNDUxOH0.3_uU2uoL1p8rTeHa61sTQSZs3j35u3QuwAtTNWJ9KQ7BuMCoOPqYIAZWMY0W3tEu")
-//            .refreshToken("eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJxd2Vyb0BnbWFpbC5jb20iLCJpYXQiOjE3NDU4MjM3MTgsImV4cCI6MTc0NjQyODUxOH0.fVUGVRW_KkkqYGRUN0sDnw2UjPaT4whERvIdmn3aepVshADqwoDhmlSAisfEgnnx")
-//            .authType("Authorization")
-//            .build();
-//
-//        // 인증 성공 모킹
-//        given(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
-//            .willReturn(new UsernamePasswordAuthenticationToken("user", null, new ArrayList<>()));
-////        given(jwtTokenProvider.generateToken(any(UserDetailsImpl.class))).willReturn(tokenDto);
-//
-//        String jsonRequest = new ObjectMapper().writeValueAsString(request);
-//
-//        // when
-//        ResultActions result = mockMvc.perform(post("/api/auths/login")
-//            .contentType(MediaType.APPLICATION_JSON)
-//            .content(jsonRequest));
-//
-//        // then
-//        result.andExpect(status().isOk())
-//            .andExpect(header().exists("Authorization")) // 액세스 토큰 헤더 있는지 확인
-//            .andExpect(jsonPath("$.accessToken").value(tokenDto.getAccessToken()))
-//            .andExpect(jsonPath("$.refreshToken").value(tokenDto.getRefreshToken()))
-//            .andExpect(jsonPath("$.grantType").value("Bearer"));
+        //given
+        LoginRequest request = StubData.MockAuth.getLoginRequest();
+        // 반환될 토큰 정보
+        TokenDto tokenDto = StubData.MockAuth.getTokenDto();
 
-//        then(authenticationManager).should().authenticate(any(UsernamePasswordAuthenticationToken.class));
-//        then(jwtTokenProvider).should().generateToken(any(UserDetailsImpl.class));
+        UserDetailsImpl userDetails = new UserDetailsImpl(StubData.MockUser.getUserDetails().getUser());
 
-//        then(authenticationManager).should(times(1)).authenticate(any(UsernamePasswordAuthenticationToken.class));
-//        then(jwtTokenProvider).should(times(1)).generateToken(any(UserDetailsImpl.class));
+        // authenticationManager를 mock하여 UserDetailsImpl(실제 로그인한 사용자 정보)을 주체로 인증된 토큰 반환
+        // UserDetailsImpl을 사용하여 인증 시도
+        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null);
+        // authenticationManager가 호출될 때, Authentication 객체가 반환하도록 함 (사용자 정상 인증되는 경우)
+        given(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+            .willReturn(authentication);
 
+        // Mocking the jwtTokenProvider to generate tokens
+        given(jwtTokenProvider.generateToken(any(UserDetailsImpl.class))).willReturn(tokenDto);
+
+        String jsonRequest = new ObjectMapper().writeValueAsString(request);
+
+        // when
+        ResultActions result = mockMvc.perform(post("/api/auths/login")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(jsonRequest));
+
+        // then
+        result.andExpect(status().isOk())
+            .andExpect(jsonPath("$.authType").value("Authorization"))
+            .andExpect(jsonPath("$.accessToken").value(tokenDto.getAccessToken()))
+            .andExpect(jsonPath("$.refreshToken").value(tokenDto.getRefreshToken()))
+            .andExpect(jsonPath("$.grantType").value("Bearer"));
+
+        then(authenticationManager).should(times(1)).authenticate(any(UsernamePasswordAuthenticationToken.class));
+        then(jwtTokenProvider).should(times(1)).generateToken(any(UserDetailsImpl.class));
     }
-
 }
