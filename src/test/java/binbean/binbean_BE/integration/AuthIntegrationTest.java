@@ -2,9 +2,12 @@ package binbean.binbean_BE.integration;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.data.redis.connection.ReactiveStreamCommands.AddStreamRecord.body;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -13,6 +16,7 @@ import binbean.binbean_BE.auth.filter.JwtVerificationFilter;
 import binbean.binbean_BE.dto.auth.request.RegisterRequest;
 import binbean.binbean_BE.encryption.AESUtils;
 import binbean.binbean_BE.enums.user.Role;
+import binbean.binbean_BE.exception.UserAlreadyExistException;
 import binbean.binbean_BE.infra.RedisService;
 import binbean.binbean_BE.service.AuthService;
 import binbean.binbean_BE.service.UserService;
@@ -87,15 +91,51 @@ public class AuthIntegrationTest {
             Role.ROLE_USER);
         String jsonRequest = new ObjectMapper().writeValueAsString(request);
 
-        // when & then
+        // when
         ResultActions result = mockMvc.perform(post("/api/auths/registration")
             .contentType(MediaType.APPLICATION_JSON)
             .content(jsonRequest));
 
-        result.andExpect(status().isCreated());
+        result.andExpect(status().isCreated())
+            .andExpect(content().string("")); // 응답 body가 빈 문자열인지 확인
 
-        verify(authService).registerUser(any(RegisterRequest.class));
-        then(authService).should().registerUser(any(RegisterRequest.class));
+        // then
+        // mock 객체가 특정 메서드를 호출했는지 검증
+        // authService(mock 객체)의 registerUser 메서드가 정확히 1번 호출되어야 한다
+        then(authService).should(times(1)).registerUser(any(RegisterRequest.class));
     }
+
+    @Test
+    @DisplayName("이미 존재하는 이메일로 회원가입을 시도하는 경우 409 상태값이 반환된다")
+    void registerUser_Fail_Returns_Conflicted() throws Exception {
+        // given
+        RegisterRequest request = new RegisterRequest(
+            "test@email.com",
+            "password123",
+            "testNickName",
+            "",
+            Role.ROLE_USER);
+
+        // registerUser 호출 시 강제로 예외 던지게 설정 (mock 객체가 특정 메서드 호출 시 예외를 던지게 미리 세팅)
+        doThrow(new UserAlreadyExistException(request.email()))
+            .when(authService).registerUser(any(RegisterRequest.class));
+
+        String jsonRequest = new ObjectMapper().writeValueAsString(request);
+
+        // when
+        ResultActions result = mockMvc.perform(post("/api/auths/registration")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(jsonRequest));
+
+        // then
+        result.andExpect(status().isConflict())
+            .andExpect(jsonPath("$.message")
+                .value("USER : " + request.email() + " already exists"));
+
+        then(authService).should(times(1)).registerUser(any(RegisterRequest.class));
+    }
+
+
+
 
 }
