@@ -7,6 +7,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.data.redis.connection.ReactiveStreamCommands.AddStreamRecord.body;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -135,7 +136,35 @@ public class AuthIntegrationTest {
         then(authService).should(times(1)).registerUser(any(RegisterRequest.class));
     }
 
+    @Test
+    @DisplayName("이미 존재하는 닉네임으로 회원가입을 시도하는 경우 409 상태값이 반환된다")
+    void registerUser_Fail_Returns_NickName_Conflicted() throws Exception {
+        // given
+        RegisterRequest request = new RegisterRequest(
+            "test@email.com",
+            "password123",
+            "testNickName",
+            "",
+            Role.ROLE_USER);
 
+        doThrow(new UserAlreadyExistException(request.nickname()))
+            .when(authService).registerUser(any(RegisterRequest.class));
+
+        String jsonRequest = new ObjectMapper().writeValueAsString(request);
+
+        // when
+        ResultActions result = mockMvc.perform(post("/api/auths/registration")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(jsonRequest));
+
+        // then
+        result.andExpect(status().isConflict())
+            .andExpect(jsonPath("$.message")
+                .value("USER : " + request.nickname() + " already exists"))
+            .andDo(print());
+
+        then(authService).should(times(1)).registerUser(any(RegisterRequest.class));
+    }
 
 
 }
