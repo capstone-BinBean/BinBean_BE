@@ -3,6 +3,7 @@ package binbean.binbean_BE.auth;
 import binbean.binbean_BE.constants.Constants.ErrorMsg;
 import binbean.binbean_BE.dto.auth.TokenDto;
 import binbean.binbean_BE.encryption.AESUtils;
+import binbean.binbean_BE.exception.UnauthorizedException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jws;
@@ -134,8 +135,23 @@ public class JwtTokenProvider {
      * refreshToken 토큰 검증
      * redis에 저장된 토큰을 불러와서 비교
      */
-    public boolean validateRefreshToken(String refreshToken, String redisRefreshToken) {
+    public boolean isRefreshTokenMatched(String refreshToken, String redisRefreshToken) {
         return StringUtils.hasText(refreshToken) && refreshToken.equals(redisRefreshToken);
+    }
+
+    public void validateRefreshToken(String jwtToken) {
+        try {
+            Jws<Claims> claims = Jwts.parser().verifyWith(key).build().parseSignedClaims(jwtToken);
+            logger.info("JWT Expiration :", claims.getPayload().getExpiration());
+            // exp 날짜가 현재 날짜보다 전에 있지 않으면 토큰 만료
+            if (claims.getPayload().getExpiration().before(new Date())) {
+                throw new UnauthorizedException();
+            }
+        } catch (JwtException e) {
+            // 기타 JWT 관련 예외
+            logger.error("JWT Exception: ", e);
+            throw new UnauthorizedException();
+        }
     }
 
     // 액세스 토큰 헤더 설정

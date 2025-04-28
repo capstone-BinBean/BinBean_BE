@@ -3,8 +3,10 @@ package binbean.binbean_BE.integration;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -21,12 +23,14 @@ import binbean.binbean_BE.dto.auth.request.RegisterRequest;
 import binbean.binbean_BE.dto.auth.request.SocialLoginRequest;
 import binbean.binbean_BE.encryption.AESUtils;
 import binbean.binbean_BE.enums.user.Role;
+import binbean.binbean_BE.exception.UnauthorizedException;
 import binbean.binbean_BE.exception.UserAlreadyExistException;
 import binbean.binbean_BE.helper.ObjectMapperUtils;
 import binbean.binbean_BE.infra.RedisService;
 import binbean.binbean_BE.service.AuthService;
 import binbean.binbean_BE.service.UserService;
 import binbean.binbean_BE.stub.StubData;
+import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -261,5 +265,49 @@ public class AuthIntegrationTest {
 
         then(authService).should(times(1)).loadUserByUsername(request.email());
         then(jwtTokenProvider).should(times(1)).generateToken(any(UserDetailsImpl.class));
+    }
+
+    @Test
+    @DisplayName("기존 리프레쉬 토큰 만료로 인해 리프레쉬 토큰 재발급 실패하면 401 상태 코드를 반환한다")
+    void reissue_Fail_Expired_Returns_Unauthorized() throws Exception {
+        // given
+        String expiredRefreshToken = "expired-refresh-token";
+
+        // 리프레쉬 토큰 만료 시 UnauthorizedException 던지도록 설정
+        doThrow(new UnauthorizedException()).when(authService).reissue(expiredRefreshToken);
+
+        // when
+        ResultActions result = mockMvc.perform(post("/api/auths/reissue")
+            .header("X-Refresh-Token", expiredRefreshToken));
+
+        // then
+        result.andExpect(status().isUnauthorized());
+
+        then(authService).should(times(1)).reissue(expiredRefreshToken);
+    }
+
+    @Test
+    @DisplayName("리프레쉬 토큰이 Redis에 저장된 값과 일치하지 않음으로 인해 재발급이 실패하면 401 상태코드가 반환된다.")
+    void reissue_Fail_Not_Match_with_Redis_Returns_Unauthorized() throws Exception {
+        // given
+        String refreshToken = "refresh-token";
+        String username = "testuser";
+
+        // redis에 저장된 리프레쉬 토큰
+        String refreshTokenInRedis = "stored-refresh-tokendsfdfasdfasd";
+
+        // 리프레쉬 토큰이 redis와 일치하지 않으면 UnauthorizedException 발생
+        when(jwtTokenProvider.isRefreshTokenMatched(refreshToken, refreshTokenInRedis))
+            .thenReturn(false);
+        doThrow(new UnauthorizedException()).when(authService).reissue(refreshToken);
+
+        // when
+        ResultActions result = mockMvc.perform(post("/api/auths/reissue")
+            .header("X-Refresh-Token", refreshToken))
+            .andDo(print());
+
+        // then
+        result.andExpect(status().isUnauthorized());
+        then(authService).should(times(1)).reissue(refreshToken);
     }
 }
