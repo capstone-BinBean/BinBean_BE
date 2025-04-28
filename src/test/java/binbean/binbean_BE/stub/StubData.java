@@ -27,6 +27,13 @@ public class StubData {
             );
         }
 
+        public static LoginRequest getLoginRequestWillFail() {
+            return new LoginRequest(
+                "test@email.com",
+                "dldl"
+            );
+        }
+
         public static TokenDto getTokenDto() {
             return TokenDto.builder()
                 .grantType("Bearer")

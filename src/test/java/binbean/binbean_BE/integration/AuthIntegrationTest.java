@@ -1,25 +1,20 @@
 package binbean.binbean_BE.integration;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.data.redis.connection.ReactiveStreamCommands.AddStreamRecord.body;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import binbean.binbean_BE.auth.JwtTokenProvider;
 import binbean.binbean_BE.auth.UserDetailsImpl;
 import binbean.binbean_BE.auth.filter.JwtVerificationFilter;
+import binbean.binbean_BE.constants.Constants.ErrorMsg;
 import binbean.binbean_BE.dto.auth.TokenDto;
 import binbean.binbean_BE.dto.auth.request.LoginRequest;
 import binbean.binbean_BE.dto.auth.request.RegisterRequest;
@@ -31,7 +26,6 @@ import binbean.binbean_BE.infra.RedisService;
 import binbean.binbean_BE.service.AuthService;
 import binbean.binbean_BE.service.UserService;
 import binbean.binbean_BE.stub.StubData;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -43,6 +37,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -189,7 +184,7 @@ public class AuthIntegrationTest {
         given(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
             .willReturn(authentication);
 
-        // Mocking the jwtTokenProvider to generate tokens
+        // JwtTokenProvider mock (반한될 tokenDto 객체 설정)
         given(jwtTokenProvider.generateToken(any(UserDetailsImpl.class))).willReturn(tokenDto);
 
         String jsonRequest = ObjectMapperUtils.toJsonString(request);
@@ -208,5 +203,29 @@ public class AuthIntegrationTest {
 
         then(authenticationManager).should(times(1)).authenticate(any(UsernamePasswordAuthenticationToken.class));
         then(jwtTokenProvider).should(times(1)).generateToken(any(UserDetailsImpl.class));
+    }
+
+    @Test
+    @DisplayName("올바르지 않은 아이디/비밀번호로 로그인 시도할 경우 401 상태 코드를 반환한다")
+    void login_Fail_Returns_Unauthorized() throws Exception {
+        // given
+        LoginRequest request = StubData.MockAuth.getLoginRequestWillFail();
+
+        // 인증 실패 예외가 발생하도록 설정
+        given(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+            .willThrow(new BadCredentialsException(ErrorMsg.INVALID_CREDENTIALS));
+
+        String jsonRequest = ObjectMapperUtils.toJsonString(request);
+
+        // when
+        ResultActions result = mockMvc.perform(post("/api/auths/login")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(jsonRequest));
+
+        // then
+        result.andExpect(status().isUnauthorized())
+            .andExpect(jsonPath("$.message").value("이메일 또는 비밀번호가 올바르지 않습니다."));
+
+        then(authenticationManager).should(times(1)).authenticate(any(UsernamePasswordAuthenticationToken.class));
     }
 }
