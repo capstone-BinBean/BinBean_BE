@@ -1,31 +1,17 @@
 package binbean.binbean_BE.dto.aws;
 
+import binbean.binbean_BE.entity.floor_plan.Seats;
+import java.util.List;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 public class DetectedItem {
     private String key;
+    // 개수
     private Integer value;
+    // 신뢰도
     private Float confidence;
-
-    public void setKey(String key) {
-        this.key = key;
-    }
-
-    public void setValue(Integer value) {
-        this.value = value;
-    }
-
-    public void setConfidence(Float confidence) {
-        this.confidence = confidence;
-    }
-
-    public String getKey() {
-        return key;
-    }
-
-    public Integer getValue() {
-        return value;
-    }
-
-    public Float getConfidence() {
-        return confidence;
-    }
+    private List<PersonDto> personPositions;
 }
