@@ -2,6 +2,7 @@ package binbean.binbean_BE.auth.filter;
 
 
 import binbean.binbean_BE.exception.ErrorResponse;
+import binbean.binbean_BE.exception.UnauthorizedException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -25,7 +26,7 @@ public class JwtExceptionFilter extends OncePerRequestFilter {
         HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         try {
             filterChain.doFilter(request, response);
-        } catch (ExpiredJwtException e) {
+        } catch (ExpiredJwtException | UnauthorizedException e) {
             writeResponse(response, HttpStatus.UNAUTHORIZED, e.getMessage());
         } catch (JwtException e) {
             // 기존에 작성했던 jwt auth filter 내부 발생하는 jwt exception이라는 예외가 발생했을 때 캐치해서 처리

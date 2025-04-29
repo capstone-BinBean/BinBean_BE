@@ -2,8 +2,10 @@ package binbean.binbean_BE.auth.filter;
 
 import binbean.binbean_BE.auth.JwtTokenProvider;
 import binbean.binbean_BE.auth.UserDetailsImpl;
+import binbean.binbean_BE.constants.Constants.ErrorMsg;
 import binbean.binbean_BE.constants.Constants.LoggingMsg;
 import binbean.binbean_BE.constants.Constants.URL;
+import binbean.binbean_BE.exception.UnauthorizedException;
 import binbean.binbean_BE.infra.RedisService;
 import binbean.binbean_BE.service.AuthService;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -14,6 +16,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Arrays;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -26,13 +29,10 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final AuthService authService;
-    private final RedisService redisService;
 
-    public JwtVerificationFilter(JwtTokenProvider jwtTokenProvider, AuthService authService,
-        RedisService redisService) {
+    public JwtVerificationFilter(JwtTokenProvider jwtTokenProvider, AuthService authService) {
         this.jwtTokenProvider = jwtTokenProvider;
         this.authService = authService;
-        this.redisService = redisService;
     }
 
     @Override
@@ -49,12 +49,17 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
-
         try {
             var securityContext = SecurityContextHolder.getContext();
 
             // 유효한 토큰인지 검사 (유효하지 않으면 예외 발생)
             jwtTokenProvider.validateToken(accessToken);
+
+            // 로그아웃 이후에도 유효한 액세스 토큰인지 검사 (예외)
+            if (jwtTokenProvider.isAccessTokenLogout(accessToken)) {
+                throw new UnauthorizedException(HttpStatus.UNAUTHORIZED, ErrorMsg.LOGIN_EXPIRED);
+            }
+
             var username = jwtTokenProvider.getUsername(accessToken);
             var userDetails = authService.loadUserByUsername(username);
             // 액세스토큰 값이 유효하면 setAuthentication 통해 securityContext에 인증 정보 저장

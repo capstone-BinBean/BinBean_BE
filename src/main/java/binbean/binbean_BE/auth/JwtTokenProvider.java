@@ -1,12 +1,15 @@
 package binbean.binbean_BE.auth;
 
 import binbean.binbean_BE.constants.Constants.ErrorMsg;
+import binbean.binbean_BE.constants.Constants.LoggingMsg;
 import binbean.binbean_BE.dto.auth.TokenDto;
 import binbean.binbean_BE.encryption.AESUtils;
 import binbean.binbean_BE.exception.UnauthorizedException;
+import binbean.binbean_BE.infra.RedisService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.Jwt;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -15,6 +18,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Date;
+import java.util.Optional;
 import javax.crypto.SecretKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +37,7 @@ public class JwtTokenProvider {
     public static final String AUTHORIZATION = "Authorization";
 
     private final SecretKey key;
+    private final RedisService redisService;
 
     @Value("${jwt.token.access-expiration-time}")
     private long accessExpirationTime;
@@ -40,13 +45,15 @@ public class JwtTokenProvider {
     @Value("${jwt.token.refresh-expiration-time}")
     private long refreshExpirationTime;
 
-    public JwtTokenProvider(@Value("${jwt.secret-key}") String secretKey, AESUtils aesUtils) {
+    public JwtTokenProvider(@Value("${jwt.secret-key}") String secretKey, AESUtils aesUtils,
+        RedisService redisService) {
         try {
             String decryptedSecretKey = aesUtils.decryptWithAesKey(secretKey);
             this.key = Keys.hmacShaKeyFor(decryptedSecretKey.getBytes(StandardCharsets.UTF_8));
         } catch (Exception e) {
             throw new RuntimeException(ErrorMsg.JWT_SECRET_DECRYPT_ERROR, e);
         }
+        this.redisService = redisService;
     }
 
     /**
@@ -170,5 +177,31 @@ public class JwtTokenProvider {
 
     public long getRefreshExpirationTime() {
         return refreshExpirationTime;
+    }
+
+    /**
+     * 토큰의 남은 유효시간 반환
+     */
+    public long getRemainingValidityTime(String token) {
+        Claims claims = Jwts.parser()
+            .verifyWith(key)
+            .build()
+            .parseSignedClaims(token)
+            .getPayload();
+
+        long exp = claims.getExpiration().getTime();
+        long now = Instant.now().getEpochSecond();
+        return Math.max(exp - now, 0);
+    }
+
+    /**
+     * 로그아웃을 하였으나 이전에 사용된 액세스 토큰이 아직 유효한 경우,
+     * 로그아웃 시에 레디스에 저장한 액세스 토큰값을 불러와 해당 값이 존재하면 (값이 "logout")
+     * true를 반환
+     * (JWT 토큰의 유효성을 서버에서 강제로 무효화시킬 수 없기에 redis에 따로 저장해두고 요청 시 확인)
+     */
+    public boolean isAccessTokenLogout(String accessToken) {
+        Optional<String> token = redisService.getValues(accessToken);
+        return token.isPresent() && token.get().equals(LoggingMsg.LOGOUT_FLAG);
     }
 }
