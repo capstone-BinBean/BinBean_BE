@@ -48,6 +48,9 @@ dependencies {
   
   	// AWS
 	implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
+	implementation 'software.amazon.awssdk:rekognition:2.31.31'
+//	implementation platform('software.amazon.awssdk:bom:2.25.20') // 최신 BOM
+
 }
 
 tasks.named('test') {
