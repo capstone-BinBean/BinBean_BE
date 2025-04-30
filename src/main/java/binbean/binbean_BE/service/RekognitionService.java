@@ -1,13 +1,10 @@
 package binbean.binbean_BE.service;
 
-import binbean.binbean_BE.dto.aws.BoundingBoxDto;
 import binbean.binbean_BE.dto.aws.DetectedItem;
-import binbean.binbean_BE.dto.aws.PersonDto;
+import binbean.binbean_BE.dto.aws.PositionDto;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -57,14 +54,14 @@ public class RekognitionService {
                 item.setValue(count);
 
                 if (instances != null && !instances.isEmpty()) {
-                    List<PersonDto> persons = instances.stream()
+                    List<PositionDto> positions = instances.stream()
                         .map(instance -> {
                             BoundingBox box = instance.boundingBox();
-                            return PersonDto.create(box);
+                            return PositionDto.create(box);
 
                         })
                         .toList();
-                    item.setPersonPositions(persons);
+                    item.setPositions(positions);
                 }
                 list.add(item);
             }

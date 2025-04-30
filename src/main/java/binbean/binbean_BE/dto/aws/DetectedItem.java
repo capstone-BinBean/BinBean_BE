@@ -1,6 +1,5 @@
 package binbean.binbean_BE.dto.aws;
 
-import binbean.binbean_BE.entity.floor_plan.Seats;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,5 +12,5 @@ public class DetectedItem {
     private Integer value;
     // 신뢰도
     private Float confidence;
-    private List<PersonDto> personPositions;
+    private List<PositionDto> positions;
 }
