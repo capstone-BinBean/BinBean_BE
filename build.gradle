@@ -48,6 +48,14 @@ dependencies {
   
   	// AWS
 	implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
+	implementation 'software.amazon.awssdk:rekognition:2.31.31'
+//	implementation platform('software.amazon.awssdk:bom:2.25.20')
+
+	// Google Vision API
+	implementation 'com.google.cloud:google-cloud-vision:3.58.0'
+	implementation 'com.google.protobuf:protobuf-java:3.25.1'
+
+
 }
 
 tasks.named('test') {
