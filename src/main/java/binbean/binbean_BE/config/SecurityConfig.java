@@ -78,8 +78,6 @@ public class SecurityConfig {
         provider.setUserDetailsService(userDetailsService);
         provider.setPasswordEncoder(passwordEncoder);
 
-        // UsernameNotFoundException을 BadCredentialsException으로 감싸지 않도록 설정
-        provider.setHideUserNotFoundExceptions(false);
         return provider;
     }
 
@@ -121,7 +119,7 @@ public class SecurityConfig {
             )
             .csrf(AbstractHttpConfigurer::disable)
             .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class)
-            .addFilterBefore(jwtVerificationFilter, JwtUsernamePasswordAuthFilter.class)
+            .addFilterAfter(jwtVerificationFilter, JwtUsernamePasswordAuthFilter.class)
             .addFilterBefore(jwtExceptionFilter, JwtVerificationFilter.class)
             .httpBasic(HttpBasicConfigurer::disable)
             .formLogin(FormLoginConfigurer::disable);

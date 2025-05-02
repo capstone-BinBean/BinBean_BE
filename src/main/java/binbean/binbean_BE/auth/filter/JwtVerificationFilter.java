@@ -4,6 +4,7 @@ import binbean.binbean_BE.auth.JwtTokenProvider;
 import binbean.binbean_BE.auth.UserDetailsImpl;
 import binbean.binbean_BE.constants.Constants.ErrorMsg;
 import binbean.binbean_BE.constants.Constants.LoggingMsg;
+import binbean.binbean_BE.constants.Constants.URL;
 import binbean.binbean_BE.exception.UnauthorizedException;
 import binbean.binbean_BE.infra.RedisService;
 import binbean.binbean_BE.service.AuthService;
@@ -14,6 +15,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Arrays;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContext;
@@ -81,4 +83,13 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
         // SecurityContext에 인증 정보 저장
         securityContext.setAuthentication(authenticationToken);
     }
+
+    // ALLOWED_URLS 매칭 메서드 (ALLOWED_URLS에 포함된 요청이면 JWT 검증을 건너뛰고 다음 필터로 진행)
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String requestURI = request.getRequestURI();
+        return Arrays.stream(URL.ALLOWED_URLS)
+            .anyMatch(allowedUrl -> allowedUrl.equals(requestURI));
+    }
+
 }

@@ -71,14 +71,14 @@ public class AuthService implements UserDetailsService {
         String refreshToken = aesUtils.decryptWithAesKey(encryptedRefreshToken);
 
         // refreshToken 유효성, 만료 검사
-        jwtTokenProvider.validateToken(refreshToken);
+        jwtTokenProvider.validateRefreshToken(refreshToken);
         String username = jwtTokenProvider.getUsername(refreshToken);
 
         String refreshTokenInRedis = aesUtils.decryptWithAesKey(redisService.getValues(username)
             .orElseThrow(UnauthorizedException::new));
 
         // redis에 저장된 토큰과 같은지를 비교 (같지 않으면 삭제 및 재로그인 요청)
-        if (!jwtTokenProvider.validateRefreshToken(refreshToken, refreshTokenInRedis)) {
+        if (!jwtTokenProvider.isRefreshTokenMatched(refreshToken, refreshTokenInRedis)) {
             redisService.deleteValues(username);
             throw new UnauthorizedException();
         }

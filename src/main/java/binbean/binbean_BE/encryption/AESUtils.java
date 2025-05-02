@@ -9,6 +9,7 @@ import java.util.Base64;
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -27,6 +28,7 @@ public class AESUtils {
         MASTER_KEY = key;
     }
 
+    @Setter
     @Value("${aes.key}")
     private String encryptedAesKey;
 
