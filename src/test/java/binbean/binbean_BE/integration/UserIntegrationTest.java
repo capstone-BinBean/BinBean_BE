@@ -121,5 +121,20 @@ public class UserIntegrationTest {
         // then
         result.andExpect(status().isOk());
     }
+
+    @Test
+    @DisplayName("사용자 프로필 이미지를 누락하고 업로드하면 400 상태값이 반환된다")
+    void upload_Profile_Image_Success_Returns_Bad_Request() throws Exception {
+        // given
+        // 이미지 없이 요청
+
+        // when
+        ResultActions result = mockMvc.perform(multipart(HttpMethod.PUT, "/api/users/profile-img")
+            .file("profileImgUrl", new byte[0])
+            .with(csrf()));
+
+        // then
+        result.andExpect(status().isBadRequest());
+    }
 }
 
