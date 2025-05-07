@@ -2,19 +2,27 @@ package binbean.binbean_BE.integration;
 
 import binbean.binbean_BE.auth.JwtTokenProvider;
 import binbean.binbean_BE.auth.UserDetailsImpl;
+import binbean.binbean_BE.dto.FloorList;
 import binbean.binbean_BE.dto.request.ChangePasswordRequest;
+import binbean.binbean_BE.dto.request.FloorPlanRegisterRequest;
 import binbean.binbean_BE.encryption.AESUtils;
+import binbean.binbean_BE.entity.Cafe;
+import binbean.binbean_BE.entity.Favorites;
 import binbean.binbean_BE.entity.User;
+import binbean.binbean_BE.entity.floor_plan.FloorPlan;
 import binbean.binbean_BE.helper.ObjectMapperUtils;
+import binbean.binbean_BE.repository.CafeRepository;
+import binbean.binbean_BE.repository.FavoritesRepository;
 import binbean.binbean_BE.repository.UserRepository;
+import binbean.binbean_BE.service.FloorPlanService;
 import binbean.binbean_BE.service.ImageStorageService;
 import binbean.binbean_BE.service.UserService;
 import binbean.binbean_BE.stub.StubData;
+import binbean.binbean_BE.stub.StubData.MockFavorites;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -34,8 +42,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -68,6 +78,13 @@ public class UserIntegrationTest {
 
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
+
+    @Autowired
+    private FloorPlanService floorPlanService;
+    @Autowired
+    private CafeRepository cafeRepository;
+    @Autowired
+    private FavoritesRepository favoritesRepository;
 
     private User testUser;
 
@@ -126,7 +143,6 @@ public class UserIntegrationTest {
         // then
         result.andExpect(status().isBadRequest());
     }
-
 
     @Test
     @DisplayName("유저의 비밀번호 변경이 성공적으로 완료되면 200 상태값이 반환된다")
@@ -198,6 +214,31 @@ public class UserIntegrationTest {
         // then
         result.andExpect(status().isForbidden());
         result.andExpect(jsonPath("$.message").value("소셜 로그인 계정은 비밀번호를 변경할 수 없습니다."));
+    }
+
+    @Test
+    @DisplayName("즐겨찾기한 카페 좌석 위치 리스트를 성공적으로 불러오면 200 상태값이 반환된다")
+    void get_Favorite_Seats_Success_Returns_OK() throws Exception {
+        // given
+        // 좌석 위치 즐겨찾기 등록
+        Cafe cafe = cafeRepository.save(MockFavorites.getMockCafe());
+        FloorPlan fp = MockFavorites.getMockFloorPlan(cafe);
+        FloorList floorList = MockFavorites.getMockFloorList(fp);
+
+        FloorPlanRegisterRequest request = new FloorPlanRegisterRequest(floorList, 1, fp.getMaxSeats());
+        floorPlanService.saveFloorPlan(List.of(request), cafe);
+
+        Favorites favorite = Favorites.create(testUser, cafe, 3L);
+        favoritesRepository.save(favorite);
+
+        // when
+        ResultActions result = mockMvc.perform(get("/api/users/favorites")
+            .contentType(MediaType.APPLICATION_JSON));
+
+        // then
+        result.andExpect(status().isOk());
+        result.andExpect(jsonPath("$.length()").value(1));
+        result.andExpect(jsonPath("$[0].cafeName").value("스타벅스 신촌점"));
     }
 }
 

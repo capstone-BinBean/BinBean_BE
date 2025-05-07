@@ -1,12 +1,20 @@
 package binbean.binbean_BE.stub;
 
 import binbean.binbean_BE.auth.UserDetailsImpl;
+import binbean.binbean_BE.dto.FloorList;
+import binbean.binbean_BE.dto.Position;
 import binbean.binbean_BE.dto.auth.TokenDto;
 import binbean.binbean_BE.dto.auth.request.LoginRequest;
 import binbean.binbean_BE.dto.auth.request.RegisterRequest;
 import binbean.binbean_BE.dto.auth.request.SocialLoginRequest;
+import binbean.binbean_BE.dto.response.FavoritesResponse;
+import binbean.binbean_BE.entity.Cafe;
 import binbean.binbean_BE.entity.User;
+import binbean.binbean_BE.entity.floor_plan.FloorPlan;
 import binbean.binbean_BE.enums.user.Role;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class StubData {
     public static class MockAuth {
@@ -82,5 +90,33 @@ public class StubData {
                 "",
                 Role.ROLE_USER);
         }
+    }
+
+    public static class MockFavorites {
+
+        public static Cafe getMockCafe() {
+            return Cafe.create(MockUser.getUserDetails().getUser(), "스타벅스 신촌점", "서울시 마포구 ...",
+                37.882, 127.730, "010-0000-0000", 1, 0, 1,
+                0, "신촌점에 위치해있습니다.");
+        }
+
+        public static FloorPlan getMockFloorPlan(Cafe cafe) {
+            return  FloorPlan.create(cafe, 1, 15);
+        }
+
+        public static FloorList getMockFloorList(FloorPlan floorPlan) {
+            List<Position> seatPositions = new ArrayList<>();
+            for (int i = 0; i < floorPlan.getMaxSeats(); i++) {
+                double randomX = ThreadLocalRandom.current().nextDouble(1, 101);
+                double randomY = ThreadLocalRandom.current().nextDouble(1, 101);
+                Position pos = Position.create(randomX, randomY);
+                seatPositions.add(pos);
+            }
+
+           return FloorList.create(List.of(), seatPositions, List.of(),
+                List.of(), List.of(), List.of());
+        }
+
+
     }
 }
