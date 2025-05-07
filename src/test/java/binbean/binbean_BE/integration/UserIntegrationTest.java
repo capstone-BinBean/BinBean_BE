@@ -156,8 +156,6 @@ public class UserIntegrationTest {
     @DisplayName("현재 비밀번호를 틀리게 입력해서 비밀번호 변경이 실패하면 400 상태값이 반환된다")
     void change_Password_Fails_Returns_Bad_Request() throws Exception {
         // given
-        // 원래 비밀번호
-        String currentPassword = testUser.getPassword();
         String incorrectCurrentPassword = "incorrectPassword123";
         String newPassword = "newPassword123";
         ChangePasswordRequest request = new ChangePasswordRequest(incorrectCurrentPassword, newPassword);
@@ -174,8 +172,32 @@ public class UserIntegrationTest {
 
         // 실제로 비밀번호가 변경되지 않았는지 DB에서 확인
         User user = userRepository.findByEmail("newUser@email.com").orElseThrow();
-        // 원본 비밀번호와 인코딩된 유저 비밀번호 비교
+        // 원래 비밀번호와 인코딩된 유저 비밀번호 비교
         assertTrue(passwordEncoder.matches("password123", user.getPassword()));
+    }
+
+    @Test
+    @DisplayName("소셜 로그인 계정일 경우 비밀번호 변경 시도 시 403 상태값이 반환된다")
+    void change_Password_Fails_Returns_Forbidden() throws Exception {
+        // given
+        User user = userRepository.findByEmail("newUser@email.com").orElseThrow();
+        // 테스트 유저 비밀번호 null로 설정 (소셜 로그인 계정)
+        user.setPassword("");
+        userRepository.save(user);
+        // 새 비밀번호
+        String newPassword = "newPassword123";
+
+        ChangePasswordRequest request = new ChangePasswordRequest(testUser.getPassword(), newPassword);
+
+        // when
+        String jsonRequest = ObjectMapperUtils.toJsonString(request);
+        ResultActions result = mockMvc.perform(put("/api/users/password")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(jsonRequest));
+
+        // then
+        result.andExpect(status().isForbidden());
+        result.andExpect(jsonPath("$.message").value("소셜 로그인 계정은 비밀번호를 변경할 수 없습니다."));
     }
 }
 
