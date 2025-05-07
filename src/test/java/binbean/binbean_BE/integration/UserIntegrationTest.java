@@ -2,64 +2,38 @@ package binbean.binbean_BE.integration;
 
 import binbean.binbean_BE.auth.JwtTokenProvider;
 import binbean.binbean_BE.auth.UserDetailsImpl;
-import binbean.binbean_BE.constants.Constants.ErrorMsg;
-import binbean.binbean_BE.dto.auth.request.RegisterRequest;
 import binbean.binbean_BE.dto.request.ChangePasswordRequest;
 import binbean.binbean_BE.encryption.AESUtils;
 import binbean.binbean_BE.entity.User;
-import binbean.binbean_BE.exception.ResponseStatusException;
-import binbean.binbean_BE.exception.UserAlreadyExistException;
 import binbean.binbean_BE.helper.ObjectMapperUtils;
-import binbean.binbean_BE.infra.RedisService;
 import binbean.binbean_BE.repository.UserRepository;
-import binbean.binbean_BE.service.AuthService;
 import binbean.binbean_BE.service.ImageStorageService;
 import binbean.binbean_BE.service.UserService;
 import binbean.binbean_BE.stub.StubData;
-import binbean.binbean_BE.stub.StubData.MockUser;
-import com.amazonaws.services.cloudformation.model.Change;
-import jakarta.persistence.EntityManager;
-import java.util.Objects;
-import java.util.Optional;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.test.context.support.TestExecutionEvent;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.test.context.support.WithUserDetails;
-import org.springframework.test.annotation.Commit;
-import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.then;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -176,6 +150,32 @@ public class UserIntegrationTest {
         // DB에서 비밀번호가 실제로 변경되었는지 검증
         User updatedUser = userRepository.findByEmail("newUser@email.com").orElseThrow();
         assertTrue(passwordEncoder.matches(newPassword, updatedUser.getPassword()));
+    }
+
+    @Test
+    @DisplayName("현재 비밀번호를 틀리게 입력해서 비밀번호 변경이 실패하면 400 상태값이 반환된다")
+    void change_Password_Fails_Returns_Bad_Request() throws Exception {
+        // given
+        // 원래 비밀번호
+        String currentPassword = testUser.getPassword();
+        String incorrectCurrentPassword = "incorrectPassword123";
+        String newPassword = "newPassword123";
+        ChangePasswordRequest request = new ChangePasswordRequest(incorrectCurrentPassword, newPassword);
+
+        // when
+        String jsonRequest = ObjectMapperUtils.toJsonString(request);
+        ResultActions result = mockMvc.perform(put("/api/users/password")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(jsonRequest));
+
+        // then
+        result.andExpect(status().isBadRequest());
+        result.andExpect(jsonPath("$.message").value("현재 비밀번호가 일치하지 않습니다."));
+
+        // 실제로 비밀번호가 변경되지 않았는지 DB에서 확인
+        User user = userRepository.findByEmail("newUser@email.com").orElseThrow();
+        // 원본 비밀번호와 인코딩된 유저 비밀번호 비교
+        assertTrue(passwordEncoder.matches("password123", user.getPassword()));
     }
 }
 
