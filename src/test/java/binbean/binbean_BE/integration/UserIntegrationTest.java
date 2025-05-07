@@ -78,10 +78,10 @@ public class UserIntegrationTest {
     private MockMvc mockMvc;
 
     @Autowired
-    private AuthService authService;
+    private UserService userService;
 
     @Autowired
-    private UserService userService;
+    private UserRepository userRepository;
 
     @MockitoBean
     private JwtTokenProvider jwtTokenProvider;
@@ -90,17 +90,10 @@ public class UserIntegrationTest {
     private AESUtils aesUtils;
 
     @MockitoBean
-    private AuthenticationManager authenticationManager;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @MockitoBean
     private ImageStorageService imageStorageService;
 
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
-
 
     private User testUser;
 
@@ -113,7 +106,7 @@ public class UserIntegrationTest {
         testUser.setPassword(encodedPassword);
         userRepository.save(testUser);
 
-        // UserDetailsImpl을 사용하여 인증 시도
+        // UserDetailsImpl을 사용하여 인증 시도 (수동 인증, 추후 @WithUserDetails로 리팩토링 예정)
         Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
@@ -140,6 +133,9 @@ public class UserIntegrationTest {
 
         // then
         result.andExpect(status().isOk());
+
+        User updatedUser = userRepository.findByEmail("newUser@email.com").orElseThrow();
+        assertEquals("https://s3.example.com/profile.jpg", updatedUser.getProfile());
     }
 
     @Test
