@@ -2,15 +2,22 @@ package binbean.binbean_BE.integration;
 
 import binbean.binbean_BE.auth.JwtTokenProvider;
 import binbean.binbean_BE.auth.UserDetailsImpl;
+import binbean.binbean_BE.constants.Constants.ErrorMsg;
 import binbean.binbean_BE.dto.auth.request.RegisterRequest;
+import binbean.binbean_BE.dto.request.ChangePasswordRequest;
 import binbean.binbean_BE.encryption.AESUtils;
 import binbean.binbean_BE.entity.User;
+import binbean.binbean_BE.exception.ResponseStatusException;
+import binbean.binbean_BE.exception.UserAlreadyExistException;
+import binbean.binbean_BE.helper.ObjectMapperUtils;
 import binbean.binbean_BE.infra.RedisService;
 import binbean.binbean_BE.repository.UserRepository;
 import binbean.binbean_BE.service.AuthService;
 import binbean.binbean_BE.service.ImageStorageService;
 import binbean.binbean_BE.service.UserService;
 import binbean.binbean_BE.stub.StubData;
+import binbean.binbean_BE.stub.StubData.MockUser;
+import com.amazonaws.services.cloudformation.model.Change;
 import jakarta.persistence.EntityManager;
 import java.util.Objects;
 import java.util.Optional;
@@ -22,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -29,6 +37,10 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.test.context.support.TestExecutionEvent;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.annotation.Commit;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -39,13 +51,18 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.springframework.test.web.servlet.ResultActions;
@@ -63,7 +80,7 @@ public class UserIntegrationTest {
     @Autowired
     private AuthService authService;
 
-    @MockitoBean
+    @Autowired
     private UserService userService;
 
     @MockitoBean
@@ -82,7 +99,8 @@ public class UserIntegrationTest {
     private ImageStorageService imageStorageService;
 
     @Autowired
-    private EntityManager entityManager;
+    private BCryptPasswordEncoder passwordEncoder;
+
 
     private User testUser;
 
@@ -91,6 +109,8 @@ public class UserIntegrationTest {
         // mock user 세팅
         testUser = StubData.MockUser.getNewUser();
         UserDetails userDetails = new UserDetailsImpl(testUser);
+        String encodedPassword = passwordEncoder.encode(testUser.getPassword());
+        testUser.setPassword(encodedPassword);
         userRepository.save(testUser);
 
         // UserDetailsImpl을 사용하여 인증 시도
@@ -135,6 +155,31 @@ public class UserIntegrationTest {
 
         // then
         result.andExpect(status().isBadRequest());
+    }
+
+
+    @Test
+    @DisplayName("유저의 비밀번호 변경이 성공적으로 완료되면 200 상태값이 반환된다")
+    void change_Password_Success_Returns_OK() throws Exception {
+        // given
+        String currentPassword = "password123";
+        String newPassword = "newPassword123";
+
+        ChangePasswordRequest request = new ChangePasswordRequest(currentPassword, newPassword);
+
+        // when
+        String jsonRequest = ObjectMapperUtils.toJsonString(request);
+
+        ResultActions result = mockMvc.perform(put("/api/users/password")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(jsonRequest));
+
+        // then
+        result.andExpect(status().isOk());
+
+        // DB에서 비밀번호가 실제로 변경되었는지 검증
+        User updatedUser = userRepository.findByEmail("newUser@email.com").orElseThrow();
+        assertTrue(passwordEncoder.matches(newPassword, updatedUser.getPassword()));
     }
 }
 
