@@ -14,6 +14,7 @@ import binbean.binbean_BE.entity.floor_plan.FloorPlan;
 import binbean.binbean_BE.enums.user.Role;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class StubData {
@@ -86,7 +87,22 @@ public class StubData {
             return new User(null,
                 "newUser@email.com",
                 "password123",
-                "testNickName",
+                "newNickName",
+                "",
+                Role.ROLE_USER);
+        }
+
+        /**
+         * 통합 테스트에서 동일한 계정(중복된 유저 정보)의 케이스가 병렬 또는 순차적으로 실행되면
+         * 충돌할 수 있기에 이를 방지하기 위해 사용
+         * ex) 즐겨찾기 기능, 카페 소유자 설정 등 유저 여러 명이 필요할 때 사용
+         */
+        public static User getRandomUser() {
+            // ID는 null이어야 함
+            return new User(null,
+                UUID.randomUUID() + "@email.com",
+                "password123",
+                UUID.randomUUID() + "nickname",
                 "",
                 Role.ROLE_USER);
         }
@@ -94,8 +110,8 @@ public class StubData {
 
     public static class MockFavorites {
 
-        public static Cafe getMockCafe() {
-            return Cafe.create(MockUser.getUserDetails().getUser(), "스타벅스 신촌점", "서울시 마포구 ...",
+        public static Cafe getMockCafe(User user) {
+            return Cafe.create(user, "스타벅스 신촌점", "서울시 마포구 ...",
                 37.882, 127.730, "010-0000-0000", 1, 0, 1,
                 0, "신촌점에 위치해있습니다.");
         }
@@ -116,7 +132,5 @@ public class StubData {
            return FloorList.create(List.of(), seatPositions, List.of(),
                 List.of(), List.of(), List.of());
         }
-
-
     }
 }

@@ -19,6 +19,7 @@ import binbean.binbean_BE.service.ImageStorageService;
 import binbean.binbean_BE.service.UserService;
 import binbean.binbean_BE.stub.StubData;
 import binbean.binbean_BE.stub.StubData.MockFavorites;
+import binbean.binbean_BE.stub.StubData.MockUser;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -45,7 +46,6 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -221,7 +221,8 @@ public class UserIntegrationTest {
     void get_Favorite_Seats_Success_Returns_OK() throws Exception {
         // given
         // 좌석 위치 즐겨찾기 등록
-        Cafe cafe = cafeRepository.save(MockFavorites.getMockCafe());
+        User ownerUser = userRepository.save(MockUser.getRandomUser());
+        Cafe cafe = cafeRepository.save(MockFavorites.getMockCafe(ownerUser));
         FloorPlan fp = MockFavorites.getMockFloorPlan(cafe);
         FloorList floorList = MockFavorites.getMockFloorList(fp);
 
