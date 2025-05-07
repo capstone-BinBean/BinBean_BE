@@ -56,4 +56,6 @@ dependencies {
 
 tasks.named('test') {
 	useJUnitPlatform()
+	// ./gradlew build 시 테스트(:test)가 실행될 때 application-dev.yml을 로딩
+	systemProperty "spring.profiles.active", "dev"
 }
