@@ -41,6 +41,7 @@ public class User {
 
     @Column(nullable = false)
     @Enumerated(value = EnumType.STRING)
+    @Builder.Default
     private Role role = Role.ROLE_USER; // 기본값
 
     public void setPassword(String encoded) {

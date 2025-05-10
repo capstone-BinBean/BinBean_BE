@@ -76,15 +76,15 @@ public class AuthIntegrationTest {
     @MockitoBean
     private AuthenticationManager authenticationManager;
 
-    @TestConfiguration
-    static class JwtFilterConfig {
-        @Bean
-        public JwtVerificationFilter jwtVerificationFilter(JwtTokenProvider jwtTokenProvider,
-            RedisService redisService, AuthService authService) {
-            // JwtVerificationFilter를 수동으로 빈으로 등록
-            return new JwtVerificationFilter(jwtTokenProvider, authService, redisService);
-        }
-    }
+//    @TestConfiguration
+//    static class JwtFilterConfig {
+//        @Bean
+//        public JwtVerificationFilter jwtVerificationFilter(JwtTokenProvider jwtTokenProvider,
+//            RedisService redisService, AuthService authService) {
+//            // JwtVerificationFilter를 수동으로 빈으로 등록
+//            return new JwtVerificationFilter(jwtTokenProvider, authService, redisService);
+//        }
+//    }
 
     @BeforeEach
     void setUp() {
