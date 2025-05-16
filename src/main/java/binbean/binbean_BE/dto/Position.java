@@ -20,9 +20,13 @@ public record Position(double x, double y) {
         double w = (double) (box.width() * imageWidth);
         double h = (double) (box.height() * imageHeight);
 
+        // 중심점
+        double centerX = x + w / 2;
+        double centerY = y + h / 2;
+
         return Position.builder()
-            .x(x + w / 2)
-            .y(y + h / 2)
+            .x(centerX)
+            .y(centerY)
             .build();
     }
 }

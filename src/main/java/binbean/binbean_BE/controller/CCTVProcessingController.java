@@ -29,7 +29,7 @@ public class CCTVProcessingController {
     @PostMapping(value = "/detect", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<FloorPlanResponse> getDetectedItems(@RequestPart(value = "image") MultipartFile image,
         @RequestPart("floor") FloorList floorList, @RequestPart("floorNumber") int floorNumber) throws IOException {
-        var response = rekognitionService.getDetectedSeats(image, floorList, floorNumber);
+        var response = rekognitionService.getCurrentOccupiedSeats(image, floorList, floorNumber);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }
