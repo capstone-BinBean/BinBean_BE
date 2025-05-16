@@ -1,12 +1,9 @@
 package binbean.binbean_BE.controller;
 
-import binbean.binbean_BE.dto.DetectedItem;
 import binbean.binbean_BE.dto.FloorList;
 import binbean.binbean_BE.dto.response.FloorPlanResponse;
 import binbean.binbean_BE.service.RekognitionService;
 import java.io.IOException;
-import java.util.List;
-import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;

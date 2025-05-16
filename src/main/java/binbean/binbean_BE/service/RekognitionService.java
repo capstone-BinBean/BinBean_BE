@@ -6,8 +6,6 @@ import binbean.binbean_BE.dto.DetectedItem;
 import binbean.binbean_BE.dto.FloorList;
 import binbean.binbean_BE.dto.Position;
 import binbean.binbean_BE.dto.response.FloorPlanResponse;
-import binbean.binbean_BE.entity.floor_plan.FloorPlan;
-import binbean.binbean_BE.repository.floor_plan.FloorPlanRepository;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -16,6 +14,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import javax.imageio.ImageIO;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.SdkBytes;
@@ -28,6 +27,7 @@ import software.amazon.awssdk.services.rekognition.model.Instance;
 import software.amazon.awssdk.services.rekognition.model.Label;
 import software.amazon.awssdk.services.rekognition.model.RekognitionException;
 
+@Slf4j
 @Service
 public class RekognitionService {
 
@@ -65,6 +65,8 @@ public class RekognitionService {
             double xdist = person.x() - seat.x();
             double ydist = person.y() - seat.y();
             double dist = Math.sqrt(Math.pow(person.x() - seat.x(), 2) + Math.pow(person.y() - seat.y(), 2));
+
+            RekognitionService.log.info("거리차: ", xdist, ydist, dist);
             if (dist < minDistance) {
                 minDistance = dist;
                 nearest = seat;
@@ -72,7 +74,7 @@ public class RekognitionService {
         }
 
         // 최대 허용 거리 30픽셀 이내에 사람이 있으면 해당 위치 좌석에 앉았다고 판단
-        // FIXME : 이미지 비율에 따라 동적으로 변해야 함 (추후 수정)
+        // FIXME : 임계값은 이미지 비율에 따라 동적으로 변해야 함 (추후 수정)
         if (minDistance <= 30) return Optional.of(nearest);
         else return Optional.empty();
     }
