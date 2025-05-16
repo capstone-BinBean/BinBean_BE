@@ -13,13 +13,16 @@ public record Position(double x, double y) {
             .build();
     }
 
-    public static Position from(BoundingBox box) {
-        double x = (double) (box.left() * box.width());
-        double y = (double) (box.top() * box.height());
+    // 클라이언트로 받은 파일 이미지의 사이즈를 통해 픽셀 기준 좌표로 변환
+    public static Position convertToPixel(BoundingBox box, int imageWidth, int imageHeight) {
+        double x = (double) (box.left() * imageWidth);
+        double y = (double) (box.top() * imageHeight);
+        double w = (double) (box.width() * imageWidth);
+        double h = (double) (box.height() * imageHeight);
 
         return Position.builder()
-            .x(x)
-            .y(y)
+            .x(x + w / 2)
+            .y(y + h / 2)
             .build();
     }
 }
