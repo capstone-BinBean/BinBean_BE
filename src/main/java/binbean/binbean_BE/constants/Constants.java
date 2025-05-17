@@ -27,6 +27,10 @@ public class Constants {
         public static final String ROLE_PREFIX = "ROLE_";
     }
 
+    public static class FixedValue {
+        public static final String PERSON = "Person";
+    }
+
     public static class LoggingMsg {
         public static final String ACCESS_TOKEN_MISSING = "Access token is missing in request: ";
         public static final String LOGOUT_FLAG = "logout";
