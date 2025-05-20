@@ -17,7 +17,7 @@ public interface CafeRepository extends JpaRepository<Cafe, Long> {
      * 네이티브 쿼리로 사용
      */
     @Query(value = """
-        SELECT * FROM CAFE_TB 
+        SELECT * FROM cafe_tb 
         WHERE (6371 * acos(cos(radians(:latitude)) * cos(radians(latitude)) 
         * cos(radians(longitude) - radians(:longitude)) 
         + sin(radians(:latitude)) * sin(radians(latitude)))) <= :radius
