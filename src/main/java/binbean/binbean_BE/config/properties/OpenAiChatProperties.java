@@ -1,57 +1,34 @@
 package binbean.binbean_BE.config.properties;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @ConfigurationProperties(prefix = "spring.ai.openai")
 public class OpenAiChatProperties {
+    @Value("${spring.ai.openai.api-key}")
     private String apiKey;
-    private String chatBaseUrl;
+    @Value("${spring.ai.openai.chat.base-url}")
+    private String baseUrl;
+    @Value("${spring.ai.openai.chat.completions-path}")
+    private String path;
+    @Value("${spring.ai.openai.chat.model}")
+    private String model;
 
-//    public OpenAiChatProperties(String apiKey, Chat chat) {
-//        this.apiKey = apiKey;
-//        this.chat = chat;
-//    }
-//
-//    public String getApiKey() {
-//        return apiKey;
-//    }
-//
-//    public Chat getChat() {
-//        return chat;
-//    }
-//
-//    public static class Chat {
-//        private final String completionsPath;
-//        private final String baseUrl;
-//
-//        public Chat(String completionsPath, String baseUrl) {
-//            this.completionsPath = completionsPath;
-//            this.baseUrl = baseUrl;
-//        }
-//
-//        public String getCompletionsPath() {
-//            return completionsPath;
-//        }
-//
-//        public String getBaseUrl() {
-//            return baseUrl;
-//        }
-//    }
     public String getApiKey() {
         return apiKey;
     }
 
-    public void setApiKey(String apiKey) {
-        this.apiKey = apiKey;
+    public String getCompletionsPath() {
+        return path;
     }
 
-    public String getChatBaseUrl() {
-        return chatBaseUrl;
+    public String getBaseUrl() {
+        return baseUrl;
     }
 
-    public void setChatBaseUrl(String chatBaseUrl) {
-        this.chatBaseUrl = chatBaseUrl;
+    public String getModel() {
+        return model;
     }
 }

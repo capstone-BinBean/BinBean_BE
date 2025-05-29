@@ -6,15 +6,18 @@ import binbean.binbean_BE.dto.DetectedItem;
 import binbean.binbean_BE.dto.FloorList;
 import binbean.binbean_BE.dto.Position;
 import binbean.binbean_BE.dto.response.FloorPlanResponse;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import javax.imageio.ImageIO;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.SdkBytes;
@@ -30,17 +33,38 @@ import software.amazon.awssdk.services.rekognition.model.RekognitionException;
 @Slf4j
 @Service
 public class RekognitionService {
-
     private final RekognitionClient rekognitionClient;
+    private final GeminiService geminiService;
 
-    public RekognitionService(RekognitionClient rekognitionClient) {
+    private ObjectMapper objectMapper = new ObjectMapper();
+
+    public RekognitionService(RekognitionClient rekognitionClient, GeminiService geminiService) {
         this.rekognitionClient = rekognitionClient;
+        this.geminiService = geminiService;
     }
 
     public FloorPlanResponse getCurrentOccupiedSeats(MultipartFile file, FloorList floorList, int floorNumber) throws IOException {
         List<DetectedItem> people = getDetectedItems(file);
         List<Position> seatPositions = floorList.seatPosition();
         Set<Position> occupiedSeats = new HashSet<>();
+
+        try {
+            String peopleJson = objectMapper.writeValueAsString(people);
+            String seatPositionsJson = objectMapper.writeValueAsString(seatPositions);
+            String currentSeatsJson = objectMapper.writeValueAsString(CurrentSeats.create(List.of(Position.create(10, 10))));
+
+            String prompt = "다음은 사진으로부터 검출된 사람들의 위치야." + peopleJson + "\n 다음은 도면 상의 좌석 위치야. " + seatPositionsJson
+                + "\n 사진과 비교하여 좌석 위치에 앉아있는 사람의 위치를 매핑해줘. 조건은 다음과 같아. \n"
+                + "1. 이미지의 크기와 비율을 고려해줘\n"
+                + "2. 이미지의 왜곡 정도를 고려하여 이미지를 Perspective Transform (투시 변환/평면화)하여 도면 좌석의 위치와 비교해줘.\n"
+                + "3. 이미지의 회전 정도를 고려해줘 (좌석 위치는 정방향으로 바라봤을 때의 좌석 위치야)\n"
+                + "4. seatPostions의 좌석에 사람이 있는지의 여부를 " + currentSeatsJson + "의 형식으로 json 형태로 반환해줘";
+
+            var response = geminiService.askGeminiWithImage(prompt, Base64.getEncoder().encodeToString(file.getBytes()));
+            log.info("gemini response: {}", response);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         for (DetectedItem person : people) {
             for (Position pos : person.positions()) {
@@ -60,6 +84,7 @@ public class RekognitionService {
     public Optional<Position> matchSeatPosition(Position person, List<Position> seatPositions) {
         Position nearest = null;
         double minDistance = Double.MAX_VALUE;
+
         for (Position seat : seatPositions) {
             // 픽셀 좌표 간 유클리드 거리 차이
             double xdist = person.x() - seat.x();
