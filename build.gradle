@@ -21,6 +21,8 @@ configurations {
 
 repositories {
 	mavenCentral()
+//	maven {url 'https://repo.spring.io/snapshot'} //스냅샷 저장소 추가
+//	maven { url 'https://repo.spring.io/milestone' } // Spring AI 저장소
 }
 
 dependencies {
@@ -49,6 +51,14 @@ dependencies {
   	// AWS
 	implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
 	implementation 'software.amazon.awssdk:rekognition:2.31.31'
+
+	// WebFlux
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
+	// SPRING AI
+//	implementation("org.springframework.ai:spring-ai-openai-spring-boot-starter:0.8.1")
+//	implementation 'org.springframework.ai:spring-ai-openai-spring-boot-starter:1.0.0-SNAPSHOT'
+//	implementation 'org.springframework.ai:spring-ai-vertex-ai-gemini-spring-boot-starter:1.0.0-SNAPSHOT'
 
 	// TEST
 	testImplementation 'org.mockito:mockito-core:4.8.0'
