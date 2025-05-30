@@ -17,7 +17,6 @@ import java.util.Optional;
 import java.util.Set;
 import javax.imageio.ImageIO;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.SdkBytes;
@@ -47,21 +46,40 @@ public class RekognitionService {
         List<DetectedItem> people = getDetectedItems(file);
         List<Position> seatPositions = floorList.seatPosition();
         Set<Position> occupiedSeats = new HashSet<>();
+        Optional<CurrentSeats> currOccupiedSeats = Optional.empty();
+
+        var peoplePositions = people.stream().map(DetectedItem::positions).toList();
 
         try {
-            String peopleJson = objectMapper.writeValueAsString(people);
+            String peoplePositionsJson = objectMapper.writeValueAsString(peoplePositions);
             String seatPositionsJson = objectMapper.writeValueAsString(seatPositions);
-            String currentSeatsJson = objectMapper.writeValueAsString(CurrentSeats.create(List.of(Position.create(10, 10))));
+            // JSON 반환 예시
+            String currentSeatsJson = objectMapper.writeValueAsString(CurrentSeats.create(List.of(Position.create(10, 10), Position.create(10, 10))));
 
-            String prompt = "다음은 사진으로부터 검출된 사람들의 위치야." + peopleJson + "\n 다음은 도면 상의 좌석 위치야. " + seatPositionsJson
-                + "\n 사진과 비교하여 좌석 위치에 앉아있는 사람의 위치를 매핑해줘. 조건은 다음과 같아. \n"
-                + "1. 이미지의 크기와 비율을 고려해줘\n"
-                + "2. 이미지의 왜곡 정도를 고려하여 이미지를 Perspective Transform (투시 변환/평면화)하여 도면 좌석의 위치와 비교해줘.\n"
-                + "3. 이미지의 회전 정도를 고려해줘 (좌석 위치는 정방향으로 바라봤을 때의 좌석 위치야)\n"
-                + "4. seatPostions의 좌석에 사람이 있는지의 여부를 " + currentSeatsJson + "의 형식으로 json 형태로 반환해줘";
+//            String prompt = "다음은 사진으로부터 검출된 사람들의 위치야." + peoplePositionsJson + "\n 다음은 도면 상의 좌석 위치야. " + seatPositionsJson
+//                + "\n 사진과 비교하여 좌석 위치에 앉아있는 사람의 위치를 매핑해줘. 조건은 다음과 같아. \n"
+//                + "1. 사진 이미지의 크기와 비율을 고려해줘\n"
+//                + "2. 사진 이미지의 왜곡 정도를 고려하여 이미지를 Perspective Transform (투시 변환/평면화) 하여 도면 좌석의 위치와 비교해줘.\n"
+//                + "3. 사진 이미지의 회전 정도를 고려해줘\n"
+//                + "4. 사진과 도면 좌석 위치를 비교했을 때, seatPostions의 좌석에 사람이 있는 것만 " + currentSeatsJson + "의 형식으로 json 형태로 반환해줘.";
+
+            String prompt =
+                "다음은 사진으로부터 검출된 사람들의 위치입니다:\n" +
+                    peoplePositionsJson + "\n\n" +
+                    "아래는 도면 상에 정의된 좌석들의 위치입니다:\n" +
+                    seatPositionsJson + "\n\n" +
+                    "이제 다음 조건에 따라, 사람의 위치를 해당 좌석에 매핑해 주세요:\n" +
+                    "1. 사진 이미지의 크기와 비율을 고려해 주세요.\n" +
+                    "2. 사진의 왜곡을 평면화 처리 등을 통해 보정한 뒤(Perspective Transform, 투시 변환), 도면 좌석 위치와 정렬해 주세요.\n" +
+                    "3. 사진의 회전 정도도 고려해 주세요.\n" +
+                    "4. 사람의 위치가 좌석과 충분히 가까운 경우, 해당 좌석에 앉아 있다고 판단해 주세요.\n\n" +
+                    "결과는 사람이 앉아 있는 좌석만 포함하여 아래 형식의 JSON으로 반환해 주세요:\n" +
+                    currentSeatsJson;
 
             var response = geminiService.askGeminiWithImage(prompt, Base64.getEncoder().encodeToString(file.getBytes()));
             log.info("gemini response: {}", response);
+
+            currOccupiedSeats = parseJsonToCurrentSeats(response);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -75,9 +93,9 @@ public class RekognitionService {
 
         // 점유된 좌석 위치 리스트
         List<Position> occupiedPos = occupiedSeats.stream().toList();
-        CurrentSeats currOccupiedSeats = CurrentSeats.create(occupiedPos);
+//        CurrentSeats currOccupiedSeats = CurrentSeats.create(occupiedPos);
 
-        return FloorPlanResponse.create(floorList, floorNumber, currOccupiedSeats);
+        return FloorPlanResponse.create(floorList, floorNumber, currOccupiedSeats.orElse(null));
     }
 
     // 이미지 상의 사람의 위치 좌표와 도면 좌표 매핑 (감지된 사람을 가장 가까운 좌석에 매핑)
@@ -182,5 +200,22 @@ public class RekognitionService {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
+    }
+
+    public Optional<CurrentSeats> parseJsonToCurrentSeats(String rawJson) {
+        try {
+            var json = cleanJsonMarkdown(rawJson);
+            return Optional.ofNullable(objectMapper.readValue(json, CurrentSeats.class));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public String cleanJsonMarkdown(String rawJson) {
+        return rawJson
+            .replace("```json", "")
+            .replace("```", "")
+            .trim();
     }
 }
