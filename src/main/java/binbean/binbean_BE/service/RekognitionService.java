@@ -51,14 +51,18 @@ public class RekognitionService {
         var peoplePositions = people.stream().map(DetectedItem::positions).toList();
 
         try {
+            String imageBytes = Base64.getEncoder().encodeToString(file.getBytes());
+            int peopleCount = !people.isEmpty() ? people.getFirst().value() : 0;
             String peoplePositionsJson = objectMapper.writeValueAsString(peoplePositions);
             String seatPositionsJson = objectMapper.writeValueAsString(seatPositions);
             // JSON 반환 예시
             String currentSeatsJson = objectMapper.writeValueAsString(CurrentSeats.create(List.of(Position.create(10, 10), Position.create(10, 10))));
 
             String prompt =
+                "이미지는 다음과 같습니다. " + imageBytes  + "\n" +
                 "다음은 이미지에서 검출된 사람들의 위치입니다:\n" +
                     peoplePositionsJson + "\n\n" +
+                    "이미지에서 검출된 사람들의 수는 " + peopleCount + "명입니다.\n" +
                     "아래는 도면 상에 정의된 좌석들의 위치입니다:\n" +
                     seatPositionsJson + "\n\n" +
                     "이제 다음 조건에 따라, 사람의 위치를 해당 좌석에 매핑해 주세요:\n" +
@@ -66,10 +70,10 @@ public class RekognitionService {
                     "2. 사진의 왜곡을 평면화 처리 등을 통해 보정한 뒤(Perspective Transform, 투시 변환), 도면 좌석 위치와 정렬해 주세요.\n" +
                     "3. 사진의 회전 정도도 고려해 주세요.\n" +
                     "4. 사람의 위치가 좌석과 충분히 가까운 경우, 해당 좌석에 앉아 있다고 판단해 주세요.\n\n" +
-                    "결과는 사람이 앉아 있는 좌석만 포함하여 아래 형식의 JSON으로 반환해 주세요:\n" +
+                    "5. 결과는 사람이 앉아 있는 좌석만 포함하여 아래 형식의 JSON으로 반환해 주세요:\n" +
                     currentSeatsJson;
 
-            var response = geminiService.askGeminiWithImage(prompt, Base64.getEncoder().encodeToString(file.getBytes()));
+            var response = geminiService.askGeminiWithImage(prompt, imageBytes);
             log.info("gemini response: {}", response);
 
             currOccupiedSeats = parseJsonToCurrentSeats(response);
