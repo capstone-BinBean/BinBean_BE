@@ -20,23 +20,15 @@ import org.springframework.web.multipart.MultipartFile;
 public class CCTVProcessingController {
 
     private final RekognitionService rekognitionService;
-    private final GeminiService geminiService;
 
-    public CCTVProcessingController(RekognitionService rekognitionService, GeminiService geminiService) {
+    public CCTVProcessingController(RekognitionService rekognitionService) {
         this.rekognitionService = rekognitionService;
-        this.geminiService = geminiService;
     }
 
     @PostMapping(value = "/detect", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<FloorPlanResponse> getDetectedItems(@RequestPart(value = "image") MultipartFile image,
-        @RequestPart("floor") FloorList floorList, @RequestPart("floorNumber") int floorNumber) throws IOException {
+        @RequestPart("floorList") FloorList floorList, @RequestPart("floorNumber") int floorNumber) throws IOException {
         var response = rekognitionService.getCurrentOccupiedSeats(image, floorList, floorNumber);
         return ResponseEntity.status(HttpStatus.OK).body(response);
-    }
-
-    @PostMapping(value = "/map", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<Void> getMappedResult(@RequestPart(value = "image") MultipartFile image) throws IOException {
-        var response = geminiService.askGeminiWithImage("", Base64.getEncoder().encodeToString(image.getBytes()));
-        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

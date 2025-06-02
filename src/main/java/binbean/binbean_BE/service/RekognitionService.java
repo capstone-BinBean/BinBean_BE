@@ -45,7 +45,7 @@ public class RekognitionService {
     public FloorPlanResponse getCurrentOccupiedSeats(MultipartFile file, FloorList floorList, int floorNumber) throws IOException {
         List<DetectedItem> people = getDetectedItems(file);
         List<Position> seatPositions = floorList.seatPosition();
-        Set<Position> occupiedSeats = new HashSet<>();
+//        Set<Position> occupiedSeats = new HashSet<>();
         Optional<CurrentSeats> currOccupiedSeats = Optional.empty();
 
         var peoplePositions = people.stream().map(DetectedItem::positions).toList();
@@ -56,15 +56,8 @@ public class RekognitionService {
             // JSON 반환 예시
             String currentSeatsJson = objectMapper.writeValueAsString(CurrentSeats.create(List.of(Position.create(10, 10), Position.create(10, 10))));
 
-//            String prompt = "다음은 사진으로부터 검출된 사람들의 위치야." + peoplePositionsJson + "\n 다음은 도면 상의 좌석 위치야. " + seatPositionsJson
-//                + "\n 사진과 비교하여 좌석 위치에 앉아있는 사람의 위치를 매핑해줘. 조건은 다음과 같아. \n"
-//                + "1. 사진 이미지의 크기와 비율을 고려해줘\n"
-//                + "2. 사진 이미지의 왜곡 정도를 고려하여 이미지를 Perspective Transform (투시 변환/평면화) 하여 도면 좌석의 위치와 비교해줘.\n"
-//                + "3. 사진 이미지의 회전 정도를 고려해줘\n"
-//                + "4. 사진과 도면 좌석 위치를 비교했을 때, seatPostions의 좌석에 사람이 있는 것만 " + currentSeatsJson + "의 형식으로 json 형태로 반환해줘.";
-
             String prompt =
-                "다음은 사진으로부터 검출된 사람들의 위치입니다:\n" +
+                "다음은 이미지에서 검출된 사람들의 위치입니다:\n" +
                     peoplePositionsJson + "\n\n" +
                     "아래는 도면 상에 정의된 좌석들의 위치입니다:\n" +
                     seatPositionsJson + "\n\n" +
@@ -84,15 +77,16 @@ public class RekognitionService {
             e.printStackTrace();
         }
 
-        for (DetectedItem person : people) {
-            for (Position pos : person.positions()) {
-                // 사람 위치와 좌석 위치 매칭
-                matchSeatPosition(pos, seatPositions).ifPresent(occupiedSeats::add);
-            }
-        }
+        // FIXME : 추후 gemini api와 혼합하여 사용 예정
+//        for (DetectedItem person : people) {
+//            for (Position pos : person.positions()) {
+//                // 사람 위치와 좌석 위치 매칭
+//                matchSeatPosition(pos, seatPositions).ifPresent(occupiedSeats::add);
+//            }
+//        }
 
         // 점유된 좌석 위치 리스트
-        List<Position> occupiedPos = occupiedSeats.stream().toList();
+//        List<Position> occupiedPos = occupiedSeats.stream().toList();
 //        CurrentSeats currOccupiedSeats = CurrentSeats.create(occupiedPos);
 
         return FloorPlanResponse.create(floorList, floorNumber, currOccupiedSeats.orElse(null));
@@ -119,8 +113,7 @@ public class RekognitionService {
         // 동적 임계값 계산
         double threshold = getDynamicThreshold(seatPositions);
 
-        // 최대 허용 거리 30픽셀 이내에 사람이 있으면 해당 위치 좌석에 앉았다고 판단
-        // FIXME : 임계값은 이미지 비율에 따라 동적으로 변해야 함 (추후 수정)
+        // 최대 허용 거리 이내에 사람이 있으면 해당 위치 좌석에 앉았다고 판단
         if (minDistance <= threshold) return Optional.of(nearest);
         else return Optional.empty();
     }
