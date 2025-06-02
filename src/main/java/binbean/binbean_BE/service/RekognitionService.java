@@ -6,9 +6,11 @@ import binbean.binbean_BE.dto.DetectedItem;
 import binbean.binbean_BE.dto.FloorList;
 import binbean.binbean_BE.dto.Position;
 import binbean.binbean_BE.dto.response.FloorPlanResponse;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -30,36 +32,75 @@ import software.amazon.awssdk.services.rekognition.model.RekognitionException;
 @Slf4j
 @Service
 public class RekognitionService {
-
     private final RekognitionClient rekognitionClient;
+    private final GeminiService geminiService;
 
-    public RekognitionService(RekognitionClient rekognitionClient) {
+    private ObjectMapper objectMapper = new ObjectMapper();
+
+    public RekognitionService(RekognitionClient rekognitionClient, GeminiService geminiService) {
         this.rekognitionClient = rekognitionClient;
+        this.geminiService = geminiService;
     }
 
     public FloorPlanResponse getCurrentOccupiedSeats(MultipartFile file, FloorList floorList, int floorNumber) throws IOException {
         List<DetectedItem> people = getDetectedItems(file);
         List<Position> seatPositions = floorList.seatPosition();
-        Set<Position> occupiedSeats = new HashSet<>();
+//        Set<Position> occupiedSeats = new HashSet<>();
+        Optional<CurrentSeats> currOccupiedSeats = Optional.empty();
 
-        for (DetectedItem person : people) {
-            for (Position pos : person.positions()) {
-                // 사람 위치와 좌석 위치 매칭
-                matchSeatPosition(pos, seatPositions).ifPresent(occupiedSeats::add);
-            }
+        var peoplePositions = people.stream().map(DetectedItem::positions).toList();
+
+        try {
+            String imageBytes = Base64.getEncoder().encodeToString(file.getBytes());
+            int peopleCount = !people.isEmpty() ? people.getFirst().value() : 0;
+            String peoplePositionsJson = objectMapper.writeValueAsString(peoplePositions);
+            String seatPositionsJson = objectMapper.writeValueAsString(seatPositions);
+            // JSON 반환 예시
+            String currentSeatsJson = objectMapper.writeValueAsString(CurrentSeats.create(List.of(Position.create(10, 10), Position.create(10, 10))));
+
+            String prompt =
+                "이미지는 다음과 같습니다. " + imageBytes  + "\n" +
+                "다음은 이미지에서 검출된 사람들의 위치입니다:\n" +
+                    peoplePositionsJson + "\n\n" +
+                    "이미지에서 검출된 사람들의 수는 " + peopleCount + "명입니다.\n" +
+                    "아래는 도면 상에 정의된 좌석들의 위치입니다:\n" +
+                    seatPositionsJson + "\n\n" +
+                    "이제 다음 조건에 따라, 사람의 위치를 해당 좌석에 매핑해 주세요:\n" +
+                    "1. 사진 이미지의 크기와 비율을 고려해 주세요.\n" +
+                    "2. 사진의 왜곡을 평면화 처리 등을 통해 보정한 뒤(Perspective Transform, 투시 변환), 도면 좌석 위치와 정렬해 주세요.\n" +
+                    "3. 사진의 회전 정도도 고려해 주세요.\n" +
+                    "4. 사람의 위치가 좌석과 충분히 가까운 경우, 해당 좌석에 앉아 있다고 판단해 주세요.\n\n" +
+                    "5. 결과는 사람이 앉아 있는 좌석만 포함하여 아래 형식의 JSON으로 반환해 주세요:\n" +
+                    currentSeatsJson;
+
+            var response = geminiService.askGeminiWithImage(prompt, imageBytes);
+            log.info("gemini response: {}", response);
+
+            currOccupiedSeats = parseJsonToCurrentSeats(response);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
-        // 점유된 좌석 위치 리스트
-        List<Position> occupiedPos = occupiedSeats.stream().toList();
-        CurrentSeats currOccupiedSeats = CurrentSeats.create(occupiedPos);
+        // FIXME : 추후 gemini api와 혼합하여 사용 예정
+//        for (DetectedItem person : people) {
+//            for (Position pos : person.positions()) {
+//                // 사람 위치와 좌석 위치 매칭
+//                matchSeatPosition(pos, seatPositions).ifPresent(occupiedSeats::add);
+//            }
+//        }
 
-        return FloorPlanResponse.create(floorList, floorNumber, currOccupiedSeats);
+        // 점유된 좌석 위치 리스트
+//        List<Position> occupiedPos = occupiedSeats.stream().toList();
+//        CurrentSeats currOccupiedSeats = CurrentSeats.create(occupiedPos);
+
+        return FloorPlanResponse.create(floorList, floorNumber, currOccupiedSeats.orElse(null));
     }
 
-    // 이미지 상의 사람의 위치 좌표와 도면 좌표 매핑
+    // 이미지 상의 사람의 위치 좌표와 도면 좌표 매핑 (감지된 사람을 가장 가까운 좌석에 매핑)
     public Optional<Position> matchSeatPosition(Position person, List<Position> seatPositions) {
         Position nearest = null;
         double minDistance = Double.MAX_VALUE;
+
         for (Position seat : seatPositions) {
             // 픽셀 좌표 간 유클리드 거리 차이
             double xdist = person.x() - seat.x();
@@ -73,10 +114,36 @@ public class RekognitionService {
             }
         }
 
-        // 최대 허용 거리 30픽셀 이내에 사람이 있으면 해당 위치 좌석에 앉았다고 판단
-        // FIXME : 임계값은 이미지 비율에 따라 동적으로 변해야 함 (추후 수정)
-        if (minDistance <= 30) return Optional.of(nearest);
+        // 동적 임계값 계산
+        double threshold = getDynamicThreshold(seatPositions);
+
+        // 최대 허용 거리 이내에 사람이 있으면 해당 위치 좌석에 앉았다고 판단
+        if (minDistance <= threshold) return Optional.of(nearest);
         else return Optional.empty();
+    }
+
+    // 도면 상의 좌석 간 평균 거리 계산
+    public double calculateAverageSeatDistance(List<Position> seatPositions) {
+        double totalDistance = 0.0;
+        int count = 0;
+        for (int i=0; i < seatPositions.size(); i++) {
+            for (int j=i+1; j < seatPositions.size(); j++) {
+                double dx = seatPositions.get(i).x() - seatPositions.get(j).x();
+                double dy = seatPositions.get(i).y() - seatPositions.get(j).y();
+                double dist = Math.sqrt(dx * dx + dy * dy);
+
+                totalDistance += dist;
+                count++;
+            }
+        }
+
+        return count == 0 ? 0.0 : (totalDistance/count);
+    }
+
+    // 평균 좌석 거리 기반 임계값 비율 계산 (사람과 좌석 간 허용 거리)
+    public double getDynamicThreshold(List<Position> seatPositions) {
+        double avgSeatDistance = calculateAverageSeatDistance(seatPositions);
+        return avgSeatDistance * 0.4;
     }
 
     private List<DetectedItem> getDetectedItems(MultipartFile file) throws IOException {
@@ -130,5 +197,22 @@ public class RekognitionService {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
+    }
+
+    public Optional<CurrentSeats> parseJsonToCurrentSeats(String rawJson) {
+        try {
+            var json = cleanJsonMarkdown(rawJson);
+            return Optional.ofNullable(objectMapper.readValue(json, CurrentSeats.class));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public String cleanJsonMarkdown(String rawJson) {
+        return rawJson
+            .replace("```json", "")
+            .replace("```", "")
+            .trim();
     }
 }
