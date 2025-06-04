@@ -35,7 +35,7 @@ public class RekognitionService {
     private final RekognitionClient rekognitionClient;
     private final GeminiService geminiService;
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public RekognitionService(RekognitionClient rekognitionClient, GeminiService geminiService) {
         this.rekognitionClient = rekognitionClient;
@@ -45,14 +45,18 @@ public class RekognitionService {
     public FloorPlanResponse getCurrentOccupiedSeats(MultipartFile file, FloorList floorList, int floorNumber) throws IOException {
         List<DetectedItem> people = getDetectedItems(file);
         List<Position> seatPositions = floorList.seatPosition();
-//        Set<Position> occupiedSeats = new HashSet<>();
+        // Euclidean distance 위치값 셋
+        Set<Position> occupiedSeatsByEuclid = new HashSet<>();
+        // 점유된 좌석
         Optional<CurrentSeats> currOccupiedSeats = Optional.empty();
 
         var peoplePositions = people.stream().map(DetectedItem::positions).toList();
 
         try {
             String imageBytes = Base64.getEncoder().encodeToString(file.getBytes());
+            // 검출된 사람 수
             int peopleCount = !people.isEmpty() ? people.getFirst().value() : 0;
+            // 좌표 위치 JSON 문자열 변환
             String peoplePositionsJson = objectMapper.writeValueAsString(peoplePositions);
             String seatPositionsJson = objectMapper.writeValueAsString(seatPositions);
             // JSON 반환 예시
@@ -73,25 +77,27 @@ public class RekognitionService {
                     "5. 결과는 사람이 앉아 있는 좌석만 포함하여 아래 형식의 JSON으로 반환해 주세요:\n" +
                     currentSeatsJson;
 
+            // 점유된 좌석 위치 리스트 반환
             var response = geminiService.askGeminiWithImage(prompt, imageBytes);
             log.info("gemini response: {}", response);
 
             currOccupiedSeats = parseJsonToCurrentSeats(response);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.warn("Gemini API 호출 시 Exception 발생. Euclidean 방식으로 처리합니다.", e);
         }
 
-        // FIXME : 추후 gemini api와 혼합하여 사용 예정
-//        for (DetectedItem person : people) {
-//            for (Position pos : person.positions()) {
-//                // 사람 위치와 좌석 위치 매칭
-//                matchSeatPosition(pos, seatPositions).ifPresent(occupiedSeats::add);
-//            }
-//        }
-
-        // 점유된 좌석 위치 리스트
-//        List<Position> occupiedPos = occupiedSeats.stream().toList();
-//        CurrentSeats currOccupiedSeats = CurrentSeats.create(occupiedPos);
+        // Gemini에서 도면과 매핑된 좌석을 못가져왔거나 Exception이 발생했을 경우, 유클리드 거리 기반 계산으로 재처리
+        if (currOccupiedSeats.isEmpty()) {
+            for (DetectedItem person : people) {
+                for (Position pos : person.positions()) {
+                    // 사람 위치와 좌석 위치 매칭(유클리드 거리 기반)
+                    matchSeatPosition(pos, seatPositions).ifPresent(occupiedSeatsByEuclid::add);
+                }
+            }
+            // 점유된 좌석 위치 리스트
+            currOccupiedSeats = Optional.ofNullable(
+                CurrentSeats.create(occupiedSeatsByEuclid.stream().toList()));
+        }
 
         return FloorPlanResponse.create(floorList, floorNumber, currOccupiedSeats.orElse(null));
     }
@@ -103,11 +109,8 @@ public class RekognitionService {
 
         for (Position seat : seatPositions) {
             // 픽셀 좌표 간 유클리드 거리 차이
-            double xdist = person.x() - seat.x();
-            double ydist = person.y() - seat.y();
             double dist = Math.sqrt(Math.pow(person.x() - seat.x(), 2) + Math.pow(person.y() - seat.y(), 2));
 
-            RekognitionService.log.info("거리차: ", xdist, ydist, dist);
             if (dist < minDistance) {
                 minDistance = dist;
                 nearest = seat;
@@ -204,8 +207,8 @@ public class RekognitionService {
             var json = cleanJsonMarkdown(rawJson);
             return Optional.ofNullable(objectMapper.readValue(json, CurrentSeats.class));
         } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+            log.warn("Failed to parse Gemini JSON response into CurrentSeats: {}", rawJson, e);
+            return Optional.empty();
         }
     }
 
