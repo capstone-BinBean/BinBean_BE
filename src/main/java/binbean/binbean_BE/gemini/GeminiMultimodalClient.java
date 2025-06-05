@@ -9,11 +9,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @Component
-public class GeminiProVisionModel {
+public class GeminiMultimodalClient {
     private final OpenAiChatProperties chatProperties;
     private final WebClient webClient;
 
-    public GeminiProVisionModel(OpenAiChatProperties chatProperties, WebClient webClient) {
+    public GeminiMultimodalClient(OpenAiChatProperties chatProperties, WebClient webClient) {
         this.chatProperties = chatProperties;
         this.webClient = webClient;
     }
