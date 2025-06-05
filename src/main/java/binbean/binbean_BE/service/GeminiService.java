@@ -1,6 +1,6 @@
 package binbean.binbean_BE.service;
 
-import binbean.binbean_BE.gemini.GeminiMultimodalClient;
+import binbean.binbean_BE.integration.gemini.GeminiMultimodalClient;
 import org.springframework.stereotype.Service;
 
 @Service

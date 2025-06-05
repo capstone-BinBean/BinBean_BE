@@ -1,4 +1,4 @@
-package binbean.binbean_BE.gemini;
+package binbean.binbean_BE.integration.gemini;
 
 import binbean.binbean_BE.config.properties.OpenAiChatProperties;
 import binbean.binbean_BE.dto.response.GeminiProVisionResponse;
