@@ -1,6 +1,5 @@
 package binbean.binbean_BE.service;
 
-import binbean.binbean_BE.constants.Constants;
 import binbean.binbean_BE.constants.Constants.FixedValue;
 import binbean.binbean_BE.dto.CurrentSeats;
 import binbean.binbean_BE.dto.DetectedItem;
@@ -35,13 +34,13 @@ import software.amazon.awssdk.services.rekognition.model.RekognitionException;
 
 @Slf4j
 @Service
-public class RekognitionService {
+public class SeatDetectionService {
     private final RekognitionClient rekognitionClient;
     private final GeminiService geminiService;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public RekognitionService(RekognitionClient rekognitionClient, GeminiService geminiService) {
+    public SeatDetectionService(RekognitionClient rekognitionClient, GeminiService geminiService) {
         this.rekognitionClient = rekognitionClient;
         this.geminiService = geminiService;
     }
