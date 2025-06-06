@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+  <meta charset="UTF-8"/>
+  <title>카페 현황</title>
+</head>
+<body>
+<h2>카페 현황</h2>
+<table border="1" cellpadding="5" cellspacing="0">
+  <thead>
+  <tr>
+    <th>ID</th>
+    <th>소유자</th>
+    <th>카페 이름</th>
+    <th>주소</th>
+    <th>위도</th>
+    <th>경도</th>
+    <th>전화번호</th>
+    <th>와이파이</th>
+    <th>충전기</th>
+    <th>반려동물</th>
+    <th>어린이</th>
+    <th>설명</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr th:each="cafe : ${cafes}">
+    <td th:text="${cafe.id}"></td>
+    <td th:text="${cafe.user.email}"></td>
+    <td th:text="${cafe.cafeName}"></td>
+    <td th:text="${cafe.cafeAddress}"></td>
+    <td th:text="${cafe.latitude}"></td>
+    <td th:text="${cafe.longitude}"></td>
+    <td th:text="${cafe.cafePhone}"></td>
+    <td th:text="${cafe.wifiAvailable == 1 ? '가능' : '불가능'}"></td>
+    <td th:text="${cafe.chargerAvailable == 1 ? '가능' : '불가능'}"></td>
+    <td th:text="${cafe.petAvailable == 1 ? '가능' : '불가능'}"></td>
+    <td th:text="${cafe.kidsAvailable == 1 ? '가능' : '불가능'}"></td>
+    <td th:text="${cafe.cafeDescription}"></td>
+  </tr>
+  </tbody>
+</table>
+</body>
+</html>
