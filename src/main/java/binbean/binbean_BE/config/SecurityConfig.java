@@ -112,8 +112,8 @@ public class SecurityConfig {
             .sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests((requests) ->
                 requests
-                    .requestMatchers(HttpMethod.POST, URL.ALLOWED_URLS)
-                    .permitAll()
+                    .requestMatchers(HttpMethod.POST, URL.ALLOWED_URLS).permitAll()
+                    .requestMatchers(HttpMethod.GET, "/api/admin/**").permitAll() // -> 관리자 계정만 접속 할 수 있도록 변경
                     .anyRequest()
                     .authenticated()
             )

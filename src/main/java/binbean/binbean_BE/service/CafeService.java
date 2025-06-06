@@ -99,6 +99,10 @@ public class CafeService {
         saveCafeImages(cafe, cafeImgFiles);
     }
 
+    public List<Cafe> getAllCafe() {
+        return cafeRepository.findAll();
+    }
+
     private void saveCafeImages(Cafe cafe, List<MultipartFile> cafeImgFiles) {
         for (MultipartFile image : cafeImgFiles) {
             String imageUrl = imageStorageService.uploadImage(image);
