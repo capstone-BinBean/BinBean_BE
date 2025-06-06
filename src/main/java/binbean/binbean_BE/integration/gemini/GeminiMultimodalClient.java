@@ -1,29 +1,23 @@
-package binbean.binbean_BE.gemini;
+package binbean.binbean_BE.integration.gemini;
 
 import binbean.binbean_BE.config.properties.OpenAiChatProperties;
 import binbean.binbean_BE.dto.response.GeminiProVisionResponse;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.List;
 import java.util.Map;
-//import org.springframework.ai.autoconfigure.openai.OpenAiChatProperties;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 @Component
-public class GeminiProVisionModel {
+public class GeminiMultimodalClient {
     private final OpenAiChatProperties chatProperties;
     private final WebClient webClient;
 
-    public GeminiProVisionModel(OpenAiChatProperties chatProperties, WebClient webClient) {
+    public GeminiMultimodalClient(OpenAiChatProperties chatProperties, WebClient webClient) {
         this.chatProperties = chatProperties;
         this.webClient = webClient;
     }
 
-/**
- * Vision + Text prompt를 받아 Gemini VLM API 호출
- */
     public String call(String prompt, String base64Image) {
         // 1) 멀티모달 요청 바디 구성
         Map<String, Object> requestBody = Map.of(
@@ -38,6 +32,12 @@ public class GeminiProVisionModel {
             )
         );
 
+        /** 2) Gemini API 호출을 위한 WebClient 요청
+         * - API 엔드포인트 : completionPath와 API KEY 기반 구성
+         * - 요청 본문(requestBody)을 JSON 형식 직렬화하여 POST 요청
+         * - 응답 : GeminiProVisionResponse 객체로 역직렬화
+         * - block() 호출 통하여 Mono를 동기 방식으로 처리
+         */
         GeminiProVisionResponse response = webClient.post()
             .uri(uriBuilder -> uriBuilder
                 .path(chatProperties.getCompletionsPath())
@@ -55,6 +55,6 @@ public class GeminiProVisionModel {
         }
 
         // 4) 첫 번째 후보 텍스트 추출
-        return response.candidates().get(0).content.parts.get(0).text;
+        return response.candidates().getFirst().content.parts.getFirst().text;
     }
 }

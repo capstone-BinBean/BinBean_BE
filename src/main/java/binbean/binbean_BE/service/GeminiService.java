@@ -1,14 +1,14 @@
 package binbean.binbean_BE.service;
 
-import binbean.binbean_BE.gemini.GeminiProVisionModel;
+import binbean.binbean_BE.integration.gemini.GeminiMultimodalClient;
 import org.springframework.stereotype.Service;
 
 @Service
 public class GeminiService {
 
-    private final GeminiProVisionModel model;
+    private final GeminiMultimodalClient model;
 
-    public GeminiService(GeminiProVisionModel model) {
+    public GeminiService(GeminiMultimodalClient model) {
         this.model = model;
     }
 

@@ -55,13 +55,6 @@ dependencies {
 	// WebFlux
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
-	// SPRING AI
-//	implementation("org.springframework.ai:spring-ai-openai-spring-boot-starter:0.8.1")
-//	implementation 'org.springframework.ai:spring-ai-openai-spring-boot-starter:1.0.0-SNAPSHOT'
-//	implementation 'org.springframework.ai:spring-ai-vertex-ai-gemini-spring-boot-starter:1.0.0-SNAPSHOT'
-
-//	implementation 'org.springframework.ai:spring-ai-starter-model-vertex-ai-gemini'
-
 	// TEST
 	testImplementation 'org.mockito:mockito-core:4.8.0'
 	testImplementation 'org.springframework.security:spring-security-test'

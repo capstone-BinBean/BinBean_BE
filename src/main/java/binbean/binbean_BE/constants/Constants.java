@@ -29,6 +29,9 @@ public class Constants {
 
     public static class FixedValue {
         public static final String PERSON = "Person";
+        // CCTV 이미지 리사이징 시 고정 너비 값 (테스트 결과, Gemini API가 최적 성능을 내는 크기)
+        public static final Integer CCTV_IMAGE_WIDTH = 800;
+        public static final String IMAGE_FORMAT = "jpg";
     }
 
     public static class LoggingMsg {
