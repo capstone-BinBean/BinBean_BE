@@ -21,6 +21,7 @@ import binbean.binbean_BE.repository.CafeImgRepository;
 import binbean.binbean_BE.repository.CafeRepository;
 import jakarta.transaction.Transactional;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -71,6 +72,10 @@ public class CafeService {
         businessHoursRepository.save(businessHours);
 
         floorPlanService.saveFloorPlan(floorRequest, cafe);
+
+        if (cafeImgFiles == null) {
+            cafeImgFiles = Collections.emptyList();
+        }
         saveCafeImages(cafe, cafeImgFiles);
 
         CafeIdResponse response = CafeIdResponse.create(cafe.getId());
@@ -109,6 +114,9 @@ public class CafeService {
     }
 
     private void saveCafeImages(Cafe cafe, List<MultipartFile> cafeImgFiles) {
+        if (cafeImgFiles==null || cafeImgFiles.isEmpty()) {
+            return;
+        }
         for (MultipartFile image : cafeImgFiles) {
             String imageUrl = imageStorageService.uploadImage(image);
             CafeImg cafeImg = CafeImg.create(cafe, imageUrl);
