@@ -7,6 +7,7 @@ import binbean.binbean_BE.dto.OperatingHours;
 import binbean.binbean_BE.dto.request.CafeRegisterRequest;
 import binbean.binbean_BE.dto.request.CafeUpdateRequest;
 import binbean.binbean_BE.dto.request.FloorPlanRegisterRequest;
+import binbean.binbean_BE.dto.response.CafeIdResponse;
 import binbean.binbean_BE.dto.response.CafeInfoResponse;
 import binbean.binbean_BE.dto.response.CafeSearchResponse;
 import binbean.binbean_BE.dto.response.ReviewResponse;
@@ -61,7 +62,7 @@ public class CafeService {
         return responses;
     }
 
-    public void registerCafe(CafeRegisterRequest cafeRequest, List<FloorPlanRegisterRequest> floorRequest,
+    public CafeIdResponse registerCafe(CafeRegisterRequest cafeRequest, List<FloorPlanRegisterRequest> floorRequest,
         List<MultipartFile> cafeImgFiles, User user) {
         Cafe cafe = cafeRequest.toCafeEntity(user);
         cafeRepository.save(cafe);
@@ -71,6 +72,10 @@ public class CafeService {
 
         floorPlanService.saveFloorPlan(floorRequest, cafe);
         saveCafeImages(cafe, cafeImgFiles);
+
+        CafeIdResponse response = CafeIdResponse.create(cafe.getId());
+
+        return response;
     }
 
     public CafeInfoResponse getCafeInfo(Long cafeId) {

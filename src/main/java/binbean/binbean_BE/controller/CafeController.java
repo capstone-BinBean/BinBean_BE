@@ -6,6 +6,7 @@ import binbean.binbean_BE.dto.request.CafeUpdateRequest;
 import binbean.binbean_BE.dto.request.FavoritesRequest;
 import binbean.binbean_BE.dto.request.FloorPlanRegisterRequest;
 import binbean.binbean_BE.dto.request.FloorPlanUpdateRequest;
+import binbean.binbean_BE.dto.response.CafeIdResponse;
 import binbean.binbean_BE.dto.response.CafeInfoResponse;
 import binbean.binbean_BE.dto.response.CafeSearchResponse;
 import binbean.binbean_BE.dto.response.FloorPlanResponse;
@@ -74,13 +75,14 @@ public class CafeController {
     }
 
     @PostMapping(value = "/registration", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<Void> registerCafe(@RequestPart("cafe") CafeRegisterRequest cafeRequest,
+    public ResponseEntity<CafeIdResponse> registerCafe(@RequestPart("cafe") CafeRegisterRequest cafeRequest,
         @RequestPart("floorPlan") List<FloorPlanRegisterRequest> floorRequest,
         @RequestPart(value = "cafeImg", required = false) List<MultipartFile> cafeImgFiles,
         @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
-        cafeService.registerCafe(cafeRequest, floorRequest, cafeImgFiles, userDetails.getUser());
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        CafeIdResponse response = cafeService.registerCafe(cafeRequest, floorRequest, cafeImgFiles,
+            userDetails.getUser());
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PutMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
