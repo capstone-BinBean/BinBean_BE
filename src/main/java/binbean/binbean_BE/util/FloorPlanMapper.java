@@ -6,6 +6,7 @@ import binbean.binbean_BE.entity.floor_plan.Counter;
 import binbean.binbean_BE.entity.floor_plan.Door;
 import binbean.binbean_BE.entity.floor_plan.FloorPlan;
 import binbean.binbean_BE.entity.floor_plan.Seats;
+import binbean.binbean_BE.entity.floor_plan.Table;
 import binbean.binbean_BE.entity.floor_plan.Toilet;
 import binbean.binbean_BE.entity.floor_plan.Window;
 import java.util.List;
@@ -48,6 +49,12 @@ public class FloorPlanMapper {
     public List<Window> createWindows(FloorList floorList, FloorPlan floorPlan) {
         return floorList.windowPosition().stream()
             .map(pos -> Window.create(floorPlan, pos.x(), pos.y()))
+            .collect(Collectors.toList());
+    }
+
+    public List<Table> createTables(FloorList floorList, FloorPlan floorPlan) {
+        return floorList.tablePosition().stream()
+            .map(pos -> Table.create(floorPlan, pos.x(), pos.y()))
             .collect(Collectors.toList());
     }
 }
