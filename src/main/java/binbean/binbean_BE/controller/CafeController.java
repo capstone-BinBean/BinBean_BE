@@ -52,7 +52,7 @@ public class CafeController {
         return ResponseEntity.status(HttpStatus.OK).body(responses);
     }
 
-    @GetMapping("/floor-plan/{cafe_id}")
+    @GetMapping("{cafe_id}/floor-plan")
     public ResponseEntity<List<FloorPlanResponse>> getFloorPlan(@PathVariable(name = "cafe_id") Long cafeId) {
 
         List<FloorPlanResponse> response = floorPlanService.getFloorPlan(cafeId);
@@ -85,20 +85,20 @@ public class CafeController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @PutMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    @PutMapping(value = "/{cafe_id}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<Void> updateCafeInfo(@RequestPart("cafe") CafeUpdateRequest request,
         @RequestPart(value = "cafeImg", required = false) List<MultipartFile> cafeImgFiles,
-        @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        @PathVariable(name = "cafe_id") Long cafeId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
-        cafeService.updateCafeInfo(request, cafeImgFiles, userDetails.getUser());
+        cafeService.updateCafeInfo(request, cafeImgFiles, cafeId, userDetails.getUser());
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    @PutMapping("/floor-plan")
+    @PutMapping("/{cafe_id}/floor-plan")
     public ResponseEntity<Void> updateFloorPlan(@RequestBody List<FloorPlanUpdateRequest> requests,
-        @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        @PathVariable(name = "cafe_id") Long cafeId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
-        floorPlanService.updateFloorPlan(requests, userDetails.getUser());
+        floorPlanService.updateFloorPlan(requests, cafeId, userDetails.getUser());
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

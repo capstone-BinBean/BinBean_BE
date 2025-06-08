@@ -1,5 +1,6 @@
 package binbean.binbean_BE.service;
 
+import binbean.binbean_BE.constants.Constants.ErrorMsg;
 import binbean.binbean_BE.dto.FloorList;
 import binbean.binbean_BE.dto.ObjectId;
 import binbean.binbean_BE.dto.request.FloorPlanRegisterRequest;
@@ -89,9 +90,8 @@ public class FloorPlanService {
     }
 
     @Transactional
-    public void updateFloorPlan(List<FloorPlanUpdateRequest> requests, User user) {
-        Cafe cafe = cafeRepository.findByUser(user)
-            .orElseThrow(() -> new NotFoundException("The user's cafe does not exist."));
+    public void updateFloorPlan(List<FloorPlanUpdateRequest> requests, Long cafeId, User user) {
+        Cafe cafe = getCafeById(cafeId);
         List<FloorPlan> floorPlans = floorPlanRepository.findByCafeId(cafe.getId());
         Map<Integer, FloorPlan> floorPlanMap = floorPlans.stream()
             .collect(Collectors.toMap(FloorPlan::getFloorNumber, fp -> fp));
@@ -118,5 +118,10 @@ public class FloorPlanService {
         return floorPlans.stream()
             .map(floorPlanResponseMapper::floorPlanResponse)
             .collect(Collectors.toList());
+    }
+
+    private Cafe getCafeById(Long cafeId) {
+        return cafeRepository.findById(cafeId)
+            .orElseThrow(() -> new NotFoundException(String.format(ErrorMsg.CAFE_NOT_FOUND)));
     }
 }

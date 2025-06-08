@@ -84,9 +84,7 @@ public class CafeService {
     }
 
     public CafeInfoResponse getCafeInfo(Long cafeId) {
-        Cafe cafe = cafeRepository.findById(cafeId)
-            .orElseThrow(() -> new NotFoundException(String.format(ErrorMsg.CAFE_NOT_FOUND)));
-
+        Cafe cafe = getCafeById(cafeId);
         OperatingHours operatingHours = businessHoursService.getBusinessHoursForToday(cafe);
         List<ImgUrl> cafeImgUrl = getCafeImageUrlList(cafe);
         double reviewAvg = reviewService.getReviewAvg(cafe);
@@ -97,16 +95,22 @@ public class CafeService {
             reviewResponse, floorPlanId);
     }
 
-    public void updateCafeInfo(CafeUpdateRequest request, List<MultipartFile> cafeImgFiles, User user) {
-
-        Cafe cafe = cafeRepository.findByUser(user)
-            .orElseThrow(() -> new NotFoundException("The user's cafe does not exist.")); // -> 403
+    public void updateCafeInfo(CafeUpdateRequest request, List<MultipartFile> cafeImgFiles, Long cafeId,
+        User user) {
+        Cafe cafe = getCafeById(cafeId);
         BusinessHours businessHours = businessHoursRepository.findByCafeId(cafe.getId())
             .orElseThrow(() -> new NotFoundException("There is no registered businessHorus."));
 
         cafe.update(request);
         businessHours.update(request);
+
+        if (cafeImgFiles == null) {
+            cafeImgFiles = Collections.emptyList();
+        }
         saveCafeImages(cafe, cafeImgFiles);
+
+        cafeRepository.save(cafe);
+        businessHoursRepository.save(businessHours);
     }
 
     public List<Cafe> getAllCafe() {
@@ -131,5 +135,10 @@ public class CafeService {
             cafeImgUrls.add(img.toImgUrlDto());
         }
         return cafeImgUrls;
+    }
+
+    private Cafe getCafeById(Long cafeId) {
+        return cafeRepository.findById(cafeId)
+            .orElseThrow(() -> new NotFoundException(String.format(ErrorMsg.CAFE_NOT_FOUND)));
     }
 }
