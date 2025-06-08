@@ -113,6 +113,8 @@ public class Cafe {
         this.cafeName = request.cafeName();
         this.cafeAddress = request.cafeAddress();
         this.cafePhone = request.cafePhone();
+        this.latitude = request.latitude();
+        this.longitude = request.longitude();
         this.wifiAvailable = request.wifiAvailable();
         this.chargerAvailable = request.chargerAvailable();
         this.petAvailable = request.petAvailable();
