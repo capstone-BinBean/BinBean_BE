@@ -65,10 +65,10 @@ public class FloorPlan {
 
     public FloorPlanResponse toFloorPlanDto(List<Position> borderPositions, List<Position> seatPositions,
         List<Position> doorPositions, List<Position> counterPositions, List<Position> toiletPositions,
-        List<Position> windowPositions, List<Position> currentPositions) {
+        List<Position> windowPositions, List<Position> tablePositions, List<Position> currentPositions) {
 
         FloorList floorList = FloorList.create(borderPositions, seatPositions, doorPositions,
-            counterPositions, toiletPositions, windowPositions);
+            counterPositions, toiletPositions, windowPositions, tablePositions);
 
         CurrentSeats currentSeats = CurrentSeats.create(currentPositions);
 

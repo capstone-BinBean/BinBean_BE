@@ -16,6 +16,7 @@ import binbean.binbean_BE.repository.floor_plan.CounterRepository;
 import binbean.binbean_BE.repository.floor_plan.DoorRepository;
 import binbean.binbean_BE.repository.floor_plan.FloorPlanRepository;
 import binbean.binbean_BE.repository.floor_plan.SeatsRepository;
+import binbean.binbean_BE.repository.floor_plan.TableRepository;
 import binbean.binbean_BE.repository.floor_plan.ToiletRepository;
 import binbean.binbean_BE.repository.floor_plan.WindowRepository;
 import binbean.binbean_BE.util.FloorPlanResponseMapper;
@@ -38,13 +39,14 @@ public class FloorPlanService {
     private final CounterRepository counterRepository;
     private final ToiletRepository toiletRepository;
     private final WindowRepository windowRepository;
+    private final TableRepository tableRepository;
     private final FloorPlanMapper floorPlanMapper;
     private final FloorPlanResponseMapper floorPlanResponseMapper;
 
     public FloorPlanService(CafeRepository cafeRepository, FloorPlanRepository floorPlanRepository,
         BorderLineRepository borderLineRepository, SeatsRepository seatsRepository,
         DoorRepository doorRepository, CounterRepository counterRepository, ToiletRepository toiletRepository,
-        WindowRepository windowRepository, FloorPlanMapper floorPlanMapper,
+        WindowRepository windowRepository, TableRepository tableRepository, FloorPlanMapper floorPlanMapper,
         FloorPlanResponseMapper floorPlanResponseMapper) {
         this.cafeRepository = cafeRepository;
         this.floorPlanRepository = floorPlanRepository;
@@ -54,6 +56,7 @@ public class FloorPlanService {
         this.counterRepository = counterRepository;
         this.toiletRepository = toiletRepository;
         this.windowRepository = windowRepository;
+        this.tableRepository = tableRepository;
         this.floorPlanMapper = floorPlanMapper;
         this.floorPlanResponseMapper = floorPlanResponseMapper;
     }
@@ -86,6 +89,7 @@ public class FloorPlanService {
             counterRepository.saveAll(floorPlanMapper.createCounters(floorList, floorPlan));
             toiletRepository.saveAll(floorPlanMapper.createToilets(floorList, floorPlan));
             windowRepository.saveAll(floorPlanMapper.createWindows(floorList, floorPlan));
+            tableRepository.saveAll((floorPlanMapper.createTables(floorList, floorPlan)));
         }
     }
 
@@ -109,6 +113,7 @@ public class FloorPlanService {
             counterRepository.saveAll(floorPlanMapper.createCounters(floorList, floorPlan));
             toiletRepository.saveAll(floorPlanMapper.createToilets(floorList, floorPlan));
             windowRepository.saveAll(floorPlanMapper.createWindows(floorList, floorPlan));
+            tableRepository.saveAll((floorPlanMapper.createTables(floorList, floorPlan)));
         }
     }
 
